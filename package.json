@@ -1,0 +1,19 @@
+{
+  "name": "formulating",
+  "version": "1.0.0",
+  "description": "Front end for formulating web app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kerok-kristoffer/formulating-vue.git"
+  },
+  "author": "kerok-kristoffer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kerok-kristoffer/formulating-vue/issues"
+  },
+  "homepage": "https://github.com/kerok-kristoffer/formulating-vue#readme"
+}
