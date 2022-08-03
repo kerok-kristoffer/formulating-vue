@@ -1,15 +1,56 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <div>
+      <Ingredients />
+  </div>
+
+  <div class="add">
+    <h1>Add Ingredients!</h1>
+    <section class="forms">
+      <form class="ingredient" @submit.prevent="submit">
+        <h2>Ingredient:</h2>
+        <input
+          placeholder="water"
+          type="text"
+          name="Name"
+        >
+        <input
+          value="Add"
+          type="submit"
+        >
+      </form>
+    </section>
   </div>
 </template>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+<script>
+import axios from "axios";
+import { useRouter } from "vue-router";
+import Ingredients from '../components/Ingredients.vue'
+
+
+ export default {
+
+  name: "Ingredient",
+  setup () {
+    const router = useRouter();
+
+    const submit = async e => {
+      const form = new FormData(e.target);
+
+      const inputs = Object.fromEntries(form.entries());
+
+      const {data} = await axios.post('users/ingredients', inputs, {
+        withCredentials: true
+      });
+    }
+
+    return {
+      submit
+    }
+  },
+    components: {
+    Ingredients
+  },
+
+ }
+</script>

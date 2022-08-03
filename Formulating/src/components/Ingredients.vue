@@ -1,22 +1,21 @@
 <template>
-  <main>
-    <h1>List of Ingredients</h1>
-    <ul>
-      <li v-for="item in message">
-        {{item.name}}
-      </li>
-    </ul>
-  </main>
+    <div>      
+        <h1>List of Ingredients</h1>
+        <ul>
+            <li v-for="item in message">
+                {{item.name}}
+            </li>
+        </ul>
+    </div>
 </template>
-
+    
 <script>
 import {onMounted, ref} from "vue";
 import axios from 'axios';
 
 
  export default {
-  name: "Home",
-  setup() {
+  data() {
     const message = ref('');
 
     onMounted(async () => {
