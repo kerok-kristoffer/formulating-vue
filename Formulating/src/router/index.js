@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
+import RecipesView from '../views/RecipesView.vue'
 import { auth } from '../auth'
 
 const router = createRouter({
@@ -38,12 +39,17 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/recipes',
+      name: 'recipes',
+      component: RecipesView
     }
   ]
 })
 
 router.beforeEach((to, from, next) => {
-  next();
+  next(); // todo kerok - add auth setting to login page
   return;
   if (to.path === '/login' && auth.currentUser) {
     next('/')
