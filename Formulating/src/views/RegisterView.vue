@@ -48,7 +48,7 @@
       const inputs = Object.fromEntries(form.entries());
 
       await axios.post('users', inputs);
-      await router.push('/login');
+      await router.push('/login'); // todo kerok - login automatically and push to "/"
     }
     
     return {

@@ -13,6 +13,7 @@
           type="text"
           name="Name"
         >
+        <input placeholder="INCI" type="text" name="Inci" />
         <input
           value="Add"
           type="submit"

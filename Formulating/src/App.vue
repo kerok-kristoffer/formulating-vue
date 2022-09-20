@@ -1,28 +1,67 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from '@/components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <div class="wrapper">
+  <main>
+    <header>
+        <nav v-if="account.user" class="relative container mx-auto p-6">
+        <div class="flex items-center justify-between">
+          <div class="pt-2">
+            <p>mySatchel</p>
+          </div>
+          <div class="hidden md:flex space-x-6">
+            <RouterLink to="/about">Ingredients</RouterLink>
+            <RouterLink to="/profile">Profile</RouterLink>
+            <RouterLink to="/">About</RouterLink>
+            <RouterLink to="/formulas">Formulas</RouterLink>
+            <RouterLink to="/login" @click="logout">logout</RouterLink>
+          </div>
+        </div>
+        </nav>
+        <nav v-else>
+          <RouterLink to="/register">Register</RouterLink>
+          <RouterLink to="/login">Login</RouterLink>
+        </nav>
+    </header>
 
-      <nav>
-        <RouterLink to="/">Ingredients</RouterLink>
-        <RouterLink to="/profile">Profile</RouterLink>
-        <RouterLink to="/register">Register</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/about">Add</RouterLink>
-        <RouterLink to="/recipes">Recipes</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <body>
+        <RouterView />
+    </body>
+  </main>
+  
 </template>
+
+
+<script>
+import { useAccountStore } from './stores/account';
+import { useRouter } from 'vue-router';
+
+export default {
+  
+  setup() {
+    const router = useRouter();
+    const account = useAccountStore();
+
+    const logout = () => {
+      account.logout()
+      router.push("/login");
+    }
+    
+    return {
+      account,
+      logout
+    }
+  }
+
+}
+
+</script>
 
 <style>
 @import '@/assets/base.css';
+@import '@/assets/tailwind.css';
+
+main {
+  max-width: 100%;
+  min-width: 1024px;
+}
 
 #app {
   max-width: 1280px;
@@ -64,6 +103,7 @@ nav {
 
 nav a.router-link-exact-active {
   color: var(--color-text);
+  background: #fff;
 }
 
 nav a.router-link-exact-active:hover {
@@ -74,6 +114,7 @@ nav a {
   display: inline-block;
   padding: 0 1rem;
   border-left: 1px solid var(--color-border);
+  background: #eee;
 }
 
 nav a:first-of-type {

@@ -11,7 +11,7 @@
         <input
           placeholder="Password"
           type="password"
-          name="password"
+          name="Password"
         />
         <input
           value="Login"
@@ -26,8 +26,8 @@
 
 <script>
 import axios from "axios";
-import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/account";
 
 
  export default {
@@ -37,14 +37,19 @@ import { useRouter } from "vue-router";
 
     const submit = async e => {
       const form = new FormData(e.target);
-
       const inputs = Object.fromEntries(form.entries());
+
+      axios.defaults.headers.common['Authorization'] = `Bearer `
 
       const {data} = await axios.post('users/login', inputs, {
         withCredentials: true
       });
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`
+      
+      const account = useAccountStore()
+      account.login(data.user);
+      
       await router.push('/');
     }
 

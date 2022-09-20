@@ -1,34 +1,28 @@
 <template>
   <main>
-    <h1>List of Ingredients</h1>
-    <ul>
-      <li v-for="item in message">
-        {{item.name}}
-      </li>
-    </ul>
+    <h1>Hello {{ user.fullName }}</h1>
+
+
   </main>
 </template>
 
 <script>
 import {onMounted, ref} from "vue";
-import axios from 'axios';
+import { useAccountStore } from '@/stores/account'
+
 
 
  export default {
-  name: "Home",
-  setup() {
-    const message = ref('');
-
-    onMounted(async () => {
-      const {data} = await axios.get('users/ingredients?page_id=1&page_size=10');
-
-      message.value = data;
-
-    });
-
-    return {
-      message
+    name: "Home",
+    setup() {
+        const user = ref("");
+        const account = useAccountStore();
+        onMounted(async () => {
+            user.value = account.user;
+        });
+        return {
+            user,
+        };
     }
-  }
- }
+}
 </script>
