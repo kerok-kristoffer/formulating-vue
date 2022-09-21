@@ -67,7 +67,9 @@ class Formula {
             p.ingredients.forEach(ingredient => {
                 let ingredientWeight = this.totalWeight * ingredient.percentage * 0.01
                 ingredient.setWeight(ingredientWeight, 'g')
-                this.allocatedPercentage += ingredient.percentage
+                if(ingredient.percentage) {
+                    this.allocatedPercentage += ingredient.percentage
+                }
             })
         })
     }

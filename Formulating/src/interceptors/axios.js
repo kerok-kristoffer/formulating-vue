@@ -2,7 +2,9 @@ import axios from "axios";
 import router from "../router";
 
 //axios.defaults.baseURL = 'https://api.kerok.se';
-axios.defaults.baseURL = 'http://localhost:8080';
+// axios.defaults.baseURL = 'http://localhost:8080';
+axios.defaults.baseURL = 'http://a761b033b94bd4a0fafb28192d044010-224995670.eu-north-1.elb.amazonaws.com';
+// a761b033b94bd4a0fafb28192d044010-224995670.eu-north-1.elb.amazonaws.com
 //axios.defaults.baseURL = 'http://a761b033b94bd4a0fafb28192d044010-224995670.eu-north-1.elb.amazonaws.com';
 
 

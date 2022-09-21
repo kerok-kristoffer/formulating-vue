@@ -96,7 +96,7 @@ const onDropFormula = (event, phase :Phase) => {
     console.log(ingredient)
 
     if(ingredient != undefined) {
-        phase.addIngredient(new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci))
+        phase.addIngredient(new Ingredient(phase.ingredients.length, ingredient.ingredient_id, ingredient.name, ingredient.inci))
         return
     }
 
@@ -136,12 +136,13 @@ const startDragFormula = (event, phaseName: string, ingredientIndex: number | st
 
 const onDrop = (event) => {
     
-    const ingredientId = event.dataTransfer.getData('ingredientId')
+    const ingredientId = event.dataTransfer.getData('ingredientPhaseIndex')
     const phaseName = event.dataTransfer.getData('phaseName')
     const phase = displayFormula.value.phases.find((phase) => phase.name == phaseName)
     if (phase !== undefined) {
         const ingredients :Ingredient[] = phase.ingredients
         ingredients.splice(ingredientId, 1)
+        weightUpdate(displayFormula.value)
     } else {
         console.log("phase %s not found in onDrop()", phaseName)
     }
