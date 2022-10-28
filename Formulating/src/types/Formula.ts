@@ -7,6 +7,7 @@ class Formula {
     public totalWeightInOunces: number
     public description: string
     public allocatedPercentage: number
+    public estimatedCost: number
     measurement: Units
     id: number
     
@@ -72,6 +73,27 @@ class Formula {
                 }
             })
         })
+    }
+
+    updateCost() :void {
+        console.log(this.name)
+        this.estimatedCost = 0
+        
+        this.phases.forEach(p => {
+            console.group(p.name)
+            p.ingredients.forEach(ingredient => {
+                console.log(ingredient.cost + 2)
+                let ingredientWeight = this.totalWeight * ingredient.percentage * 0.01
+                console.log(ingredientWeight)
+                let ingredientCost = ingredientWeight * ingredient.cost * 0.001
+                
+                if(ingredient.cost) {
+                    this.estimatedCost += ingredientCost
+                    console.log(ingredientCost)
+                }
+            })
+        })
+
     }
 }
 

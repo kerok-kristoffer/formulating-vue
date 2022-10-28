@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import DefaultLayout from '../components/DefaultLayout.vue'
 import ProfileView from '../views/ProfileView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
+import IngredientsView from '../views/IngredientsView.vue'
 import FormulasView from '../views/FormulasView.vue'
 import { useAccountStore } from '../stores/account'
 
@@ -11,27 +12,15 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      component: DefaultLayout,
       meta:{
         requiresAuth: true
-      }
-    },
-    {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue'),
-      meta:{
-        requiresAuth: true
-      }
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: ProfileView,
-      meta:{
-        requiresAuth: true
-      }
+      },
+      children: [
+        {path: '/profile', name: 'profile', component: ProfileView},
+        {path: '/formulas', name: 'formulas', component: FormulasView,},
+        {path: '/ingredients', name: 'ingredients', component: IngredientsView}
+      ]
     },
     {
       path: '/sandbox',
@@ -47,14 +36,6 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView
-    },
-    {
-      path: '/formulas',
-      name: 'formulas',
-      component: FormulasView,
-      meta:{
-        requiresAuth: true
-      }
     }
   ]
 })

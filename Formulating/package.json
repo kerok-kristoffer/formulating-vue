@@ -12,12 +12,16 @@
     "test:unit:ci": "cypress run --component --quiet --reporter spec"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.3",
+    "@heroicons/vue": "^2.0.11",
+    "@tailwindcss/forms": "^0.5.3",
     "autoprefixer": "^10",
     "pinia": "^2.0.18",
     "postcss": "^8",
     "tailwindcss": "^3",
     "vue": "^3.2.37",
-    "vue-router": "^4.0.16"
+    "vue-router": "^4.0.16",
+    "vuejs-paginate-next": "^1.0.2"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.0",
