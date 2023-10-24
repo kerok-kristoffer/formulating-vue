@@ -1,5 +1,6 @@
 import Units from './Units'
 import Phase from './Phase'
+import Ingredient from './Ingredient'
 import FormulaSaveStatus from './FormulaSaveStatus'
 
 class Formula {
@@ -16,7 +17,9 @@ class Formula {
         public name: string,
         public phases: Phase[],
         weightInGrams: number,
-        public saveStatus: FormulaSaveStatus
+        public saveStatus: FormulaSaveStatus,
+        public created_at: string,
+        public updated_at: string
         ) {
         this.setWeight(weightInGrams, 'g')
     }
@@ -76,25 +79,56 @@ class Formula {
     }
 
     updateCost() :void {
-        console.log(this.name)
         this.estimatedCost = 0
         
         this.phases.forEach(p => {
-            console.group(p.name)
             p.ingredients.forEach(ingredient => {
-                console.log(ingredient.cost + 2)
                 let ingredientWeight = this.totalWeight * ingredient.percentage * 0.01
-                console.log(ingredientWeight)
                 let ingredientCost = ingredientWeight * ingredient.cost * 0.001
                 
                 if(ingredient.cost) {
                     this.estimatedCost += ingredientCost
-                    console.log(ingredientCost)
                 }
             })
         })
 
     }
+
+    getInciList() :string[] {
+
+        let ingredientList :Ingredient[] = []
+        let incis: string[] = []
+
+        this.phases.forEach(p => {
+            ingredientList = ingredientList.concat(p.ingredients)
+        })
+
+        ingredientList.sort((a, b) => b.percentage - a.percentage)
+
+        ingredientList.forEach(i => {
+            
+            if (!i.inci || i.inci == "") {
+                return
+            }
+            incis.push(i.inci)
+        })
+
+        return incis
+    }
+
+    hasIngredient(ingredient :Ingredient) :boolean {
+
+        for (let i = 0; i < this.phases.length; i++) {
+            let phasesWithIngredient = this.phases[i].ingredients.filter(ing => {
+                return ing.ingredient_id == ingredient.ingredient_id;
+            })
+            if (phasesWithIngredient.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
 
 export default Formula

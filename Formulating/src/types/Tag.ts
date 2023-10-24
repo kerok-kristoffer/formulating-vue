@@ -8,6 +8,10 @@ class Tag {
     ) {
 
     }
+
+    equals(tag: Tag) {
+        return tag.name === this.name;
+    }
 }
 
 export default Tag

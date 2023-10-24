@@ -1,23 +1,24 @@
 <template>
-    <h1 class="text-3xl mb-6">Ingredients</h1>
 
-      <!-- Add function table, side-by-side with Ingredients on md, col on mobile -->
-          <!-- replaced by tags, that can include functions -->
-      <div class="flex flex-row mb-6 px-12 w-4/5 pb-3">
-          <ul class="w-full text-left h-128">
-              <li class="flex flex-row bg-slate-200">
-                <p class="w-1/6 font-bold">Name</p>
-                <p class="w-1/6 font-bold">Inci</p>
-                <p class="w-1/6 font-bold">Estimated Cost ($/kg)</p>
-                <p class="w-2/6 font-bold">Tags</p>
+    <h1 class="text-3xl mb-6">Ingredients</h1>
+<!--todo, question for PO, what would you want to see at the mobile view for ingredients?-->
+    <div class="flex flex-col mb-12 px-0 md:pt-0 w-full pb-3">
+      <div class="flex flex-row mb-6 md:px-4 w-full pb-3">
+          <ul class="flex flex-col w-full text-left text-xl md:text-sm">
+              <li class="flex w-full h-9 md:h-5 pt-1 bg-slate-200 dark:bg-slate-700">
+                <p class="w-9/12 md:w-5/12 font-bold">Name</p>
+                <p class="hidden md:block w-5/12 md:w-4/12 font-bold">Inci</p>
+                <p class="w-4/12 md:w-1/12 font-bold">Cost ($/kg)</p>
+                <p class="hidden md:block w-1/12 font-bold">Tags</p>
               </li>
 
-              <li class="w-full even:bg-slate-100 odd:bg-slate-200 hover:bg-slate-300" v-for="ingredient, index in ingredients" :key="ingredient.id">
-                      <div @click="editToggle(index)" v-show="editing !== index" class="w-full  flex flex-row hover:cursor-pointer">
-                        <p class="font-bold w-1/6">{{ingredient.name}}</p>
-                        <p class="font-thin italic w-1/6">{{ingredient.inci}}</p>
-                        <p class="font-thin italic w-1/6">{{ingredient.cost}}</p>
-                        <p class="w-2/6 flex flex-row justify-items-start" >
+              <li class="w-full h-9 md:h-5 pt-1 md:pt-0 even:bg-slate-100 odd:bg-slate-200 hover:bg-slate-300 dark:even:bg-slate-500 dark:odd:bg-slate-700 dark:hover:bg-slate-600" v-for="ingredient in ingredients">
+                <div class="w-full flex flex-row">
+                  <div @click="editIngredient(ingredient)" class="w-full flex flex-row hover:cursor-pointer">
+                        <p class="font-bold w-9/12 md:w-5/12 whitespace-no-wrap" >{{ingredient.name}}</p>
+                        <p class="font-thin italic hidden md:block w-4/12 whitespace-no-wrap">{{ingredient.inci}}</p>
+                        <p class="font-thin italic w-1/12">{{ingredient.cost}}</p>
+                        <p class="w-1/12 hidden md:flex flex-row justify-items-start" >
                           <div v-for="tag in ingredient.tags" class="mx-0.5">
                             <span class="
                             h-5 
@@ -30,214 +31,157 @@
                             py-0">{{tag.name}}</span>
                           </div>
                         </p>
+<!--                    <i class="fa-solid fa-file-circle-exclamation" style="color: #64748b;"></i>-->
                       </div>
-                      <div v-show="editing === index" class="w-full flex">
-                        <input type="text" class="w-1/6 h-6" v-model="ingredient.name">
-                        <input type="text" class="w-1/6 h-6" placeholder="inci" v-model="ingredient.inci">
-                        <input type="number" class="w-1/6 h-6" placeholder="cost/kg" v-model="ingredient.cost">
-                        <div class="tag-input w-2/6 h-6 ">
-                          <div 
-                              v-for="tag, index in ingredient.tags"
-                              class="tag-input__tag">
+                  <p v-if="isPartOfFormula(ingredient)" ><font-awesome-icon :icon="['fas', 'fa-file-circle-exclamation']" class="text-slate-400"/></p>
+<!--                  <p v-if="false" ><font-awesome-icon :icon="['fas', 'fa-file-circle-exclamation']" style="color: #64748b;" /></p>-->
+                  <button v-else class="border-solid border-slate-500 rounded-md hover:bg-slate-400 px-1.5" @click="deleteIngredient(ingredient)">X</button>
+                </div>
 
-                              <span @click="ingredient.removeTag(index)">x</span>
-                              {{ tag.name }}
-                          </div>
-                          <input
-                              type="text"
-                              @keydown="addTag($event, ingredient)"
-                              @keydown.delete="removeLastTag($event, ingredient)"
-                              placeholder="Enter a tag"
-                              class="h-6
-                              border-none 
-                              outline-none 
-                              font-extralight
-                              bg-none
-                              "
-                          />
-                      </div>
-                      <div class="w-1/6 my-auto flex justify-end gap-1">
-                        <button @click="updateIngredient(ingredient)" class="bg-slate-400 p-1 rounded-md">Update</button>
-                        <button @click="deleteIngredient(ingredient)" class="bg-rose-300 p-1 rounded-md">Delete</button> 
-                        <button @click="editToggle(-1)" class="bg-slate-300 p-1 mr-1 rounded-md">X</button>
-                      </div>
-                      
-                    </div>
               </li>
           </ul>
-      </div>
-      <paginate
-      :page-count="pageCount"
-      :page-range="5"
-      :margin-pages="2"
-      :click-handler="paginateCallback"
-      :container-class="'flex flex-row my-2 mx-36'"
-      :prev-text="'<'"
-      :next-text="'>'"
-      :prev-class="'bg-slate-300 hover:bg-slate-400 p-2 px-4 mx-1 rounded-md text-lg'"
-      :next-class="'bg-slate-300 hover:bg-slate-400 p-2 px-4 mx-1 rounded-md text-lg'"
-      :page-class="'bg-slate-300 hover:bg-slate-400 p-2 px-4 mx-1 rounded-md text-lg'"
-      :active-class="'bg-blue-300 text-xl'"
-    >
-    </paginate>
 
-    <div class="flex flex-col items-center mb-6 bg-gray-100 py-6">
-      
-      <div class="forms">
-        <h2 class="text-lg">Add Ingredients</h2>
-          <input
-            v-model="newIngredient.Name"
-            type="text"
-            placeholder="name"
-          />
-          <input 
-            v-model="newIngredient.Inci" 
-            type="text"
-            placeholder="Inci"
-          />
-          <button class="bg-slate-300 p-2 px-3 mx-1 rounded-md text-lg"
-            @click="addIngredient"
-           >Add</button>
       </div>
-    </div>
+      <button-standard :text="'Add Ingredient'" @click="addIngredientClick" />
+
+    <edit-ingredient-component v-if="showEditWindow" :item="selectedItem" :itemCopy="selectedItemCopy" :ingredient-in-formulas="foundInFormulasList" @prev="prevIng" @next="nextIng" @cancel="cancelUpdate" @update-item="onUpdateItem" @restore="restoreEditItem"/>
+    <add-ingredient-component v-if="showAddWindow" :item="newIngredient" @cancel="cancelAdd" @updateItem="addIngredient"/>
+  </div>
+
+
     
 </template>
     
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import axios from 'axios';
-import Paginate from 'vuejs-paginate-next';
+import { onMounted, ref } from "vue";
+
 import Ingredient from "../types/Ingredient";
+import EditIngredientComponent from "./EditIngredientComponent.vue";
+import ButtonStandard from "./ButtonStandard.vue";
+import AddIngredientComponent from "./AddIngredientComponent.vue";
+import {useAccountStore} from "../stores/account";
 
+import {userData} from "../stores/userData";
+import Formula from "../types/Formula";
+
+const data = userData()
 const editing = ref(-1)
-const newIngredient = ref({Name: "", Inci: ""})
-const ingredients = ref<Ingredient[]>([])
-const ingredientCount = ref(1)
-const pageCount = ref(1)
-const pageSize = 20;
-let currentPage = 1;
+const newIngredient = new Ingredient(0,0,"new ingredient", "", null, [])
+const ingredients = ref<Ingredient[]>(data.ingredientList.ingredients)
+const showEditWindow = ref(false);
 
-const editToggle = (index) => {
-  editing.value = index
+let api = data.api;
+const showAddWindow = ref(false);
+const selectedItem = ref<Ingredient>(newIngredient)
+const selectedItemCopy = ref<Ingredient>(newIngredient)
+const accountStore = useAccountStore();
+let foundInFormulasList = ref<Formula[]>([]);
+
+const editIngredient = (ingredient :Ingredient) => {
+  data.ingredientList.setHighlightIngredient(ingredient);
+  data.ingredientList.setHighlightIndex(data.ingredientList.ingredients.indexOf(ingredient))
+  selectedItem.value = data.ingredientList.getHighlightIngredient(); // TODO safe to delete after moving functionality to ingredientList?
+  selectedItemCopy.value = data.ingredientList.getHighlightIngredientCopy();
+  foundInFormulasList.value = inFormulas(ingredient);
+  showEditWindow.value = true;
+}
+
+function inFormulas(ingredient :Ingredient) :Formula[] {
+
+  let filter = formulas.filter((formula) => {
+    return formula.hasIngredient(ingredient);
+  });
+  return filter;
+}
+
+let formulas = data.formulaList.formulas;
+
+function isPartOfFormula(ingredient :Ingredient) :boolean {
+
+  for (let i = 0; i < formulas.length; i++) {
+    if(formulas[i].hasIngredient(ingredient)) {
+      return true;
+    }
+  }
+  return false;
+
+}
+
+function prevIng() {
+  data.ingredientList.highlightPreviousIngredient();
+  selectedItem.value = data.ingredientList.getHighlightIngredient(); // TODO is there a way of referencing the highlighted ingredient directly in the prop?
+  selectedItemCopy.value = data.ingredientList.getHighlightIngredientCopy();
+  foundInFormulasList.value = inFormulas(data.ingredientList.getHighlightIngredient());
+}
+function nextIng() {
+  data.ingredientList.highlightNextIngredient();
+  selectedItem.value = data.ingredientList.getHighlightIngredient();
+  selectedItemCopy.value = data.ingredientList.getHighlightIngredientCopy();
+  foundInFormulasList.value = inFormulas(data.ingredientList.getHighlightIngredient());
+}
+
+const onUpdateItem = (ingredient :Ingredient) => {
+  // ingredients.value[editing.value] = item; // ?
+  console.log("updating ing:" + ingredient.name);
+
+  api.getIngredientService().updateIngredient(ingredient).then(response => {
+    console.log(response);
+  })
+  showEditWindow.value = false;
+}
+
+function restoreEditItem() {
+
+  selectedItem.value = data.ingredientList.getHighlightIngredient();
+}
+
+const cancelUpdate = () => {
+  showEditWindow.value = false;
+}
+const cancelAdd = () => {
+  showAddWindow.value = false;
 }
 
 const getIngredients = () => {
-  let url = 'users/ingredients?page_id=' + currentPage + '&page_size=' + pageSize
-  axios.get(url).catch(error => {
-
-  }).then((response :any) => {
-    ingredients.value = []
-    for (let i in response.data) {
-        let ing = response.data[i]
-        let ingredient = new Ingredient(ing.Id, ing.Id, ing.Name, ing.Inci, ing.cost, ing.tags)
-        ingredients.value.push(ingredient)
-    }
-  });
+  ingredients.value = data.ingredientList.ingredients
 }
 
 onMounted(async () => {
-  updateIngredientCount()
-  getIngredients()
+  if(accountStore.cachedIngredients.length == 0) {
+    getIngredients()
+
+  } else {
+    ingredients.value = accountStore.cachedIngredients;
+  }
+
 });
 
-
-const paginateCallback = (pageNum) => {
-  currentPage = pageNum
-  getIngredients()
+async function refreshIngredients() {
+  await data.refreshIngredientList()
+  await data.ingredientList.populateWithTags()
+  ingredients.value = data.ingredientList.ingredients
 }
 
-const updateIngredientCount = () => {
-  axios.get('users/ingredients/count').then(response => {
-    ingredientCount.value = response.data
-    pageCount.value = (Number) (ingredientCount.value / pageSize)
-  })
-}
-
-let editable = false
-
-const updateIngredient = (ingredient :Ingredient) => {
-  axios.post('users/ingredients/' + ingredient.ingredient_id, ingredient).catch((error) => {
-
-  }).then( (response) => {
-    editToggle(-1)
-  })
-}
 const deleteIngredient = (ingredient :Ingredient) => {
-  axios.delete('users/ingredients/' + ingredient.id).catch((error) => {
-    
-  }).then( (response) => {
-    updateIngredientCount()
-    editToggle(-1)
-    let pageGotEmptied = currentPage > pageCount.value
-    if(pageGotEmptied && currentPage > 1) {
-      currentPage--
-    }
-    getIngredients()
+  data.ingredientList.removeIngredient(ingredient);
+  api.getIngredientService().deleteIngredient(ingredient).then( (response) => {
+    console.log(response.status)
   })
 }
 
-const addIngredient = e => {
-
-  axios.post('users/ingredients', newIngredient.value).then(response => {
-        updateIngredientCount()
-        getIngredients()
-        newIngredient.value = {Name: "", Inci: ""}
-  })
+function addIngredientClick() {
+  showAddWindow.value = true;
 }
 
-const addTag = (event :any , ingredient :Ingredient) => {
+async function addIngredient(ingredient :Ingredient)  {
+  api.getIngredientService().createIngredient(ingredient).then(response => {
+    console.log(response);
+  });
+  showAddWindow.value = false;
 
-  if( event.code == 'Comma' || event.code == 'Enter') {
-            event.preventDefault();
-            
-            let val = event.target.value.trim()
-            if (val.length > 0) {
-            ingredient.addTag(val)
-            event.target.value = ""
-            }
-        }
+  await refreshIngredients();
+  console.log("refreshed ingredient list!")
 }
 
-const removeLastTag = (event, ingredient :Ingredient) => {
-  
-  if (event.target.value.length === 0) {
-    ingredient.removeLastTag()
-  } 
-}
 
 </script>
-  
-<style scoped>
-  
-  .tag-input {
-      min-width: 150px;
-      min-height: 1.5rem;
-      background-color: white;
-      border: 1px solid #eee;
-      font-size: 0.9em;
-      height: 50px;
-      box-sizing: border-box;
-      padding: 0 10px;
-  }
-
-  .tag-input__tag {
-      height: 20px;
-      float: left;
-      margin-right: 2px;
-      background-color: #eee;
-      margin-top: 5px;
-      line-height: 18px;
-      padding: 0 3px;
-      border-radius: 5px;
-  }
-
-  .tag-input__tag > span {
-      cursor: pointer;
-      opacity: 0.75;
-  }
-
-  .tag-input__text {
-
-  }
-  
-</style>
