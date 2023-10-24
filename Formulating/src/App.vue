@@ -1,40 +1,34 @@
 <template>
   <main>
-    <body>
-        <RouterView />
-    </body>
+    <div>
+      <RouterView />
+    </div>
   </main>
-  
 </template>
 
-
 <script>
-import { useAccountStore } from './stores/account';
-import { useRouter } from 'vue-router';
+import { useAccountStore } from './stores/account'
+import { useRouter } from 'vue-router'
 
 export default {
-  
   setup() {
-    const router = useRouter();
-    const account = useAccountStore();
+    const router = useRouter()
+    const account = useAccountStore()
 
     const logout = () => {
       account.logout()
-      router.push("/login");
+      router.push('/login')
     }
-    
+
     return {
       account,
       logout
     }
   }
-
 }
-
 </script>
 
 <style>
-  @import './assets/base.css';
-  @import './assets/tailwind.css';
-
+@import './assets/base.css';
+@import './assets/tailwind.css';
 </style>

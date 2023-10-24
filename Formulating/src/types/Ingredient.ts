@@ -1,4 +1,3 @@
-import IngredientProperties from "./IngredientProperties"
 import Units from "./Units";
 import Tag from "./Tag";
 
@@ -7,6 +6,8 @@ class Ingredient {
     phase: number
     weightInGrams: number // ide complains on import if set to private, fix!
     weightInOunces: number
+    formula_ingredient_id: number = 0
+    private dirty: boolean;
 
     constructor(
         public id: number,
@@ -19,7 +20,42 @@ class Ingredient {
             if (tags === null) {
                 this.tags = []
             }
+            this.dirty = false;
         }
+
+    equals(ingredient :Ingredient) :boolean {
+        if (ingredient.name !== this.name) {
+            return false;
+        }
+        if (ingredient.inci !== this.inci) {
+            return false;
+        }
+        if (ingredient.cost !== this.cost) {
+            return false;
+        }
+        if (ingredient.tags.length !== this.tags.length) {
+            return false;
+        }
+        for (let i = 0; i < this.tags.length ; i++) {
+            console.log("comparing " + ingredient.tags[i].name + " to " + this.tags[i].name);
+            if (ingredient.tags[i].name != this.tags[i].name) {
+                console.log("tag discrepancy found!");
+                return false;
+            } else {
+                console.log("tag looks fine!");
+            }
+
+        }
+        return true;
+    }
+
+    isDirty() :boolean {
+        return this.dirty
+    }
+
+    setDirty(dirty :boolean) {
+        this.dirty = dirty;
+    }
 
     setWeight(weight :number, unit :Units) :void {
 
@@ -57,7 +93,6 @@ class Ingredient {
     addTag(tag :string) {
         
         let newTag = new Tag(0, tag)
-        console.log(this)
         this.tags.push(newTag)
     }
         
@@ -69,6 +104,9 @@ class Ingredient {
         this.removeTag(this.tags.length - 1)
     }
 
+    copy() :Ingredient{
+        return new Ingredient(this.id, this.ingredient_id, this.name, this.inci, this.cost, Array.from(this.tags));
+    }
         
 }
 

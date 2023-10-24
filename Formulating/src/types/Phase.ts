@@ -3,6 +3,7 @@ import Ingredient from './Ingredient'
 class Phase {
 
     public description: string
+    public searchIngredient: string
 
     constructor(
         public id: number,
@@ -31,6 +32,16 @@ class Phase {
     orderIngredientsByPercentage = (unorderedIngredients :Ingredient[]) :Ingredient[]  => {
         return unorderedIngredients.sort( (a: Ingredient, b: Ingredient) => {
                 return a.percentage < b.percentage ? 1 : -1
+            })
+    }
+
+    updateIngredientOrderByName() :void {
+        this.orderIngredientsByName(this.ingredients)
+    }
+
+    orderIngredientsByName = (unorderedIngredients :Ingredient[]) :Ingredient[]  => {
+        return unorderedIngredients.sort( (a: Ingredient, b: Ingredient) => {
+                return a.name.localeCompare(b.name)
             })
     }
 

@@ -1,18 +1,11 @@
 <template>
-  <section class="container flex flex-col rounded-xl items-center py-6 px-6 mx-auto mt-10 space-y-0 bg-slate-100">
+  <section
+    class="flex flex-col md:rounded-xl items-center md:py-6 md:px-6 md:mx-auto md:mt-10 space-y-0 bg-slate-100 dark:bg-slate-500"
+  >
     <Ingredients />
   </section>
-  
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
 import Ingredients from '../components/Ingredients.vue'
-
-
-
-const router = useRouter();
-
-
-
 </script>
