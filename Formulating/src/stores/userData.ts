@@ -8,14 +8,15 @@ let ingredientList = new IngredientList()
 let api = new BackendGateway('')
 let formulaList = new FormulaList()
 
+
 export const userData = defineStore('data', {
-  state: () => {
-    return {
+  state: () => ({
       api: api,
       ingredientList: ingredientList,
       formulaList: formulaList,
-      cachedFormula: null
-    }
+      cachedFormula: null as Formula | null,
+  }),
+  getters: {
   },
     actions: {
     setCachedFormula(formula :Formula) {

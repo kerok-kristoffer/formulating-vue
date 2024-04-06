@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import {nextTick, onMounted, ref} from "vue";
 import axios from 'axios';
 import Ingredient from "../types/Ingredient";
 import Formula from "../types/Formula";
@@ -12,6 +12,11 @@ import FilterBox from "../components/FilterBox.vue";
 import FormulaPrintPage from "../components/FormulaPrintPage.vue";
 import SearchIngredientBox from "../components/SearchIngredientBox.vue";
 import FormulaList from "../components/FormulaList.vue";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import ButtonStandard from "@/components/ButtonStandard.vue";
+import ButtonDanger from "@/components/ButtonDanger.vue";
+import EditIngredientComponent from "@/components/EditIngredientComponent.vue";
+import FormulaDetails from "@/components/FormulaDetails.vue";
 
 const ingredients = ref<Ingredient[]>([])
 const formulaUnit = ref<Units>('g')
@@ -20,33 +25,49 @@ const newIngredient = ref(new Ingredient(0, 0, "", "", 0, []))
 const ingInput = ref<any>(null)
 const accountStore = useAccountStore()
 const tags = ref<Tag[]>([])
-const tagFilters = ref<Tag[]>([])
 const filteredIngredients = ref<Ingredient[]>([])
 const showPhaseDescs = ref(new Set())
-const ingredientSearchInput = ref('')
 const data = userData()
 let ingredientList = null;
+const displayFormulaList = ref(false);
+const displayIngredientList = ref(false);
+let foundInFormulasList = ref<Formula[]>([]);
+const showEditWindow = ref(false);
+let showDetails = ref(false);
 
 onMounted(async () => {
-  ingredientList = data.ingredientList;
-  ingredients.value = ingredientList.ingredients;
-  tags.value = ingredientList.tags;
-  filteredIngredients.value = ingredients.value
+  populateIngredientListWithTags();
+  filteredIngredients.value = ingredients.value;
 
   formulaList.value = data.formulaList.formulas
 
 });
 
-
-
-const getFormulaList = () => {
-    return formulaList.value
+function populateIngredientListWithTags() {
+  ingredientList = data.ingredientList;
+  ingredients.value = ingredientList.ingredients;
+  tags.value = ingredientList.tags;
 }
 
-const setDisplayFormula = (formula :Formula) => { // TODO: save "new" formulas as temporary? could load cached when pressing new formula button again?
+function toggleDisplayFormulaList() {
+  displayFormulaList.value = !displayFormulaList.value;
+}
+
+function toggleDisplayIngredientList() {
+  displayIngredientList.value = !displayIngredientList.value;
+}
+
+const setDisplayFormula = (formula :Formula, pinListView :boolean) => { // TODO: save "new" formulas as temporary? could load cached when pressing new formula button again?
     formula.saveStatus = 'edited'
     displayFormula.value = formula
-    displayFormula.value.updateCost()
+    displayFormula.value.updateCost(formulaUnit.value)
+  displayFormula.value.phases.forEach((phase) => {
+    phase.updateIngredientOrder();
+  })
+  accountStore.setCachedFormula(displayFormula.value);
+  if (!pinListView) {
+    displayFormulaList.value = false;
+  }
 }
 
 const toggleFilter = (tag :Tag)  => {
@@ -61,8 +82,14 @@ defaultEmptyPhases.push(new Phase(0, 'A', []))
 const displayFormula = ref<Formula>(new Formula("New Formula", defaultEmptyPhases, 100, 'new', '', ''))
 if(accountStore.cachedFormula !== null) {
     displayFormula.value = accountStore.cachedFormula
+  console.log("cached formula found: " + displayFormula.value.name)
+  displayFormula.value.phases.forEach((phase) => {
+    phase.updateIngredientOrder();
+  })
+} else {
+ console.log("no cached formula");
 }
-accountStore.setCachedFormula(displayFormula.value)
+accountStore.setCachedFormula(displayFormula.value) // TODO figure out why this is not working, and fix it, should be saved in cookies.
 
 const resetDisplayFormula = () => {
     defaultEmptyPhases = [] as Phase[]
@@ -147,6 +174,43 @@ const onDrop = (event) => {
     }
 }
 
+function removeIngredientFromPhase(ingredientId :Number, phase :Phase) {
+    const ingredients :Ingredient[] = phase.ingredients
+    ingredients.splice(ingredientId, 1)
+    weightUpdate(displayFormula.value)
+}
+
+ // TODO probably need to give a list of ingredients to component depending on which view we are in
+function editIngredient(ingredient :Ingredient) {
+    ingredientList.setHighlightIngredient(ingredient);
+    ingredientList.setHighlightIndex(ingredients.value.indexOf(ingredient))
+    showEditWindow.value = true;
+}
+
+const closeEditIngredientWindow = () => {
+  showEditWindow.value = false;
+  data.ingredientList.populateWithTags().then(
+    () => {
+      populateIngredientListWithTags();
+      ingredientList.filterIngredientList();
+      ingredientList.refreshIngredient(ingredientList.getHighlightIngredient());
+
+      nextTick(() => {
+        filteredIngredients.value = ingredientList.getFilteredIngredients();
+        updateFormulaCost();
+      });
+    }
+  );
+}
+
+function inFormulas(ingredient :Ingredient) :Formula[] {
+
+  let filter = formulaList.value.filter((formula) => {
+    return formula.hasIngredient(ingredient);
+  });
+  return filter;
+}
+
 const toggleMeasurement = () :void => {
     if (formulaUnit.value === 'g') {
         formulaUnit.value = 'Oz'
@@ -157,7 +221,7 @@ const toggleMeasurement = () :void => {
 
 const weightUpdate = (formula :Formula) :void => {
     formula.updateWeights(formulaUnit.value)
-    formula.updateCost()
+    formula.updateCost(formulaUnit.value)
 }
 
 const updateIngredientWeight = (ingredient :Ingredient, phase :Phase) :void => {
@@ -165,11 +229,11 @@ const updateIngredientWeight = (ingredient :Ingredient, phase :Phase) :void => {
     ingredient.setWeight(ingredientWeight, formulaUnit.value)
     
     displayFormula.value.updateWeights(formulaUnit.value)
-    displayFormula.value.updateCost()
+    displayFormula.value.updateCost(formulaUnit.value)
 }
 
 const updateFormulaCost = () => {
-    displayFormula.value.updateCost()
+    displayFormula.value.updateCost(formulaUnit.value)
 }
 
 const print = (formula :Formula) => {
@@ -216,7 +280,7 @@ const deleteFormula = () => {
 }
 
 const submitUpdateFormula = () => {
-    // TODO kerok: add error messages for faulty inputs in fron-end, ie 0g for updateFormula
+    // TODO kerok: add error messages for faulty inputs in front-end, ie 0g for updateFormula
     if(displayFormula.value.getWeight('g') == 0) {
         //accountStore.notify("Formula amount can not be 0", "error") // todo: allow this instead!
     }
@@ -250,33 +314,115 @@ const submitIngredient = (ingredient :Ingredient) => {
     });
 }
 
+function toggleShowDetails() {
+  showDetails.value = !showDetails.value;
+}
 
-</script> 
+
+</script>
 
 <template>
-    <div class="md:hidden w-full bg-slate-100">
+
+  <div id="formula-list-panel" class="fixed top-28 md:top-20 z-10 md:h-2/3 md:bg-slate-200 rounded-r-xl md:flex md:flex-row md:border-2 md:border-l-0 border-slate-400">
+    <formula-list v-if="displayFormulaList" @clickFormula="setDisplayFormula" class="overscroll-auto overflow-auto w-72"/>
+    <font-awesome-icon @click="toggleDisplayFormulaList" :icon="['fa', 'file-lines']" class="top-1/2 mx-1 hidden md:flex text-slate-400 text-3xl" />
+  </div>
+
+  <div id="ingredient-list-panel" class="fixed top-20 hidden md:flex md:flex-row z-10 right-0 rounded-l-xl bg-slate-200 h-2/3 border-2 border-r-0 border-slate-400">
+    <font-awesome-icon @click="toggleDisplayIngredientList" :icon="['fa', 'file-lines']" class="top-1/2 ml-1 text-slate-400 text-3xl" />
+    <div v-if="displayIngredientList" id="ingredient-list" class="right-0 w-72 ml-2 hidden bg-slate-200 md:block h-full">
+      <div class="drop-zone w-full h-3/4 overflow-y-scroll"
+           @drop="onDrop($event)"
+           @dragenter.prevent
+           @dragover.prevent
+      >
+
+        <h2 class="py-1 w-full bg-slate-300 font-bold rounded-t-md text-center">Ingredients</h2>
+        <div class="w-full overflow-auto">
+          <ul
+              v-for="item in filteredIngredients"
+              :key="item.id"
+              class="drag-el
+                            px-1 py-1
+                            even:bg-slate-100
+                            odd:bg-slate-200
+                            hover:bg-slate-300
+                            hover:cursor-grab
+                            active:cursor-grabbing
+                            "
+              draggable="true"
+              @dragstart="startDrag($event, item.id)"
+          >
+            <li class="flex flex-row w-full">
+              <p class="w-1/2 font-semibold">{{ item.name }}</p>
+              <p class="w-1/2 font-thin italic">{{ item.inci}}</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-row w-full h-1/12 my-3">
+        <input
+            class="w-1/2 font-thin text-xs"
+            placeholder="new ingredient"
+            v-model="newIngredient.name"
+            type="text"
+            name="Name"
+            ref="ingInput"
+        />
+        <input
+            class="w-1/3 font-thin text-xs"
+            v-model="newIngredient.inci"
+            placeholder="INCI"
+            type="text"
+            name="Inci" />
+
+        <button
+            class="bg-slate-400 px-2 hover:bg-slate-300 mx-1 rounded-md text-sm font-semibold"
+            value="Add"
+            @click="submitIngredient(newIngredient)">Add</button>
+      </div>
+
+      <FilterBox v-if="tags" :tags="tags" @toggleFilter="toggleFilter" class="h-1/12"/>
+
+    </div>
+  </div>
+
+    <div id="mobile-formulating-panel" class="md:hidden print:hidden w-full bg-slate-100 pt-3">
+      <font-awesome-icon @click="toggleDisplayFormulaList" :icon="['fa', 'file-lines']" class=" ml-1 text-slate-400 text-3xl" />
       <p class="text-xl text-center">
-        {{displayFormula.name}}
+        <!-- add displayFormula.name input  -->
+        <input type="text" placeholder="New Formula" class="h-6 w-2/5 bg-transparent border-0" name="formula-name" id="formula-name" v-model.lazy="displayFormula.name">
+        <input type="number" v-model="displayFormula.totalWeight" v-on:blur="weightUpdate(displayFormula)" class="h-6 w-1/5 text-right bg-transparent border-0">g
       </p>
 
-      <ul v-for="phase, phaseKey in displayFormula.phases" class="flex flex-col">
-        <li class="w-full flex flex-col"
+      <ul v-for="(phase, phaseKey) in displayFormula.phases" class="flex flex-col odd:bg-slate-300 text-xs">
+        <li class="w-full flex flex-col mb-2"
              :key="phaseKey"
              :id="'phase-' + phaseKey"
         >
-          <div class="text-lg">{{phase.name}}</div>
-          <ul v-for="ing in phase.ingredients" class="flex flex-col ml-2">
-            <li class="flex flex-row">
-              <div class="w-8/12">
+          <div class="flex flex-row justify-between mb-0.5">
+            <input :id="'mobile-phase-name-' + phaseKey" v-model="phase.name"  class="text-lg bg-transparent"/>
+            <ButtonDanger :text="'X'" @click="deletePhase(phaseKey)" class="w-1/12"/>
+          </div>
+          <ul v-for="ing, ingKey in phase.ingredients" class="flex flex-col ml-2">
+            <li class="flex flex-row my-0.5">
+              <div class="w-4/12">
                 {{ ing.name }}
               </div>
-              <div class="w-2/12 text-xs">
-                {{ing.percentage}} %
+              <div class="w-2/12 inline-flex">
+                <input type="number" v-model="ing.percentage" v-on:blur="updateIngredientWeight(ing, phase)" class="text-xs text-right border-0 h-4 w-3/4 p-0.5 bg-transparent"/>%
               </div>
-              <div class="w-2/12 text-xs ">${{Number((ing.getWeight('g') * ing.cost * 0.001 ).toFixed(2)) }}</div>
+              <div class="w-2/12 text-right"> {{ Number(ing.getWeight('g')).toFixed(2) }}g</div>
+              <div class="w-2/12 inline-flex">
+                <input type="number" v-model="ing.cost" v-on:blur="updateFormulaCost()" class="w-3/4 text-xs h-4 border-0 text-right p-0.5 bg-transparent"/> $/kg
+              </div>
+              <div class="w-2/12 text-right pr-1" v-if="displayFormula.estimatedCost">${{Number((ing.getWeight('g') * ing.cost * 0.001 ).toFixed(2)) }}</div>
+              <font-awesome-icon @click="phase.removeIngredientByIndex(ingKey)" :icon="['fa', 'circle-xmark']" class="mx-1 hidden md:flex text-slate-400 text-md" />
             </li>
 
           </ul>
+          <search-ingredient-box :phase="phase" :phase-key="phase" />
         </li>
       </ul>
       <div class="flex flex-row justify-end w-full text-lg">
@@ -284,91 +430,79 @@ const submitIngredient = (ingredient :Ingredient) => {
         <div class="w-2/12">{{100 - displayFormula.getAllocatedPercentagesRemaining()}}%</div>
         <div class="mr-10">${{Number(displayFormula.estimatedCost).toFixed(2)}}</div>
       </div>
-    </div>
-    <div class="md:w-5/6 mx-auto py-6 pb-24 bg-slate-100 hidden md:flex flex-col">
-        
-        <div class="flex flex-row">
+      <div class="flex flex-row gap-2 justify-end w-full text-lg">
+        <ButtonStandard :text="'Add Phase'" @click="addPhase" class="w-full"/>
+        <ButtonDanger :text="'Delete'" @click="deleteFormula" class="w-full"/>
+        <ButtonStandard :text="'Save'" @click="submitFormula" class="w-full"/>
+      </div>
 
-          <formula-list @clickFormula="setDisplayFormula"/>
-            <div id="formula-box" class="w-4/6 flex md:flex flex-col md:mx-6 p-6 rounded-lg bg-slate-200">
+
+    </div>
+
+    <div id="formulating-panel" class="sm:w-5/6 mx-auto py-6 pb-24 hidden md:flex flex-col">
+        
+        <div class="flex flex-row justify-around">
+            <div id="formula-box" class="md:w-full lg:w-10/12 flex md:flex flex-col md:mx-6 p-6 rounded-lg bg-slate-200">
 
                 <h2 v-if="displayFormula.name" class="font-bold text-lg text-center pb-3">{{displayFormula.name}}</h2>
-                <div class="flex flex-row h-24">
-                    <div class="flex flex-col w-1/4">
-                        <div class="flex flex-row px-2">
-                            <div class="w-1/3">
+                <div class="flex flex-row h-10">
+                    <div class="flex flex-col w-full">
+                        <div class="flex flex-row px-2 justify-start">
+                            <div class="">
                                 <label for="formula-name w-1/3">name: </label>
                             </div>
-                            <div class="w-2/3">
+                            <div class="">
                                 <input type="text" 
                                 placeholder="New Formula"
-                                class="h-6 w-full" 
+                                class="h-6 w-full border-2 border-slate-400 rounded-md"
                                 name="formula-name" 
                                 id="formula-name" 
                                 v-model.lazy="displayFormula.name">
                             </div>
-                            
-                        </div>
-                        <div class="flex flex-row px-2" v-show="formulaUnit==='g'">
-                            <div class="w-1/3">
-                                <label for="formula-weight" class="text-left">amount: </label>
+
+                          <div class="flex flex-row px-2" v-show="formulaUnit==='g'">
+                            <div class="">
+                              <label for="formula-weight" class="text-left">amount: </label>
                             </div>
-                            <div class="w-2/3">
-                                <input 
-                                type="number" 
-                                name="formula-weight" 
-                                id="formula-weight"
-                                class="h-6 w-2/3"
-                                v-model="displayFormula.totalWeight" 
-                                v-on:blur="weightUpdate(displayFormula)"> 
-                                <button @click="toggleMeasurement" class="bg-slate-300 mx-1 px-2 rounded-sm hover:bg-slate-200">{{ formulaUnit }}</button>
+                            <div class="">
+                              <input
+                                  type="number"
+                                  name="formula-weight"
+                                  id="formula-weight"
+                                  class="h-6 w-2/3 border-2 border-slate-400 rounded-md"
+                                  v-model="displayFormula.totalWeight"
+                                  v-on:blur="weightUpdate(displayFormula)">
+                              <button @click="toggleMeasurement" class="bg-slate-300 mx-1 px-2 rounded-sm hover:bg-slate-200">{{ formulaUnit }}</button>
                             </div>
-                        </div>
-                        <div class="flex flex-row px-2" v-show="formulaUnit==='Oz'">
-                            <div class="w-1/3">
-                                <label for="formula-weight" class="text-left">amount: </label>
+                          </div>
+                          <div class="flex flex-row px-2" v-show="formulaUnit==='Oz'">
+                            <div class="">
+                              <label for="formula-weight" class="text-left">amount: </label>
                             </div>
-                            <div class="w-2/3">
-                                <input 
-                                    type="number" 
-                                    name="formula-weight" 
-                                    id="formula-weight" 
-                                    class="h-6 w-2/3"
-                                    v-model="displayFormula.totalWeightInOunces"
-                                    v-on:blur="weightUpdate(displayFormula)"> 
-                                <button @click="toggleMeasurement" class="bg-slate-300 mx-1 px-2 rounded-sm hover:bg-slate-200">{{ formulaUnit }}</button>
+                            <div class="">
+                              <input
+                                  type="number"
+                                  name="formula-weight"
+                                  id="formula-weight"
+                                  class="h-6 w-2/3"
+                                  v-model="displayFormula.totalWeightInOunces"
+                                  v-on:blur="weightUpdate(displayFormula)">
+                              <button @click="toggleMeasurement" class="bg-slate-300 mx-1 px-2 rounded-sm hover:bg-slate-200">{{ formulaUnit }}</button>
                             </div>
+                          </div>
+
+                          <div class="flex flex-row px-2">
+                            <p class="">remaining: </p>
+                            <p class="font-semibold px-4 text-end">{{ displayFormula.getAllocatedPercentagesRemaining() }}%</p>
+                          </div>
+                          <div class="flex flex-row px-2">
+                            <p class="">cost: </p>
+                            <p class="font-semibold px-4 text-end" v-if="displayFormula.estimatedCost">${{ Number((displayFormula.estimatedCost).toFixed(2)) }}</p>
+                          </div>
+
                         </div>
-                        <div class="flex flex-row px-2">
-                            <p class="w-1/3">remaining: </p> 
-                            <p class="w-1/3 font-semibold px-4 text-end">{{ displayFormula.getAllocatedPercentagesRemaining() }}%</p>
-                        </div>
-                        <div class="flex flex-row px-2">
-                            <p class="w-1/3">cost: </p> 
-                            <p class="w-1/3 font-semibold px-4 text-end" v-if="displayFormula.estimatedCost">${{ Number((displayFormula.estimatedCost).toFixed(2)) }}</p>
-                        </div>
+
                         
-                    </div>  
-                    <div class="flex flex-col w-2/4">
-                        <textarea 
-                            v-model="displayFormula.description" 
-                            rows="20" 
-                            cols="50"
-                            resize="none"
-                            name="description" 
-                            id="formula-description"
-                            class="textarea" 
-                            placeholder="description"
-                            
-                        />
-                    </div> 
-                    <div class="flex flex-col  w-1/4 m-2">
-                        <p v-if="displayFormula.created_at">
-                            First created: {{ displayFormula.created_at}}
-                        </p>
-                        <p v-if="displayFormula.updated_at">
-                            Last updated: {{ displayFormula.updated_at}}
-                        </p>
                     </div>
                 </div>
 
@@ -383,15 +517,16 @@ const submitIngredient = (ingredient :Ingredient) => {
                         <div class="w-full flex flex-col">
                             <div class="flex flex-col w-full px-3 mb-4">
                                 <div class=" rounded-sm w-full flex flex-row mb-2">
-                                    <div class="w-2/5 flex flex-row">
+                                    <div class="w-2/6 flex flex-row">
                                         <div class="w-full px-2 font-semibold" @click="phase.updateIngredientOrderByName()">Ingredient</div>
                                         <div class="hidden w-1/2 font-semibold">Inci</div>
                                     </div>
 
-                                    <div class="w-3/5 flex flex-row px-2 justify-end gap-1">
+                                    <div class="w-4/6 flex flex-row px-2 mr-10 justify-end gap-3">
                                         <div class="w-20 font-semibold" @click="phase.updateIngredientOrder()">Percentage</div>
                                         <div class="w-12 font-semibold">Amount</div>
-                                        <div class="w-24 mr-5 ml-6 font-semibold">$/kg</div>
+                                        <div class="w-24 mr-5 ml-6 font-semibold" v-show="formulaUnit==='g'">$/kg</div>
+                                        <div class="w-24 mr-5 ml-6 font-semibold" v-show="formulaUnit==='Oz'">$/Oz</div>
                                         <div class="w-8 font-semibold">Cost</div>
                                     </div>
                                 </div>
@@ -436,24 +571,31 @@ const submitIngredient = (ingredient :Ingredient) => {
                                             <p v-if="ingredient.percentage">{{ Number(ingredient.getWeight(formulaUnit)).toFixed(2) }}</p>
                                             <p class="">{{ formulaUnit }}</p>
                                         </div>
-
-                                        <div class="flex flex-row w-24 mr-5 ml-6">
+<!--TODO replace with common div that uses global Unit as input to getCost instead of hard coded, same for $/Unit-->
+                                        <div class="flex flex-row w-24 mr-5 ml-6 " v-show="formulaUnit==='g'">
                                             
-                                            <input 
+<!--                                            <input
                                             v-model.lazy="ingredient.cost"
-                                            v-on:blur="updateFormulaCost()" 
-                                            type="number" 
-                                            name="ingredientCost" 
+                                            v-on:blur="updateFormulaCost()"
+                                            type="number"
+                                            name="ingredientCost"
                                             :id="'cost-ingredient-'+ingredient.name"
                                             class="h-6 w-16 appearance-none outline-none border p-2"
-                                            >
-                                            <p>$/kg</p>
+                                            >-->
+                                            <p>{{ Number(ingredient.getCost('g')).toFixed(2) }} $/kg</p>
                                             
                                         </div>
-                                        
+
+                                        <div class="flex flex-row w-24 mr-5 ml-6" v-show="formulaUnit==='Oz'">
+                                          <p>{{ Number(ingredient.getCost('Oz')).toFixed(2) }} $/Oz</p>
+                                        </div>
+
                                         <div class="flex flex-row w-10 justify-end">
                                             <p v-if="ingredient.percentage">${{ Number((ingredient.getWeight('g') * ingredient.cost * 0.001 ).toFixed(2)) }}</p>
                                         </div>
+                                      <font-awesome-icon @click="editIngredient(ingredient)" :icon="['fa', 'gears']" class="my-1 hover:cursor-pointer flex text-slate-600 hover:text-slate-500 text-md" />
+<!--                                      todo : figure out how to add below icon and write down how so i know for next time -->
+                                      <font-awesome-icon @click="phase.removeIngredientByIndex(ingredientKey)" :icon="['fa', 'circle-xmark']" class="my-1 hover:cursor-pointer flex hover:text-red-700 text-slate-600 text-md" />
                                     </div>
 
                                 </div>
@@ -520,81 +662,21 @@ const submitIngredient = (ingredient :Ingredient) => {
                             mx-2 
                             rounded-md 
                             font-semibold">Duplicate</button>
+<!--                      todo replace these with recognisable icons up top after moving info to details below -->
                         <button @click="submitUpdateFormula" class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 rounded-md font-semibold">Save</button>
                         <button @click="deleteFormula" class="bg-red-400 hover:bg-red-200 px-2 mx-2 rounded-md font-semibold">Delete</button>
                         <button @click="resetDisplayAndCachedFormula()" class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 rounded-md font-semibold">New Formula</button>
+                        <button @click="toggleShowDetails()" class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 rounded-md font-semibold">Details</button>
                     </div>
+
                 </div>
+              <formula-details v-if="showDetails" :formula="displayFormula" @close="toggleShowDetails" />
             </div>
 
-            <div id="ingredient-list" class="w-1/6 pr-2 hidden md:block">
-                <div class="drop-zone"  
-                    @drop="onDrop($event)"
-                    @dragenter.prevent
-                    @dragover.prevent
-                >
-
-                    <h2 class="py-1 bg-slate-300 font-bold rounded-t-md text-center">Ingredients</h2>
-                    <div class="h-128 overflow-y-auto">
-                        <ul 
-                            v-for="item in filteredIngredients" 
-                            :key="item.id" 
-                            class="drag-el 
-                            px-2 py-1 
-                            even:bg-slate-100 
-                            odd:bg-slate-200 
-                            hover:bg-slate-300
-                            hover:cursor-grab
-                            active:cursor-grabbing
-                            "
-                            draggable="true"
-                            @dragstart="startDrag($event, item.id)"
-                        >
-                            <li class="flex flex-row w-full">
-                            <p class="w-1/2 font-semibold">{{ item.name }}</p>
-                            <p class="w-1/2 font-thin italic">{{ item.inci}}</p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="flex flex-row w-full h-6 my-3">
-                    <input
-                        class="w-1/2 font-thin text-xs"
-                        placeholder="new ingredient"
-                        v-model="newIngredient.name"
-                        type="text"
-                        name="Name"
-                        ref="ingInput"
-                        />
-                    <input 
-                        class="w-1/3 font-thin text-xs"
-                        v-model="newIngredient.inci" 
-                        placeholder="INCI" 
-                        type="text" 
-                        name="Inci" />
-
-                    <button 
-                    class="bg-slate-400 px-2 hover:bg-slate-300 mx-1 rounded-md text-sm font-semibold" 
-                    value="Add" 
-                    @click="submitIngredient(newIngredient)">Add</button>
-                </div>
-
-                <FilterBox v-if="tags" :tags="tags" @toggleFilter="toggleFilter"/>
-
-                <div v-if="displayFormula.getInciList().length >0" 
-                class="py-2 my-2 bg-slate-200 font-semibold rounded-md text-center">
-                
-                    <span v-for="inci in displayFormula.getInciList()">
-                        {{ inci }}, 
-                    </span>
-                
-                </div>
-                
-            </div>
-
+          <edit-ingredient-component v-if="showEditWindow" :item="data.ingredientList.getHighlightIngredient()" :itemCopy="data.ingredientList.getHighlightIngredientCopy()" :ingredient-in-formulas="foundInFormulasList" @close="closeEditIngredientWindow"/>
         </div>
     </div>
+
    <formula-print-page :display-formula="displayFormula" :formula-unit="formulaUnit" />
 </template>
 

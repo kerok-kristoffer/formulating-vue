@@ -8,7 +8,7 @@ import FormulasView from '../views/FormulasView.vue'
 import SubscriptionsView from '../views/SubscriptionView.vue'
 import SuccessView from '../views/SubscriptionSuccessPage.vue'
 import CancelView from '../views/SubscriptionCancelPage.vue'
-import { useAccountStore } from '../stores/account'
+import { globalState } from '@/main'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,9 +57,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const account = useAccountStore()
-  if (to.path === '/login' && account.user) {
-    next('/')
+
+  if (to.path === '/login' && globalState.isAuthenticated) {
+    next('/formulas')
     return
   }
 
@@ -68,7 +68,8 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (to.matched.some((record) => record.meta.requiresAuth) && !account.user) {
+  if (to.matched.some((record) => record.meta.requiresAuth) && globalState.isAuthenticated !== true) {
+    console.log('not authenticated')
     next('/login')
     return
   }

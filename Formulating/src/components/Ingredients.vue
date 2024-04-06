@@ -44,7 +44,7 @@
       </div>
       <button-standard :text="'Add Ingredient'" @click="addIngredientClick" />
 
-    <edit-ingredient-component v-if="showEditWindow" :item="selectedItem" :itemCopy="selectedItemCopy" :ingredient-in-formulas="foundInFormulasList" @prev="prevIng" @next="nextIng" @cancel="cancelUpdate" @update-item="onUpdateItem" @restore="restoreEditItem"/>
+    <edit-ingredient-component v-if="showEditWindow" :item="data.ingredientList.getHighlightIngredient()" :itemCopy="selectedItemCopy" :ingredient-in-formulas="foundInFormulasList" @close="closeEditWindow" @refresh="refreshInFormulaList" />
     <add-ingredient-component v-if="showAddWindow" :item="newIngredient" @cancel="cancelAdd" @updateItem="addIngredient"/>
   </div>
 
@@ -85,7 +85,7 @@ const editIngredient = (ingredient :Ingredient) => {
   foundInFormulasList.value = inFormulas(ingredient);
   showEditWindow.value = true;
 }
-
+// TODO move this to ingredientList
 function inFormulas(ingredient :Ingredient) :Formula[] {
 
   let filter = formulas.filter((formula) => {
@@ -107,32 +107,25 @@ function isPartOfFormula(ingredient :Ingredient) :boolean {
 
 }
 
-function prevIng() {
-  data.ingredientList.highlightPreviousIngredient();
-  selectedItem.value = data.ingredientList.getHighlightIngredient(); // TODO is there a way of referencing the highlighted ingredient directly in the prop?
-  selectedItemCopy.value = data.ingredientList.getHighlightIngredientCopy();
+function refreshInFormulaList() {
   foundInFormulasList.value = inFormulas(data.ingredientList.getHighlightIngredient());
 }
-function nextIng() {
-  data.ingredientList.highlightNextIngredient();
-  selectedItem.value = data.ingredientList.getHighlightIngredient();
-  selectedItemCopy.value = data.ingredientList.getHighlightIngredientCopy();
-  foundInFormulasList.value = inFormulas(data.ingredientList.getHighlightIngredient());
+
+function closeEditWindow() {
+  showEditWindow.value = false;
 }
 
 const onUpdateItem = (ingredient :Ingredient) => {
   // ingredients.value[editing.value] = item; // ?
   console.log("updating ing:" + ingredient.name);
 
-  api.getIngredientService().updateIngredient(ingredient).then(response => {
-    console.log(response);
-  })
+  //api.getIngredientService().updateIngredient(ingredient).then(response => {
   showEditWindow.value = false;
 }
 
 function restoreEditItem() {
-
-  selectedItem.value = data.ingredientList.getHighlightIngredient();
+  data.ingredientList.setHighlightIngredient(data.ingredientList.getHighlightIngredientCopy());
+  //selectedItem.value = data.ingredientList.getHighlightIngredient();
 }
 
 const cancelUpdate = () => {

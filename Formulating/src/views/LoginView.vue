@@ -41,44 +41,37 @@
   </main>
 </template>
 
-<script>
+<script setup>
+import { onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/account'
 import imgUrl from '/login_bg_compressed.png'
-import { ref, onMounted } from 'vue'
 
-export default {
-  name: 'Login',
-  setup() {
-    const router = useRouter()
+let router
+let account
 
-    onMounted(() => {
-      const image = new Image()
-      image.src = imgUrl
-      image.onload = () => {}
-    })
+onMounted(() => {
+  const image = new Image()
+  image.src = imgUrl
+  image.onload = () => {}
+  router = useRouter()
+  account = useAccountStore()
+})
 
-    const submit = async (e) => {
-      const form = new FormData(e.target)
-      const inputs = Object.fromEntries(form.entries())
+const submit = async (e) => {
+  const form = new FormData(e.target)
+  const inputs = Object.fromEntries(form.entries())
 
-      axios.defaults.headers.common['Authorization'] = `Bearer `
+  axios.defaults.headers.common['Authorization'] = `Bearer `
 
-      const { data } = await axios.post('users/login', inputs, {
-        withCredentials: JSON.parse(import.meta.env.VITE_API_CREDS)
-      })
+  const { data } = await axios.post('users/login', inputs, {
+    withCredentials: JSON.parse(import.meta.env.VITE_API_CREDS)
+  })
 
-      const account = useAccountStore()
-      account.login(data.user, data.access_token, data.refresh_token)
-      await router.push('/formulas')
-    }
-
-    return {
-      submit,
-      imgUrl
-    }
-  }
+  await account.login(data.user, data.access_token, data.refresh_token)
+  console.log('login successful, pushing to /formulas')
+  await router.push('/formulas')
 }
 </script>
 

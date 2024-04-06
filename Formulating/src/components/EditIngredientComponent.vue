@@ -95,7 +95,7 @@ const { item } = defineProps<{
 
 
 
-const emit = defineEmits(['updateItem', 'cancel', 'next', 'prev', 'restore']);
+const emit = defineEmits(['close', 'refresh']);
 
 const router = useRouter();
 const formulas = userData().formulaList.formulas;
@@ -119,7 +119,7 @@ async function handleAlertYesClick(callback: CallbackFunction) {
 
 function handleAlertNoClick(callback: CallbackFunction) {
   data.ingredientList.restoreHighlightIngredient();
-  emit('restore');
+  //emit('restore');
 
   isAlertVisible.value = false;
   callback();
@@ -158,7 +158,8 @@ function prevIngredientClick() {
     alertUnsavedChangesToIngredient();
     return;
   }
-  emit('prev');
+  data.ingredientList.highlightPreviousIngredient();
+  emit("refresh");
 
 }
 function nextIngredientClick() {
@@ -167,13 +168,17 @@ function nextIngredientClick() {
     alertUnsavedChangesToIngredient();
     return;
   }
-    emit('next'); // TODO are these emits necessary, or should I just call the ingredientList.next from here?
+  data.ingredientList.highlightNextIngredient();
+  emit("refresh");
 }
 
 const updateItem = (ing :Ingredient) => {
   console.log("emit from updateItem: ", ing)
-  emit('updateItem', ing); // TODO implement call to api from here?
-  showEditWindow.value = false;
+  data.api.getIngredientService().updateIngredient(ing).then(response => {
+    console.log(response);
+  })
+  emit('close');
+  showEditWindow.value = false; // TODO does this do anything anymore?
 }
 
 const cancelEdit = () => {
@@ -182,7 +187,7 @@ const cancelEdit = () => {
     alertUnsavedChangesToIngredient();
     return;
   }
-  emit('cancel');
+  emit('close');
   showEditWindow.value = false;
 };
 

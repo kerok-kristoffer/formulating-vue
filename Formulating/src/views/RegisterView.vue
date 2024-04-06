@@ -108,7 +108,6 @@ export default {
       }
       // TODO start using backend api service
       axios.post('users', inputs).then((response) => {
-        // account.login()
         if (response.status === 200) {
           let data = response.data
 

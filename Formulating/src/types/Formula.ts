@@ -22,6 +22,7 @@ class Formula {
         public updated_at: string
         ) {
         this.setWeight(weightInGrams, 'g')
+        this.description = "";
     }
 
     setWeight(weight :number, unit :Units) :void {
@@ -69,22 +70,22 @@ class Formula {
         this.allocatedPercentage = 0
         this.phases.forEach(p => {
             p.ingredients.forEach(ingredient => {
-                let ingredientWeight = this.totalWeight * ingredient.percentage * 0.01
+                let ingredientWeight = this.totalWeight * Number(ingredient.percentage) * 0.01
                 ingredient.setWeight(ingredientWeight, 'g')
                 if(ingredient.percentage) {
-                    this.allocatedPercentage += ingredient.percentage
+                    this.allocatedPercentage += Number(ingredient.percentage)
                 }
             })
         })
     }
 
-    updateCost() :void {
+    updateCost(unit :Units) :void {
         this.estimatedCost = 0
         
         this.phases.forEach(p => {
             p.ingredients.forEach(ingredient => {
                 let ingredientWeight = this.totalWeight * ingredient.percentage * 0.01
-                let ingredientCost = ingredientWeight * ingredient.cost * 0.001
+                let ingredientCost = Number(ingredientWeight * ingredient.cost * 0.001)
                 
                 if(ingredient.cost) {
                     this.estimatedCost += ingredientCost

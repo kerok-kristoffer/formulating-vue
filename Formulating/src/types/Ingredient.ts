@@ -2,7 +2,7 @@ import Units from "./Units";
 import Tag from "./Tag";
 
 class Ingredient {
-    percentage: number
+    percentage: number = 0;
     phase: number
     weightInGrams: number // ide complains on import if set to private, fix!
     weightInOunces: number
@@ -39,10 +39,7 @@ class Ingredient {
         for (let i = 0; i < this.tags.length ; i++) {
             console.log("comparing " + ingredient.tags[i].name + " to " + this.tags[i].name);
             if (ingredient.tags[i].name != this.tags[i].name) {
-                console.log("tag discrepancy found!");
                 return false;
-            } else {
-                console.log("tag looks fine!");
             }
 
         }
@@ -83,6 +80,30 @@ class Ingredient {
                 return this.weightInOunces
             default:
                 return -1
+        }
+    }
+
+    getCost(unit :Units) :number {
+        switch (unit) {
+            case 'g':
+                return this.cost
+            case 'Oz':
+                return this.cost * 0.03527396 // verify conversion
+            default:
+                return -1
+        }
+    }
+
+    setCost(cost :number, unit :Units) :void {
+        switch (unit) {
+            case 'g':
+                this.cost = cost
+                break;
+            case 'Oz':
+                this.cost = cost / 0.03527396
+                break;
+            default:
+                break;
         }
     }
 

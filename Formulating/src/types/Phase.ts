@@ -29,7 +29,7 @@ class Phase {
         this.orderIngredientsByPercentage(this.ingredients)
     }
 
-    orderIngredientsByPercentage = (unorderedIngredients :Ingredient[]) :Ingredient[]  => {
+    private orderIngredientsByPercentage = (unorderedIngredients :Ingredient[]) :Ingredient[]  => {
         return unorderedIngredients.sort( (a: Ingredient, b: Ingredient) => {
                 return a.percentage < b.percentage ? 1 : -1
             })

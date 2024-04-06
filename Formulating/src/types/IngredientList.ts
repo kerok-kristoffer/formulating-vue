@@ -2,6 +2,7 @@ import Ingredient from "./Ingredient";
 import axios from 'axios';
 import Tag from "./Tag";
 import {userData} from "../stores/userData";
+import IngredientBuilder from "./IngredientBuilder";
 
 class IngredientList {
 
@@ -13,23 +14,6 @@ class IngredientList {
     public tags: Tag[];
     private tagFilters: Tag[] = [];
     private highlightIndex = 0;
-
-    populate() {
-        this.defaultPage = 1;
-        this.defaultPageSize = 750;
-
-        let url = 'users/ingredients?page_id=' + this.defaultPage + '&page_size=' + this.defaultPageSize
-        axios.get(url).catch(error => {
-            console.log(error)
-        }).then((response :any) => {
-            this.ingredients = []
-            for (let i in response.data) {
-                let ing = response.data[i]
-                let ingredient = new Ingredient(ing.Id, ing.Id, ing.Name, ing.Inci, ing.cost, ing.tags)
-                this.ingredients.push(ingredient)
-            }
-        });
-    }
 
     async populateWithTags() { // TODO replace direct call with api function in userData
         await axios.get('users/ingredients?page_id=1&page_size=750').catch(error => {
@@ -51,8 +35,8 @@ class IngredientList {
                     if(!tagNames.has(tag.name)) {
                         tagNames.add(tag.name)
                         this.tags.push(tag)
-
                     } else {
+
                         ing.tags[i] = this.tags.find((t) => {return t.name == tag.name})
                     }
                 }
@@ -160,6 +144,13 @@ class IngredientList {
         let indexToRemove = this.ingredients.indexOf(ingredient)
         if(indexToRemove !== -1) {
             this.ingredients.splice(indexToRemove, 1);
+        }
+    }
+
+    refreshIngredient(ingredient :Ingredient) {
+        const index = this.ingredients.findIndex((i) => i.ingredient_id === ingredient.ingredient_id);
+        if(index !== -1) {
+            this.ingredients.splice(index, 1, ingredient);
         }
     }
 }
