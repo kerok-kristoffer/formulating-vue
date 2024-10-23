@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-1 right-1">
+  <div class="print:hidden fixed bottom-1 right-1 z-10">
     <button @click="showForm = !showForm" class="bg-slate-400 hover:bg-Slate-500 text-white font-bold py-2 px-4 rounded">
       Feedback
     </button>

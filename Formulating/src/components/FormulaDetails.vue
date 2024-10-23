@@ -8,10 +8,10 @@
           <div class="flex flex-col w-full mx-auto">
             <div class="profile bg-slate-200 p-3 rounded-md">
               <div v-if="formula.getInciList().length > 0" class="">
-                  <h2 class="font-bold mt-2">Incis</h2>
+                  <h2 class="font-bold mt-2">Inci</h2>
 
-                  <span v-for="inci in formula.getInciList()" :key="inci" class="text-sm font-light">
-                    {{ inci }},
+                  <span v-for="(inci, index) in sortedInciList" :key="inci" class="text-sm font-light">
+                    {{ inci }}<span v-if="index < sortedInciList.length - 1">,</span>
                 </span>
               </div>
 
@@ -40,12 +40,16 @@
 
 <script setup lang="ts">
 
-import {defineEmits, defineProps, onMounted, UnwrapRef} from "vue";
+import {computed, defineEmits, defineProps, onMounted, UnwrapRef} from "vue";
 import Formula from "@/types/Formula";
 
 const { formula } = defineProps<{
   formula: UnwrapRef<Formula>
 }>();
+
+const sortedInciList =  computed(() => {
+  return formula.getInciList().slice();
+})
 
 onMounted(() => {
   console.log('mounted');

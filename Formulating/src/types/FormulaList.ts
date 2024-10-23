@@ -2,6 +2,9 @@ import axios from 'axios'
 import Formula from "./Formula";
 import Phase from "./Phase";
 import Ingredient from "./Ingredient";
+import FormulaFactory from "./FormulaFactory";
+import FormulaHelper from "./FormulaHelper";
+import {userData} from "../stores/userData";
 
 class FormulaList {
     public formulas: Formula[];
@@ -12,49 +15,86 @@ class FormulaList {
 
         this.formulas = []
 
+        if (data === null) {
+            console.log("no formulas found")
+            return
+        }
+
+        console.log("formulas found: " + data.length)
       for (const i in data) {
         let formulaData = data[i]
         this.addToFormulaListFromApiData(formulaData)
       }
-      this.formulas.sort((t1, t2) => {
-        return t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1
-      })
+      this.sort();
     })
   }
 
-    addToFormulaListFromApiData(formulaData :Formula) {
-        // Can these be cast to Formulas without all of this looping through individual sub components?
-        let formulaPhases = [] as Phase[];
-        for (let j in formulaData.phases) { // TODO: move this to a FormulaFactory?
-            let phase = formulaData.phases[j]
-            let phaseIngredients = [] as Ingredient[];
+  public removeFormula(formula: Formula) {
+      for (let i in this.formulas) {
+          if (this.formulas[i].id == formula.id) {
+              console.log("deleting:" + formula.id + " at: " + i);
+              this.formulas.splice(Number(i), 1)
+              break;
+          }
+      }
+  }
 
-            for (let k in phase.ingredients) {
-                let phaseIngredient = phase.ingredients[k]
-                let newIngredient = new Ingredient(
-                    phaseIngredient.id,
-                    phaseIngredient.ingredient_id,
-                    phaseIngredient.name,
-                    phaseIngredient.inci,
-                    Number(phaseIngredient.cost),
-                    []
-                )
-                newIngredient.percentage = phaseIngredient.percentage
-                newIngredient.setWeight(phaseIngredient.weightInGrams, 'g')
-                newIngredient.formula_ingredient_id = phaseIngredient.id
-                phaseIngredients.push(newIngredient)
+  public resetFormulaToCookieFormula(formula: Formula) {
+      let formulaToReset = this.getFormulaById(formula.id)
+
+        if (formulaToReset == null) {
+            console.error("could not find formula to reset")
+            return
+        }
+        let cookieFormula = userData().getCachedFormula()
+
+      if (!cookieFormula) {
+            console.error("could not find cookie formula")
+          return
+      }
+        FormulaHelper.restoreFormula(formulaToReset, cookieFormula, userData().settings.preferredUnits)
+
+      return formulaToReset
+  }
+
+  public updateFormulaInList(formula: Formula) {
+        for (let i in this.formulas) {
+            if (this.formulas[i].id == formula.id) {
+                this.formulas[i] = formula
+                break
             }
-
-            let storedPhase = new Phase(phase.id, phase.name, phaseIngredients)
-            storedPhase.description = phase.description
-
-            formulaPhases.push(storedPhase)
         }
 
-        let formula = new Formula(formulaData.name, formulaPhases, formulaData.totalWeight, 'saved', formulaData.created_at, formulaData.updated_at)
-        formula.description = formulaData.description
+        this.sort()
+  }
+
+  public getFormulaById(id: number) {
+    for (let i in this.formulas) {
+        if (this.formulas[i].id == id) {
+            return this.formulas[i]
+        }
+    }
+    return null
+  }
+
+
+    public sort() {
+        this.formulas.sort((t1, t2) => {
+            return t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1
+        })
+    }
+
+
+
+    public addToFormulaListFromApiData(formulaData :Formula) {
+        let formula = FormulaFactory.createFormulaFromData(formulaData)
         formula.id = formulaData.id
-        this.formulas.push(formula)
+        this.addFormula(formula)
+    }
+
+    public addFormula(newFormula: Formula) {
+        this.formulas.push(newFormula)
+        this.sort()
     }
 }
 

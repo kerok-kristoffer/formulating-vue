@@ -10,10 +10,10 @@ class Formula {
     public allocatedPercentage: number
     public estimatedCost: number
     measurement: Units
-    id: number
     
 
     constructor(
+        public id: number,
         public name: string,
         public phases: Phase[],
         weightInGrams: number,
@@ -23,6 +23,51 @@ class Formula {
         ) {
         this.setWeight(weightInGrams, 'g')
         this.description = "";
+    }
+
+    equals(formula :Formula) :boolean {
+        if (formula.name !== this.name) {
+            console.log("name not equal, " + formula.name + ", vs " + this.name)
+            return false;
+        }
+        if (formula.totalWeight !== this.totalWeight) {
+            console.log("totalWeight not equal")
+            return false;
+        }
+        if (formula.totalWeightInOunces !== this.totalWeightInOunces) {
+            console.log("totalWeightInOunces not equal")
+            return false;
+        }
+        if (formula.phases.length !== this.phases.length) {
+            console.log("phases length not equal")
+            return false;
+        }
+        if(formula.description != this.description) {
+            console.log("description not equal")
+            console.log("cached:" + formula.description)
+            console.log("display:" + this.description)
+            return false;
+        }
+        if (formula.allocatedPercentage !== this.allocatedPercentage) {
+            console.log("allocatedPercentage not equal")
+            return false;
+        }
+        if (formula.estimatedCost !== this.estimatedCost) {
+            console.log("estimatedCost not equal")
+
+            console.log("cached" + formula.estimatedCost)
+            console.log("display" + this.estimatedCost)
+            return false;
+        }
+
+        for (let i = 0; i < this.phases.length ; i++) {
+            const phase = this.phases[i] as Phase;
+            if (!phase.equals(formula.phases[i] as Phase)) {
+                console.log("phases not equal")
+                return false;
+            }
+        }
+        return true;
     }
 
     setWeight(weight :number, unit :Units) :void {
@@ -92,29 +137,20 @@ class Formula {
                 }
             })
         })
-
     }
 
     getInciList() :string[] {
 
         let ingredientList :Ingredient[] = []
-        let incis: string[] = []
 
         this.phases.forEach(p => {
             ingredientList = ingredientList.concat(p.ingredients)
         })
 
-        ingredientList.sort((a, b) => b.percentage - a.percentage)
-
-        ingredientList.forEach(i => {
-            
-            if (!i.inci || i.inci == "") {
-                return
-            }
-            incis.push(i.inci)
-        })
-
-        return incis
+        return ingredientList
+            .filter((i) => i.inci != undefined && i.inci != "")
+            .sort((a, b) => b.percentage - a.percentage)
+            .map((i) => i.inci)
     }
 
     hasIngredient(ingredient :Ingredient) :boolean {
@@ -130,6 +166,57 @@ class Formula {
         return false;
     }
 
+    getIngredientList() :Ingredient[] {
+        let ingredients :Ingredient[] = []
+        console.log("getting ingredient list from Formula " + this.name)
+        this.phases.forEach(p => {
+            ingredients = ingredients.concat(p.ingredients)
+            p.ingredients.forEach(i => {
+                console.log(i.tags)
+            })
+        })
+        return ingredients
+    }
+
+
+    moveIngredientFromPhaseToPhase(ingredientIndex: number, fromPhaseKey: number, toPhase: Phase): void {
+        const fromPhase = this.phases[fromPhaseKey];
+        if (fromPhase) {
+            const ingredient = fromPhase.removeIngredientByIndex(ingredientIndex);
+            if (ingredient) {
+                toPhase.addIngredient(ingredient);
+                toPhase.updateIngredientOrder();
+            }
+        }
+    }
+
+    toString(): string {
+        let formulaString = `Formula: ${this.name}\n`;
+        formulaString += `ID: ${this.id}\n`;
+        formulaString += `Description: ${this.description}\n`;
+        formulaString += `Total Weight: ${this.totalWeight} ${this.measurement}\n`;
+        formulaString += `Total Weight in Ounces: ${this.totalWeightInOunces}\n`;
+        formulaString += `Allocated Percentage: ${this.allocatedPercentage}\n`;
+        formulaString += `Estimated Cost: ${this.estimatedCost}\n`;
+        formulaString += `Created At: ${this.created_at}\n`;
+        formulaString += `Updated At: ${this.updated_at}\n`;
+        formulaString += `Save Status: ${this.saveStatus}\n`;
+
+        this.phases.forEach((phase, phaseIndex) => {
+            formulaString += `\nPhase ${phaseIndex + 1}:\n`;
+            phase.ingredients.forEach((ingredient, ingredientIndex) => {
+                formulaString += `  Ingredient ${ingredientIndex + 1}:\n`;
+                formulaString += `    ID: ${ingredient.id}\n`;
+                formulaString += `    Name: ${ingredient.name}\n`;
+                formulaString += `    INCI: ${ingredient.inci}\n`;
+                formulaString += `    Percentage: ${ingredient.percentage}\n`;
+                formulaString += `    Cost: ${ingredient.cost}\n`;
+                formulaString += `    Tags: ${ingredient.tags.map(tag => tag.name).join(', ')}\n`;
+            });
+        });
+
+        return formulaString;
+    }
 }
 
 export default Formula

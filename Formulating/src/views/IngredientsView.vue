@@ -1,6 +1,6 @@
 <template>
   <section
-    class="flex flex-col md:rounded-xl items-center md:py-6 md:px-6 md:mx-auto md:mt-10 space-y-0 bg-slate-100 dark:bg-slate-500"
+    class="flex flex-col md:rounded-xl items-center md:py-6 md:px-6 md:mx-auto md:mt-10 space-y-0 bg-slate-100"
   >
     <Ingredients />
   </section>

@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import Phase from "../types/Phase";
 import Ingredient from "../types/Ingredient";
-import {nextTick, ref} from "vue";
+import {computed, nextTick, ref} from "vue";
 import axios from 'axios';// TODO move API calls to backend api service
 import {userData} from "../stores/userData";
 
@@ -53,7 +53,7 @@ const { phase, phaseKey } = defineProps<{
 
 const searchIngredientList = ref<Ingredient[]>([])
 const phaseCurrentlySearching = ref(-1)
-const ingredients = ref<Ingredient[]>(data.ingredientList.ingredients)
+const ingredients = computed(() => data.ingredientList.ingredients);
 
 const searchIngredient = (phaseKey :number, phaseSearchTerm :string) => {
 
@@ -71,7 +71,7 @@ const searchIngredient = (phaseKey :number, phaseSearchTerm :string) => {
 
 const addNewSearchIngredient = (phase :Phase, input :string) => {
 
-  let requestIngredient = new Ingredient(0, 0, input, "", 0, [])
+  let requestIngredient = new Ingredient(0, 0, input, "", 0, 0, [])
 
   axios.post('users/ingredients', requestIngredient).then(response => {
     if (response.status !== 200) {
@@ -79,17 +79,20 @@ const addNewSearchIngredient = (phase :Phase, input :string) => {
     }
     let ing = response.data
 
-    let responseIngredient = new Ingredient(ingredients.value.length, Number(ing.Id), ing.Name, ing.Inci, ing.cost, [])
+    let responseIngredient = new Ingredient(ingredients.value.length, Number(ing.Id), ing.Name, ing.Inci, ing.percentage, ing.cost, [])
     ingredients.value.push(responseIngredient)
     ingredients.value.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
     addSearchIngredient(phase, responseIngredient)
   });
 }
 // TODO add Ingredient and Formula factory to avoid calling constructor directly
+// TODO introduce new FormulaIngredient class to differentiate between Ingredients and FormulaIngredients
 const addSearchIngredient = (phase :Phase, ingredient :Ingredient) => {
-  let newFormulaIngredient = new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci, ingredient.cost, ingredient.tags)
+  let newFormulaIngredient = new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci, 0, ingredient.cost, ingredient.tags)
   ingredient.formula_ingredient_id = 0
   phase.addIngredient(newFormulaIngredient)
+  data.getReactiveDisplayFormula().updateWeights(data.settings.preferredUnits)
+  data.getReactiveDisplayFormula().updateCost(data.settings.preferredUnits)
   phase.searchIngredient = ""
   searchIngredientList.value = []
 }

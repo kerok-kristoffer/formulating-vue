@@ -1,14 +1,14 @@
 <template>
   <!-- Mobile Navbar (Hidden on Large Screens) -->
-  <nav class="bg-slate-100 dark:bg-slate-400 md:hidden">
+  <nav class="bg-slate-100 dark:bg-slate-300 md:hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <p class="flex flex-row items-center font-normal">
               <img
-                class="mb-4 h-20 w-34"
-                src="../assets/mySatchel_logo_plain.png"
+                class="my-4 h-12 w-34"
+                src="../assets/mySatchel_text.png"
                 alt="mySatchel"
               />
             </p>
@@ -59,6 +59,13 @@
           {{ item.name }}
         </router-link>
         <!-- Add more menu items here if needed -->
+
+        <button
+          @click="logout"
+          class="text-gray-500 hover:bg-red-200 hover:text-black px-3 py-2 rounded-md text-sm font-medium"
+        >
+          log out
+        </button>
       </div>
     </div>
   </div>
@@ -68,10 +75,18 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { navigation } from '@/navigation'
+import { useAccountStore } from '@/stores/account'
 
 const router = useRouter()
 const path = computed(() => router.currentRoute)
+const account = useAccountStore()
 let isMobileMenuOpen = ref(false)
+
+async function logout() {
+  await account.logout()
+  console.log('redirecting to login')
+  router.push('/login')
+}
 
 function toggleMobileMenu() {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -80,5 +95,4 @@ function toggleMobileMenu() {
 function closeMobileMenu() {
   isMobileMenuOpen.value = false
 }
-
 </script>

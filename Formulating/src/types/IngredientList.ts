@@ -2,12 +2,12 @@ import Ingredient from "./Ingredient";
 import axios from 'axios';
 import Tag from "./Tag";
 import {userData} from "../stores/userData";
-import IngredientBuilder from "./IngredientBuilder";
 
 class IngredientList {
 
     public ingredients: Ingredient[];
-    private highlightIngredient: Ingredient;
+    private filteredIngredients: Ingredient[];
+    public highlightIngredient :Ingredient;
     private highlightIngredientRegretCopy: Ingredient;
     private defaultPage: 1;
     private defaultPageSize: 750;
@@ -15,38 +15,77 @@ class IngredientList {
     private tagFilters: Tag[] = [];
     private highlightIndex = 0;
 
-    async populateWithTags() { // TODO replace direct call with api function in userData
-        await axios.get('users/ingredients?page_id=1&page_size=750').catch(error => {
-            console.log(error)
-        })
-            .then((response :any) => {
-            let data = response.data
-            let tagNames = new Set()
-            this.ingredients = []
-            this.tags = []
-            for (let i in data) {
-                let ing = data[i]
-                let ingredient = new Ingredient(Number(i), ing.Id, ing.Name, ing.Inci, ing.cost, ing.tags)
-                this.ingredients.push(ingredient)
-
-                for (const i in ing.tags) {
-                    let tag = ing.tags[i]
-
-                    if(!tagNames.has(tag.name)) {
-                        tagNames.add(tag.name)
-                        this.tags.push(tag)
-                    } else {
-
-                        ing.tags[i] = this.tags.find((t) => {return t.name == tag.name})
-                    }
-                }
-                this.tags.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
-            }
-            this.ingredients.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
-        });
+    constructor() {
+        this.ingredients = [];
+        this.filteredIngredients = [];
+        this.tags = [];
     }
 
-    private filteredIngredients: Ingredient[];
+    async populateWithTags(): Promise<void> { // TODO replace direct call with api function in userData
+        console.log("populating ingredient list with tags")
+        try {
+            await axios.get('users/ingredients?page_id=1&page_size=750')
+                .then((response :any) => {
+                    let data = response.data
+                    let tagNames = new Set()
+                    this.ingredients = []
+                    this.tags = []
+                    for (let i in data) {
+                        let ing = data[i]
+                        let ingredient = new Ingredient(Number(i), ing.Id, ing.Name, ing.Inci, ing.percentage, ing.cost, ing.tags)
+                        this.ingredients.push(ingredient)
+
+                        for (const i in ing.tags) {
+                            let tag = ing.tags[i]
+
+                            if(!tagNames.has(tag.name)) {
+                                tagNames.add(tag.name)
+                                this.tags.push(tag)
+                            } else {
+
+                                ing.tags[i] = this.tags.find((t) => {return t.name == tag.name})
+                            }
+                        }
+                        this.tags.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
+                    }
+                    this.ingredients.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
+                    console.log("populated ingredient list with tags:" + this.ingredients.length)
+                    return Promise.resolve();
+                });
+        } catch (error) {
+            console.error(error)
+            throw error;
+
+        }
+        return Promise.resolve();
+    }
+
+    populateWithList(list :Ingredient[]) {
+        console.log("populating with list" + list.length)
+        this.ingredients = []
+        this.tags = []
+        let tagNames = new Set()
+        for (let i in list) {
+            let ing = list[i]
+            console.log("adding ingredient: " + ing.name)
+            let ingredient = new Ingredient(Number(i), ing.ingredient_id, ing.name, ing.inci, ing.percentage, ing.cost, ing.tags)
+            this.ingredients.push(ingredient)
+
+            for (const i in ing.tags) {
+                let tag = ing.tags[i]
+
+                if(!tagNames.has(tag.name)) {
+                    console.log("adding tag: " + tag.name)
+                    tagNames.add(tag.name)
+                    this.tags.push(tag)
+                } else {
+
+                    ing.tags[i] = this.tags.find((t) => {return t.name == tag.name})
+                }
+            }
+            this.tags.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
+        }
+    }
 
     toggleFilter(tag :Tag) {
         if(tag.isActive) {
@@ -85,13 +124,23 @@ class IngredientList {
     }
 
     getFilteredIngredients() :Ingredient[] {
+        if (this.filteredIngredients.length == 0) {
+            this.filteredIngredients = this.ingredients;
+        }
         return this.filteredIngredients;
     }
 
     setHighlightIngredient(ing :Ingredient) {
+        console.log("highlighting ingredient: " + ing.name)
+        console.log(ing)
         this.highlightIngredientRegretCopy = ing.copy();
         this.highlightIngredient = ing;
     }
+
+    public updateHighlightIngredientCopy() {
+        this.highlightIngredientRegretCopy = this.highlightIngredient.copy();
+    }
+
 
     getHighlightIngredient() :Ingredient {
         return this.highlightIngredient;
@@ -119,14 +168,19 @@ class IngredientList {
         return this.highlightIngredient;
     }
 
-    publishHighlightedIngredient() {
-        userData().api.getIngredientService().updateIngredient(this.getHighlightIngredient()).then(response => {
-            console.log("updated ingredient: " + response);
+    async publishHighlightedIngredient() {
+        console.log("publishing ingredient: " + this.getHighlightIngredient().name)
+        console.log(this.getHighlightIngredient().cost)
+        await userData().api.getIngredientService().updateIngredient(this.getHighlightIngredient()).then(response => {
+            console.log("published ingredient: " + this.highlightIngredient.name);
+           this.updateHighlightIngredientCopy()
         })
     }
 
     highlightNextIngredient() :Ingredient {
         this.setHighlightIndex((this.getHighlightIndex() +1) % this.ingredients.length);
+        console.log("highligtIndex " + this.getHighlightIndex())
+        console.log("highlighting ingredient: " + this.ingredients[this.getHighlightIndex()].name)
 
         this.setHighlightIngredient(this.ingredients[this.getHighlightIndex()]);
         return this.getHighlightIngredient();

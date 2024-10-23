@@ -6,8 +6,8 @@
           <div class="flex-shrink-0">
             <p class="flex flex-row items-center font-normal">
               <img
-                class="mb-4 h-20 w-34"
-                src="../assets/mySatchel_logo_plain.png"
+                class="my-4 h-12 w-34"
+                src="../assets/mySatchel_text.png"
                 alt="mySatchel"
               />
             </p>
@@ -55,8 +55,8 @@ const account = useAccountStore()
 const path = computed(() => router.currentRoute)
 
 
-const logout = () => {
-  account.logout()
+async function logout() {
+  await account.logout()
   console.log('redirecting to login')
   router.push('/login')
 }

@@ -41,7 +41,7 @@ axios.interceptors.response.use(
         console.log('printing error...')
 
         if (error.response.data) {
-          account.notify(error.response.data)
+          // account.notify(error.response.data)
         } else {
           console.log(error)
         }

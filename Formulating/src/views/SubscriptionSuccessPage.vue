@@ -1,38 +1,37 @@
 <template>
-  <div class="flex flex-col w-1/2 mx-auto">
-    <div class="flex flex-row h-96"></div>
-    <div class="profile bg-slate-200 p-3 rounded-md">
-      <h1 class="text-lg font-bold">Success</h1>
-      <h2>Thanks for your order!</h2>
-      <p>Subscription to mySatchel Beta successful!</p>
-      <p>
-        Start formulating
-        <RouterLink class="bg-slate-300 hover:bg-slate-400 px-1 h-8 rounded-md py-1" to="formulas"
-          >Go!</RouterLink
-        >
-      </p>
+  <div v-if="sessionFound" class="flex flex-col items-center justify-center min-h-screen bg-slate-200">
+    <div class="bg-white p-8 rounded-lg shadow-md text-center">
+      <h1 class="text-2xl font-bold text-green-600 mb-4">Success!</h1>
+      <h2 class="text-xl text-gray-700 mb-6">Thank you for your order!</h2>
+      <p class="text-lg text-gray-600 mb-6">Your subscription to mySatchel Beta was successful!</p>
+      <RouterLink
+        class="inline-block bg-slate-400 text-white text-lg font-semibold py-3 px-6 rounded-lg shadow hover:bg-green-600 transition duration-300"
+        to="/formulas"
+      >
+        Start Formulating
+      </RouterLink>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import {useAccountStore} from "@/stores/account";
-import SubPlan from "@/types/SubPlan";
-import axios from "axios";
+import axios from 'axios'
+import {useRouter} from "vue-router";
 
 const sessionId = ref('')
-
+let sessionFound = ref(false)
 onMounted(() => {
   const query = new URLSearchParams(window.location.search)
   if (query.get('session_id')) {
+    sessionFound.value = true
     sessionId.value = query.get('session_id')
-    console.log(sessionId.value);
-    useAccountStore().setActiveSubscription(SubPlan.getDummySubPlans()[2]); // TODO this currently saves subscription to store, but does not save to back-end
-// TODO perhaps test this out using Postman before implementing front end.
-    // TODO we should expect backend to validate the session id and save the subscription to the user
-    // TODO then it should return the user with the updated subscription and redirect to the formula page
-    // TODO I still need to keep track of the user's subscription in the store, it should update when the user logs in or refreshes the session
+    console.log(sessionId.value)
+    /*let accessToken = Cookies.get('accessToken')
+    let refreshToekn = Cookies.get('refreshToken')
+    let user = JSON.parse(Cookies.get('user'))
+    console.log(accessToken, refreshToekn, user)*/
+    // useAccountStore().setUser(user)
     axios.post('/users/sub/confirm', { session_id: sessionId.value }).then((response) => {
       console.log(response.data)
     })

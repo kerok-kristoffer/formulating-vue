@@ -9,12 +9,16 @@ import SubscriptionsView from '../views/SubscriptionView.vue'
 import SuccessView from '../views/SubscriptionSuccessPage.vue'
 import CancelView from '../views/SubscriptionCancelPage.vue'
 import { globalState } from '@/main'
+import ResetPasswordView from '@/views/ResetPasswordView.vue'
+import RenewPasswordView from '@/views/RenewPasswordView.vue'
+import { useAuthStore } from '@/stores/auth'
+import ExitSurveyView from '@/views/ExitSurvey.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/home',
+      path: '/',
       name: 'home',
       component: () => import('../views/HomeView.vue')
     },
@@ -32,48 +36,76 @@ const router = createRouter({
       ]
     },
     {
-      // path: '/sandbox',
-      // name: 'sandbox',
-      // component: () => import('../components/sandbox/sandbox.vue'),
-    },
-    {
       path: '/register',
       name: 'register',
       component: RegisterView
     },
     {
       path: '/login',
-      name: 'login',
+      name: 'Login',
       component: LoginView
     },
     {
-      path: '/beta',
-      name: 'beta',
-      component: () => import('../views/BetaLandingPage.vue')
+      path: '/reset-password',
+      name: 'reset-password',
+      component: ResetPasswordView
+    },
+    {
+      path: '/renew-password',
+      name: 'renew-password',
+      component: RenewPasswordView
     },
     { path: '/success', name: 'subSuccess', component: SuccessView },
-    { path: '/cancel', name: 'subCancel', component: CancelView }
+    { path: '/exitSurvey', name: 'exitSurvey', component: ExitSurveyView },
   ]
 })
 
-router.beforeEach((to, from, next) => {
+async function attemptReauth(next) {
+  const authStore = useAuthStore()
+  console.log('attempting re-authentication')
+  try {
+    await authStore.reAuthenticate()
 
-  if (to.path === '/login' && globalState.isAuthenticated) {
+    if (authStore.token !== null) {
+      globalState.isAuthenticated = true
+      next()
+    } else {
+      console.log('re-authentication attempt failed')
+      globalState.isAuthenticated = false
+      next({ name: 'Login' })
+    }
+  } catch (error) {
+    console.log('re-authentication attempt failed')
+    globalState.isAuthenticated = false
+    router.push('/login')
+  }
+}
+
+router.beforeEach(async (to, from, next) => {
+  console.log('Navigation guard triggered', {
+    to: to.path,
+    from: from.path,
+    isAuthenticated: globalState.isAuthenticated
+  })
+  if (
+      (to.name === 'Login' || to.name === 'register') &&
+      globalState.isAuthenticated
+  ) {
+    console.log('Redirecting to /formulas from router: ' + to.name)
     next('/formulas')
     return
   }
 
-  if (to.path === '/') {
-    next('/home')
+  if (
+    to.matched.some((record) => record.meta.requiresAuth) &&
+    globalState.isAuthenticated !== true
+  ) {
+    await attemptReauth(next)
     return
   }
 
-  if (to.matched.some((record) => record.meta.requiresAuth) && globalState.isAuthenticated !== true) {
-    console.log('not authenticated')
-    next('/login')
-    return
-  }
-
+  console.log('Proceeding to next route')
   next()
 })
+
 export default router

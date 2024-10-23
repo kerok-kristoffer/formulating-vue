@@ -1,6 +1,17 @@
 <template>
-  <div id="formula-list" class="w-5/6 pl-2 md:block"> <!-- todo: add filtering on formula tags -->
-    <h2 class="py-1 bg-slate-300 font-bold rounded-t-md text-center">Formulas <input type="checkbox" v-model="pinned"></h2>
+  <div id="formula-list" class="w-5/6 pl-2 md:block overflow-y-auto h-3/4 md:h-full max-h-[calc(100vh-4rem)]"> <!-- todo: add filtering on formula tags -->
+
+    <div class="flex flex-row w-full justify-between items-center">
+      <h2 class="py-1 bg-slate-300 font-bold w-full rounded-t-md text-center">Formulas
+        <div class="flex flex-row space-x-1 absolute top-2 left-1">
+        <input type="checkbox" v-model="pinned">
+        <font-awesome-icon icon="lock" v-if="pinned" />
+        <font-awesome-icon icon="lock-open" v-else />
+      </div></h2>
+
+    </div>
+
+
 
     <ul class="px-2 py-1 even:bg-slate-100 odd:bg-slate-200 hover:bg-slate-300" v-for="formula in formulas">
       <li v-bind:class="'hover:cursor-pointer status_' + formula.saveStatus" @click="selectFormula(formula)">{{ formula.name }}</li>
@@ -12,16 +23,18 @@
 
 import {userData} from "../stores/userData";
 import Formula from "../types/Formula";
+import {computed, ref} from "vue";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
-let pinned = false;
+let pinned = ref(false);
 const emitOptions = defineEmits<{
-  clickFormula: [formula: Formula, pinned: boolean]
+  clickFormula: [pinned: boolean]
 }>()
 
 function selectFormula(formula :Formula) {
-  emitOptions('clickFormula', formula, pinned);
+  emitOptions('clickFormula', pinned.value, formula);
 }
 
-const formulas :Formula[] = userData().formulaList.formulas;
+const formulas = computed(() => userData().formulaList.formulas);
 
 </script>

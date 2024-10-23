@@ -1,6 +1,152 @@
+<script setup lang="ts">
+import SearchIngredientBox from '@/components/SearchIngredientBox.vue'
+import FormulaOperations from '@/components/FormulaOperations.vue'
+import UnitSelector from '@/components/UnitSelector.vue'
+import FormulaDetails from '@/components/FormulaDetails.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { userData } from '@/stores/userData'
+import {computed, defineProps, nextTick, onMounted, ref, watch} from 'vue'
+import Formula from '@/types/Formula'
+import FormulaHelper from "@/types/FormulaHelper";
+import {useAccountStore} from "@/stores/account";
+import Phase from "@/types/Phase";
+import Ingredient from "@/types/Ingredient";
+
+const data = userData()
+const { displayFormula } = defineProps<{
+  displayFormula: Formula,
+}>();
+
+onMounted(() => {
+  updateIngredientInputs()
+})
+const formulaUnit = computed(() => data.settings.preferredUnits)
+
+const emit = defineEmits([
+  'submitFormula',
+  'deleteFormula',
+  'print',
+  'resetDisplayAndCachedFormula',
+    'editIngredient'
+])
+
+function editIngredient(ingredient :Ingredient) {
+  emit('editIngredient', ingredient)
+}
+
+const submitFormula = async () => {
+  console.log("submitting formula" + data.displayFormula.name + " id: " + data.displayFormula.id)
+
+  await FormulaHelper.submitFormula(data.getReactiveDisplayFormula())
+  console.log("submitted formula, updating cached formula")
+  data.setCachedFormula(data.getReactiveDisplayFormula())
+}
+
+const showPhaseDescs = ref(new Set())
+
+const toggleDescShow = (index :number) => {
+  if (showPhaseDescs.value.has(index)) {
+    showPhaseDescs.value.delete(index)
+  } else {
+    showPhaseDescs.value.add(index)
+  }
+}
+let showDetails = ref(false);
+function toggleShowDetails() {
+  showDetails.value = !showDetails.value;
+}
+
+const deleteFormula = () => {
+
+  emit('deleteFormula')
+}
+
+const print = () => {
+  emit('print')
+}
+
+const resetDisplayAndCachedFormula = () => {
+  emit('resetDisplayAndCachedFormula')
+}
+
+const duplicateFormula = () => {
+  let duplicate = FormulaHelper.duplicateFormula(data.displayFormula)
+  console.log("duplicated formula: ", duplicate.name)
+  useAccountStore().notify(data.displayFormula.name + " duplicated", "success")
+}
+
+const onDropFormula = (event, dropPhase :Phase) => {
+  // todo: possible to transfer Ingredient object instead of strings?
+  let ingredientListIndex = event.dataTransfer.getData('ingredientListIndex')
+  let ingredientIndex = event.dataTransfer.getData('ingredientPhaseIndex')
+
+  const fromPhaseKey = event.dataTransfer.getData('phaseKey')
+  if (fromPhaseKey) {
+    data.getReactiveDisplayFormula().moveIngredientFromPhaseToPhase(ingredientIndex, fromPhaseKey, dropPhase)
+    data.setDragIngredient(null)
+    // ingredientDropFromPhase(fromPhaseKey, dropPhase)
+  } else {
+    ingredientDropFromIngredientList(ingredientListIndex, dropPhase)
+  } // TODO move this drag-drop logic to a helper class
+}
+
+const startDragFormula = (event, phaseKey: number, ingredientIndex: number | string) => {
+  event.dataTransfer.dropEffect = 'copy'
+  event.dataTransfer.effectAllowed = 'copy'
+  event.dataTransfer.setData('phaseKey', phaseKey)
+  event.dataTransfer.setData('ingredientPhaseIndex', ingredientIndex)
+  const ingredient = data.getReactiveDisplayFormula().phases[phaseKey].ingredients[ingredientIndex]
+  data.setDragIngredient(ingredient)
+}
+
+const ingredientDropFromIngredientList = (ingredientListIndex :number, dropPhase :Phase) => {
+
+  let ingredient = data.ingredientList.ingredients.find((i) => i.id == ingredientListIndex)
+
+  if(ingredient != undefined) {
+    dropPhase.addIngredient(new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci, 0, Number(ingredient.cost), []))
+    return
+  }
+}
+
+const getOrderedIngredients = (phase :Phase) => {
+  return computed( () => phase.getOrderedIngredients())
+}
+
+const ingredientInputs = ref({});
+
+const updateIngredientInputs = async () => {
+  await nextTick()
+  const inputs = document.querySelectorAll('[id^="ingredient-input-"]');
+  inputs.forEach((input, index) => {
+    ingredientInputs.value[index] = input;
+  });
+};
+
+// Watch for changes in the ingredient list
+watch(() => displayFormula.phases, updateIngredientInputs, { deep: true });
+
+async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number) {
+  event.preventDefault();
+  await nextTick();
+
+  const nextIngredientKey = ingredientKey + 1;
+  const nextElementId = `ingredient-input-${nextIngredientKey}`;
+  const nextElement = document.getElementById(nextElementId) as HTMLElement;
+
+  if (nextElement) {
+    nextElement.focus();
+    nextElement.select();
+  } else {
+    (ingredientInputs.value[ingredientKey] as HTMLElement).blur();
+  }
+}
+
+
+</script>
+
 <template>
-  <!-- saved old formulating-panel just for reference -->
-  <div id="formulating-panel" class="sm:w-5/6 mx-auto py-6 pb-24 hidden md:hidden flex-col">
+  <div id="formulating-panel" class="sm:w-5/6 mx-auto py-6 pb-24 hidden md:flex flex-col">
     <div class="flex flex-row justify-around">
       <div
         id="formula-box"
@@ -47,11 +193,11 @@
                     id="formula-weight"
                     class="h-6 w-2/3 border-2 border-slate-400 rounded-md"
                     v-model="displayFormula.totalWeight"
-                    v-on:blur="weightUpdate(displayFormula)"
+                    v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)"
                   />
                   <!--                              <button @click="toggleMeasurement" class="bg-slate-300 mx-1 px-2 rounded-sm hover:bg-slate-200">{{ formulaUnit }}</button>-->
                 </div>
-                <UnitSelector @unitSelected="setMeasurement" />
+                <UnitSelector @unitSelected="data.setPreferredUnit(formulaUnit)" />
               </div>
               <div class="flex flex-row px-2 justify-end" v-show="formulaUnit === 'Oz'">
                 <div class="">
@@ -64,11 +210,11 @@
                     id="formula-weight"
                     class="h-6 w-2/3 border-2 border-slate-400 rounded-md"
                     v-model="displayFormula.totalWeightInOunces"
-                    v-on:blur="weightUpdate(displayFormula)"
+                    v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)"
                   />
                   <!--                              <button @click="toggleMeasurement" class="bg-slate-300 mx-1 px-2 rounded-sm hover:bg-slate-200">{{ formulaUnit }}</button>-->
                 </div>
-                <UnitSelector @unitSelected="setMeasurement" />
+                <UnitSelector @unitSelected="data.setPreferredUnit(formulaUnit)" />
               </div>
 
               <div class="flex flex-row px-2">
@@ -134,13 +280,13 @@
                 </div>
 
                 <div
-                  v-for="(ingredient, ingredientKey) in phase.ingredients"
+                  v-for="(ingredient, ingredientKey) in getOrderedIngredients(phase).value"
                   :key="ingredientKey"
                   class="drag-el flex flex-row even:bg-slate-200 odd:bg-slate-300 hover:cursor-grab active:cursor-grabbing hover:bg-slate-400"
                   draggable="true"
                   @dragstart="startDragFormula($event, phaseKey, ingredientKey)"
                 >
-                  <label :for="'ingredient-' + ingredient.name" class="w-2/5 flex flex-row">
+                  <label :for="'ingredient-' + ingredientKey" class="w-2/5 flex flex-row">
                     <div class="w-full px-2">{{ ingredient.name }}</div>
                     <div class="w-1/2 hidden font-thin italic">{{ ingredient.inci }}</div>
                   </label>
@@ -148,12 +294,14 @@
                   <div class="w-3/5 flex flex-row px-2 justify-end gap-1">
                     <div class="flex flex-row w-20">
                       <input
-                        v-model.lazy="ingredient.percentage"
-                        v-on:blur="updateIngredientWeight(ingredient, phase)"
-                        type="number"
-                        name="percentage"
-                        :id="'ingredient-' + ingredient.name"
-                        class="h-6 w-14"
+                          v-model.lazy="ingredient.percentage"
+                          @keydown.enter="enterClickPercentage($event, ingredientKey)"
+                          v-on:blur="FormulaHelper.updateIngredientWeight(displayFormula, data.settings.preferredUnits, ingredient)"
+                          type="number"
+                          name="percentage"
+                          :id="'ingredient-input-' + ingredientKey"
+                          :ref="'ingredientInput-' + ingredientKey"
+                          class="h-6 w-14"
                       />
                       <p>%</p>
                     </div>
@@ -172,9 +320,7 @@
 
                     <div class="flex flex-row w-10 justify-end">
                       <p v-if="ingredient.percentage">
-                        ${{
-                          Number((ingredient.getWeight('g') * ingredient.cost * 0.001).toFixed(2))
-                        }}
+                        ${{ Number(Number((ingredient.getWeight('g') * ingredient.cost * 0.001).toFixed(2))) }}
                       </p>
                     </div>
                     <font-awesome-icon
@@ -182,7 +328,6 @@
                       :icon="['fa', 'gears']"
                       class="my-1 hover:cursor-pointer flex text-slate-600 hover:text-slate-500 text-md"
                     />
-                    <!--                                      todo : figure out how to add below icon and write down how so i know for next time -->
                     <font-awesome-icon
                       @click="phase.removeIngredientByIndex(ingredientKey)"
                       :icon="['fa', 'circle-xmark']"
@@ -196,7 +341,7 @@
                 <div class="flex flex-col w-1/2 pt-0">
                   <div class="flex-row">
                     <button
-                      @click="deletePhase(phaseKey)"
+                      @click="FormulaHelper.removePhase(displayFormula, phaseKey)"
                       class="bg-slate-400 hover:bg-red-400 px-2 mx-2 rounded-md font-semibold h-8 text-white"
                     >
                       Delete
@@ -232,7 +377,7 @@
         <div class="flex flex-row w-full justify-between mt-1">
           <div class="flex flex-row justify-start">
             <button
-              @click="addPhase"
+              @click="FormulaHelper.addPhase(displayFormula)"
               class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 h-8 rounded-md font-semibold text-white"
             >
               <font-awesome-icon icon="plus" /> Add Phase
@@ -260,15 +405,8 @@
         </div>
         <formula-details v-if="showDetails" :formula="displayFormula" @close="toggleShowDetails" />
       </div>
-      <!--                    Need to send an IngredientList to edit Ingredient Component and iterate over that one instead of accessing the userData ingredientList from inside the component-->
-      <!--                      This needs to be changed in hte IngredientView as well.-->
     </div>
   </div>
 </template>
-<script setup>
-import SearchIngredientBox from '@/components/SearchIngredientBox.vue'
-import FormulaOperations from '@/components/FormulaOperations.vue'
-import UnitSelector from '@/components/UnitSelector.vue'
-import FormulaDetails from '@/components/FormulaDetails.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-</script>
+
+<style scoped></style>

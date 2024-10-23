@@ -2,7 +2,6 @@ import Units from "./Units";
 import Tag from "./Tag";
 
 class Ingredient {
-    percentage: number = 0;
     phase: number
     weightInGrams: number // ide complains on import if set to private, fix!
     weightInOunces: number
@@ -14,10 +13,11 @@ class Ingredient {
         public ingredient_id: number,
         public name: string,
         public inci: string,
+        public percentage: number,
         public cost: number,
         public tags: Tag[],
         ) {
-            if (tags === null) {
+            if (tags === null || tags === undefined) {
                 this.tags = []
             }
             this.dirty = false;
@@ -33,11 +33,13 @@ class Ingredient {
         if (ingredient.cost !== this.cost) {
             return false;
         }
-        if (ingredient.tags.length !== this.tags.length) {
+        if (!Array.isArray(this.tags) || !Array.isArray(ingredient.tags) || this.tags.length !== ingredient.tags.length) {
+            console.log("tags length not equal")
+            console.log(this.tags)
+            console.log(ingredient.tags)
             return false;
         }
         for (let i = 0; i < this.tags.length ; i++) {
-            console.log("comparing " + ingredient.tags[i].name + " to " + this.tags[i].name);
             if (ingredient.tags[i].name != this.tags[i].name) {
                 return false;
             }
@@ -46,12 +48,23 @@ class Ingredient {
         return true;
     }
 
-    isDirty() :boolean {
-        return this.dirty
-    }
-
-    setDirty(dirty :boolean) {
-        this.dirty = dirty;
+    equalsFormulaIngredient(ingredient :Ingredient) :boolean { // TODO replace this workaround by implementing a formulaIngredient class that naturally ignores tags.
+        if (ingredient.name !== this.name) {
+            return false;
+        }
+        if (ingredient.inci !== this.inci) {
+            return false;
+        }
+        if (ingredient.cost !== this.cost) {
+            return false;
+        }
+        console.log("ingredient percentage")
+        console.log(ingredient.percentage)
+        console.log(this.percentage)
+        if (ingredient.percentage !== this.percentage) {
+            return false;
+        }
+        return true;
     }
 
     setWeight(weight :number, unit :Units) :void {
@@ -88,7 +101,7 @@ class Ingredient {
             case 'g':
                 return this.cost
             case 'Oz':
-                return this.cost * 0.03527396 // verify conversion
+                return this.formatWeight(this.cost * 0.03527)
             default:
                 return -1
         }
@@ -100,7 +113,7 @@ class Ingredient {
                 this.cost = cost
                 break;
             case 'Oz':
-                this.cost = cost / 0.03527396
+                this.cost = this.formatWeight(cost / 0.03527)
                 break;
             default:
                 break;
@@ -126,7 +139,13 @@ class Ingredient {
     }
 
     copy() :Ingredient{
-        return new Ingredient(this.id, this.ingredient_id, this.name, this.inci, this.cost, Array.from(this.tags));
+        return new Ingredient(this.id,
+            this.ingredient_id,
+            this.name,
+            this.inci,
+            this.percentage,
+            this.cost,
+            Array.isArray( this.tags) ? Array.from(this.tags) : [])
     }
         
 }

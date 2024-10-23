@@ -11,7 +11,7 @@ export default class IngredientBuilder {
     }
 
     static build(ing :any) :Ingredient {
-      return new Ingredient(ing.Id, ing.Id, ing.name, ing.inci, ing.cost, ing.tags);
+      return new Ingredient(ing.Id, ing.Id, ing.name, ing.inci, ing.percentage, ing.cost, ing.tags);
     }
 
     static buildToListWithTags(data: any[], ingredients: Ingredient[], tags: Tag[]) {

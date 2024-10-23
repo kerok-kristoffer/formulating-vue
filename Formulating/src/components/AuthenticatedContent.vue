@@ -1,37 +1,27 @@
 <template>
-  <div v-if="loaded && account.hasActiveSubscription()">
+  <div v-if="loaded && authorized">
     <router-view :key="$route.path"></router-view>
     <BetaNotice />
+    <AlertPopup
+      v-if="userData().alert.state.visible"
+      :promptText="userData().alert.state.message"
+      :callback="userData().alert.state.callback"
+      @yes-click="userData().alert.yesClick"
+      @no-click="userData().alert.noClick"
+      @cancel-click="userData().alert.cancelClick"
+    />
   </div>
 
-  <div v-else-if="loaded && !account.hasActiveSubscription()" class="mt-6 text-center">
-    <h1 class="text-3xl font-bold">You are not subscribed</h1>
+  <div v-else-if="loaded && !authorized" class="mt-6 text-center">
+    <h1 class="text-3xl font-bold">Welcome to mySatchel</h1>
     <p class="text-xl my-10">Select a plan and start our free 7 day trial!</p>
+    <p class="text-xl mb-10">Sign up yearly and <strong>get 2 months free!</strong></p>
     <stripe-pricing-table
-      pricing-table-id="prctbl_1OPpFrAyAF7HunP402hUvSnq"
-      publishable-key="pk_test_51OPmhJAyAF7HunP4DqO9w7K5RQkXCn6q3Ewlm6R1JXOoQfADP4cnLYSjK31CEsYnuXV9ZytvRxY79BYYi8um5o5s00Y0S9dEu7"
-      success-url="https://mysatchel-e2f78.web.app/success?session_id={CHECKOUT_SESSION_ID}"
-      return-url="https://mysatchel-e2f78.web.app/success?session_id={CHECKOUT_SESSION_ID}"
-
-    >
+      pricing-table-id="prctbl_1QB66gAyAF7HunP427mYj67X"
+      publishable-key="pk_live_51OPmhJAyAF7HunP4jDglwW09eX9oixSs91nlyxRt1VjxIxbmMihTAL2G7tSEwtWNoquaKHjCiY5aeHuLAxyo8AEK00kyKKMDMA"
+      ><!-- return url set in Stripe dashboard under pricing table-->
     </stripe-pricing-table>
-    <ButtonStandard :text="'LocalBypass'" @click="account.setActiveSubscription(SubPlan.getDummySubPlans()[2]);" />
-    <!--    <div class="flex flex-col items-center justify-center h-screen">
-      <h1 class="text-3xl font-bold">You are not subscribed</h1>
-      <p class="text-xl">Please subscribe to use this app</p>
-      <div class="flex flex-col md:flex-row w-4/5 gap-6">
-        <ul class="flex w-full border-2 rounded-md border-slate-400" v-bind:key="plan.id" v-for="plan in SubPlan.getDummySubPlans()">
-          <li class="justify-center text-center w-full">
-            <div class="flex flex-col w-full h-48 justify-around">
-              <p>{{plan.name}}</p>
-              <p>cost: {{plan.price}}</p>
-              <p>{{plan.description}}</p>
-              <p><ButtonStandard :text="'subscribe'" @click="account.setActiveSubscription(plan)"/></p>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>-->
+    <p class="text-xs italic">Payment Processing Notice: All payments are securely processed through Stripe on behalf of Kerok Tech LLC.</p>
   </div>
   <div v-else>
     <LoadingIndicator />
@@ -40,20 +30,19 @@
 
 <script setup>
 import { useAccountStore } from '@/stores/account'
-import { userData } from '@/stores/userData'
 import { onMounted, ref } from 'vue'
 import LoadingIndicator from './LoadingIndicator.vue'
-import ButtonStandard from '@/components/ButtonStandard.vue'
 import BetaNotice from '@/components/BetaNotice.vue'
-import SubPlan from '@/types/SubPlan'
+import AlertPopup from '@/components/AlertPopup.vue'
+import { userData } from '@/stores/userData'
 
 const account = useAccountStore()
-const data = userData()
 let loaded = ref(false)
+let authorized = ref(false)
 
 onMounted(async () => {
-  await data.ingredientList.populateWithTags()
-  await data.formulaList.populate()
+  authorized.value = await account.hasActiveSubscription()
+
   loaded.value = true
 })
 </script>

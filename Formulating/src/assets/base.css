@@ -71,6 +71,20 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* App.vue or main.css */
+
+  .tippy-tooltip.light-theme {
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+  }
+
+  .tippy-tooltip.dark-theme {
+    background-color: lightslategray;
+    color: white;
+    border: 1px solid white;
+  }
 }
 
 @layer base {

@@ -2,7 +2,7 @@
   <main class="register bg-cover" :style="{ 'background-image': `url(${imgUrl})` }">
     {{ message }}
     <div class="md:mx-24 flex flex-col md:pt-52 pb-72 bg-slate-300 bg-opacity-40">
-      <img class="md:mx-14 w-80" src="../assets/mySatchel_logo_plain.png" alt="mySatchel" />
+      <img class="md:mx-14 w-80" src="../assets/mySatchel_text.png" alt="mySatchel" />
       <section class="forms bg-slate-200 p-12 sm:mx-4 md:mx-12 shadow-lg shadow-slate-500">
         <form class="register" @submit.prevent="submit">
           <div class="flex flex-col md:w-80">
@@ -52,7 +52,7 @@ import {onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '../stores/account'
 import Notification from '../components/Notification.vue'
-import imgUrl from '/register_bg_compressed.png'
+import imgUrl from '/register_bg_compressed.jpg'
 
 export default {
   name: 'Login',
@@ -66,20 +66,7 @@ export default {
     })
 
     function isAlphaNumeric(str) {
-      var code, i, len
-
-      for (i = 0, len = str.length; i < len; i++) {
-        code = str.charCodeAt(i)
-        if (
-          !(code > 47 && code < 58) && // numeric (0-9)
-          !(code > 64 && code < 91) && // upper alpha (A-Z)
-          !(code > 96 && code < 123)
-        ) {
-          // lower alpha (a-z)
-          return false
-        }
-      }
-      return true
+      return /^[a-z0-9]+$/i.test(str)
     }
 
     const submit = async (e) => {
@@ -93,26 +80,29 @@ export default {
         inputs.fullname.length < 1 ||
         inputs.password.length < 1
       ) {
-        account.notify('All fields must be filled!')
+        account.notify('All fields must be filled!', 'error')
         return
       }
 
       if (inputs.password !== inputs.password_repeat) {
-        account.notify('Password repeat does not match password')
+        account.notify('Password repeat does not match password', 'error')
         return
       }
 
       if (!isAlphaNumeric(inputs.userName)) {
-        account.notify('Username can only contain numbers and letters')
+        account.notify('Username can only contain numbers and letters', 'error')
         return
       }
       // TODO start using backend api service
+
+      // TODO seems like login is bypassing the cookie functionality somehow. Need to investigate why I saw ingredients for a new user after logging out and registering a new one.
+      // TODO seems most likely a cookies issue, perhaps not cleared when logging out, or not set when registering a new user.
       axios.post('users', inputs).then((response) => {
         if (response.status === 200) {
           let data = response.data
 
           const account = useAccountStore()
-          account.login(data.user, data.access_token, data.refresh_token)
+          account.setUser(data.user, data.access_token, data.refresh_token)
           router.push('/formulas')
         }
       })
