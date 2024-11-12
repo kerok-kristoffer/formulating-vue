@@ -15,12 +15,15 @@
     import Recipe from '../types/Formula';
     import Ingredient from "../types/Ingredient";
     import Phase from "../types/Phase";
+    import {userData} from "@/stores/userData";
 
     const recipe = ref(new Recipe("Magic", [] as Phase[], 0, 'new'))
 
     const onDrop = (event, phase :Phase) => {
         let ingredientId = event.dataTransfer.getData('ingredientId')
+      if (userData().debug) {
         console.log(ingredientId.value)
+      }
 
         let ingredient = {}
 

@@ -40,8 +40,8 @@
         </div>
 
         <div class="flex justify-end">
-          <button @click="updateItem" class="bg-blue-500 text-white rounded-md px-4 py-2">Save</button>
-          <button @click="cancelEdit" class="ml-2 bg-gray-300 text-gray-700 rounded-md px-4 py-2">Cancel</button>
+          <button @click="updateItem" class="bg-slate-400 text-white rounded-md px-4 py-2">Save</button>
+          <button @click="cancelEdit" class="ml-2 bg-slate-400 text-white rounded-md px-4 py-2">Cancel</button>
         </div>
     </div>
   </div>

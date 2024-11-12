@@ -1,6 +1,6 @@
 <template>
   <main
-      class="reset-password flex flex-col justify-end items-end w-full h-full"
+      class="reset-password flex flex-col justify-end items-end w-full h-full bg-slate-100"
       id="reset-password-page-container"
   >
     <div
@@ -9,7 +9,7 @@
       <section v-if="!success" class="forms shadow-lg shadow-slate-500 p-5 md:p-8 rounded-b-md md:rounded-md md:mx-12">
         <div class="flex flex-col justify-around">
           <h2 class="font-semibold mx-2">Reset Password</h2>
-          <form class="flex flex-col reset-password justify-end" @submit.prevent="submit">
+          <form class="flex flex-col reset-password-form justify-end" @submit.prevent="submit">
             <div class="flex flex-col w-full">
               <input class="w-full" placeholder="Email" type="email" name="email" v-model="email" />
             </div>
@@ -61,10 +61,16 @@ const submit = async (e: Event) => {
 </script>
 
 <style>
+
+.reset-password {
+  min-height: 100vh; /* Ensure the main tag fills the whole screen vertically */
+}
+
 @media (min-width: 1024px) {
   .reset-password {
     display: flex;
     align-items: center;
+    min-height: 100vh; /* Ensure the main tag fills the whole screen vertically */
   }
 }
 </style>

@@ -14,6 +14,17 @@
 
   <div v-else-if="loaded && !authorized" class="mt-6 text-center">
     <h1 class="text-3xl font-bold">Welcome to mySatchel</h1>
+
+    <p class="mt-2">
+      Get a sneak peek tutorial series on our Youtube channel
+      <a
+        href="https://www.youtube.com/playlist?list=PLDxjUdNDZ676dXEKCq6GqGyYI0xJEyxP0"
+        class="text-blue-500 underline hover:text-blue-700"
+        target="_blank"
+      >
+        Click here to see
+      </a>
+    </p>
     <p class="text-xl my-10">Select a plan and start our free 7 day trial!</p>
     <p class="text-xl mb-10">Sign up yearly and <strong>get 2 months free!</strong></p>
     <stripe-pricing-table
@@ -21,7 +32,10 @@
       publishable-key="pk_live_51OPmhJAyAF7HunP4jDglwW09eX9oixSs91nlyxRt1VjxIxbmMihTAL2G7tSEwtWNoquaKHjCiY5aeHuLAxyo8AEK00kyKKMDMA"
       ><!-- return url set in Stripe dashboard under pricing table-->
     </stripe-pricing-table>
-    <p class="text-xs italic">Payment Processing Notice: All payments are securely processed through Stripe on behalf of Kerok Tech LLC.</p>
+    <p class="text-xs italic">
+      Payment Processing Notice: All payments are securely processed through Stripe on behalf of
+      Kerok Tech LLC.
+    </p>
   </div>
   <div v-else>
     <LoadingIndicator />

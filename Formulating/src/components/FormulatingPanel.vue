@@ -11,6 +11,7 @@ import FormulaHelper from "@/types/FormulaHelper";
 import {useAccountStore} from "@/stores/account";
 import Phase from "@/types/Phase";
 import Ingredient from "@/types/Ingredient";
+import FormulaFactory from "@/types/FormulaFactory";
 
 const data = userData()
 const { displayFormula } = defineProps<{
@@ -69,7 +70,14 @@ const resetDisplayAndCachedFormula = () => {
   emit('resetDisplayAndCachedFormula')
 }
 
+function attemptDuplicateFormula() {
+  data.attemptSetDisplayFormula(data.getReactiveDisplayFormula())
+  console.log("dirty check completed")
+  // duplicateFormula()
+}
+
 const duplicateFormula = () => {
+
   let duplicate = FormulaHelper.duplicateFormula(data.displayFormula)
   console.log("duplicated formula: ", duplicate.name)
   useAccountStore().notify(data.displayFormula.name + " duplicated", "success")
@@ -105,6 +113,7 @@ const ingredientDropFromIngredientList = (ingredientListIndex :number, dropPhase
 
   if(ingredient != undefined) {
     dropPhase.addIngredient(new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci, 0, Number(ingredient.cost), []))
+    dropPhase.updateIngredientOrderByPercentageAndName()
     return
   }
 }
@@ -119,26 +128,37 @@ const updateIngredientInputs = async () => {
   await nextTick()
   const inputs = document.querySelectorAll('[id^="ingredient-input-"]');
   inputs.forEach((input, index) => {
-    ingredientInputs.value[index] = input;
+    const id = input.id;
+    ingredientInputs.value[id] = input;
   });
 };
 
 // Watch for changes in the ingredient list
 watch(() => displayFormula.phases, updateIngredientInputs, { deep: true });
 
-async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number) {
+async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number, phaseKey: number) {
   event.preventDefault();
   await nextTick();
 
   const nextIngredientKey = ingredientKey + 1;
-  const nextElementId = `ingredient-input-${nextIngredientKey}`;
-  const nextElement = document.getElementById(nextElementId) as HTMLElement;
+  const nextElementId = `ingredient-input-${phaseKey}-${nextIngredientKey}`;
+  let nextElement = document.getElementById(nextElementId) as HTMLElement;
+
+  if(!nextElement) {
+    const nextPhaseKey = phaseKey + 1;
+    const nextElementId = `ingredient-input-${nextPhaseKey}-0`;
+    nextElement = document.getElementById(nextElementId) as HTMLElement;
+  }
 
   if (nextElement) {
     nextElement.focus();
     nextElement.select();
   } else {
-    (ingredientInputs.value[ingredientKey] as HTMLElement).blur();
+    const currentElementId = `ingredient-input-${phaseKey}-${ingredientKey}`;
+    const currentElement = ingredientInputs.value[currentElementId] as HTMLElement;
+    if (currentElement) {
+      currentElement.blur();
+    }
   }
 }
 
@@ -291,17 +311,19 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number)
                     <div class="w-1/2 hidden font-thin italic">{{ ingredient.inci }}</div>
                   </label>
 
-                  <div class="w-3/5 flex flex-row px-2 justify-end gap-1">
-                    <div class="flex flex-row w-20">
+                  <div class="w-3/5 flex flex-row mx-2 justify-end gap-1">
+                    <div class="flex flex-row w-20 mr-2">
                       <input
                           v-model.lazy="ingredient.percentage"
-                          @keydown.enter="enterClickPercentage($event, ingredientKey)"
+                          @keydown.up.prevent
+                          @keydown.down.prevent
+                          @keydown.enter="enterClickPercentage($event, ingredientKey, phaseKey)"
                           v-on:blur="FormulaHelper.updateIngredientWeight(displayFormula, data.settings.preferredUnits, ingredient)"
-                          type="number"
+                          type="number" step="0.01"
                           name="percentage"
-                          :id="'ingredient-input-' + ingredientKey"
-                          :ref="'ingredientInput-' + ingredientKey"
-                          class="h-6 w-14"
+                          :id="'ingredient-input-' + phaseKey + '-' + ingredientKey"
+                          :ref="'ingredientInput-' + phaseKey + '-' + ingredientKey"
+                          class="h-6 w-16 justify-end pl-1"
                       />
                       <p>%</p>
                     </div>
@@ -348,7 +370,7 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number)
                     </button>
                     <button
                       @click="toggleDescShow(phaseKey)"
-                      class="bg-slate-400 px-2 mx-2 h-8 text-white rounded-md font-semibold hover:cursor-pointer hover:bg-slate-300"
+                      class="bg-slate-400 px-2 mx-2 h-8 text-white rounded-md font-semibold hover:cursor-pointer hover:bg-slate-500"
                       :for="'phase-desc-' + phaseKey"
                     >
                       Description
@@ -378,7 +400,7 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number)
           <div class="flex flex-row justify-start">
             <button
               @click="FormulaHelper.addPhase(displayFormula)"
-              class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 h-8 rounded-md font-semibold text-white"
+              class="bg-slate-400 hover:bg-slate-500 px-2 mx-2 h-8 rounded-md font-semibold text-white"
             >
               <font-awesome-icon icon="plus" /> Add Phase
             </button>
@@ -397,7 +419,7 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number)
           <div v-else class="flex flex-row justify-end">
             <button
               @click="toggleShowDetails"
-              class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 h-8 rounded-md font-semibold text-white"
+              class="bg-slate-400 hover:bg-slate-500 px-2 mx-2 h-8 rounded-md font-semibold text-white"
             >
               <font-awesome-icon icon="fa-circle-info" /> Details
             </button>

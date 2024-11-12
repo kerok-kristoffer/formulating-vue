@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {userData} from "../../stores/userData";
 
 export interface ApiResponse<T> {
     data: T;
@@ -17,7 +18,9 @@ export class BaseApiService {
             const response = await axios.get(url);
             return response.data;
         } catch (error) {
-            console.log(error);
+            if (userData().debug) {
+                console.log(error);
+            }
             // Handle error
         }
     }
@@ -27,7 +30,9 @@ export class BaseApiService {
             const response = await axios.post(url, data);
             return response.data;
         } catch (error) {
-            console.log(error)
+            if (userData().debug) {
+                console.log(error)
+            }
             // Handle error
         }
     }
@@ -37,7 +42,9 @@ export class BaseApiService {
             const response = await axios.delete(url + id)
             return response.data;
         } catch (error) {
-            console.log(error)
+            if (userData().debug) {
+                console.log(error)
+            }
             // TODO handle error! connect banner or similar...
         }
     }
@@ -47,7 +54,9 @@ export class BaseApiService {
             const response = await axios.post(url, data);
             return response.data;
         } catch (error) {
-            console.log(error);
+            if (userData().debug) {
+                console.log(error);
+            }
         }
     }
 }

@@ -21,8 +21,20 @@ class IngredientList {
         this.tags = [];
     }
 
+    clear() {
+        this.ingredients = [];
+        this.filteredIngredients = [];
+        this.tags = [];
+        this.tagFilters = [];
+        this.highlightIngredient = null;
+        this.highlightIngredientRegretCopy = null;
+        this.highlightIndex = 0;
+    }
+
     async populateWithTags(): Promise<void> { // TODO replace direct call with api function in userData
-        console.log("populating ingredient list with tags")
+        if (userData().debug) {
+            console.log("populating ingredient list with tags")
+        }
         try {
             await axios.get('users/ingredients?page_id=1&page_size=750')
                 .then((response :any) => {
@@ -49,7 +61,9 @@ class IngredientList {
                         this.tags.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
                     }
                     this.ingredients.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
-                    console.log("populated ingredient list with tags:" + this.ingredients.length)
+                    if (userData().debug) {
+                        console.log("populated ingredient list with tags:" + this.ingredients.length)
+                    }
                     return Promise.resolve();
                 });
         } catch (error) {
@@ -61,13 +75,17 @@ class IngredientList {
     }
 
     populateWithList(list :Ingredient[]) {
-        console.log("populating with list" + list.length)
+        if (userData().debug) {
+            console.log("populating with list" + list.length)
+        }
         this.ingredients = []
         this.tags = []
         let tagNames = new Set()
         for (let i in list) {
             let ing = list[i]
-            console.log("adding ingredient: " + ing.name)
+            if (userData().debug) {
+                console.log("adding ingredient: " + ing.name)
+            }
             let ingredient = new Ingredient(Number(i), ing.ingredient_id, ing.name, ing.inci, ing.percentage, ing.cost, ing.tags)
             this.ingredients.push(ingredient)
 
@@ -75,7 +93,9 @@ class IngredientList {
                 let tag = ing.tags[i]
 
                 if(!tagNames.has(tag.name)) {
-                    console.log("adding tag: " + tag.name)
+                    if (userData().debug) {
+                        console.log("adding tag: " + tag.name)
+                    }
                     tagNames.add(tag.name)
                     this.tags.push(tag)
                 } else {
@@ -131,8 +151,10 @@ class IngredientList {
     }
 
     setHighlightIngredient(ing :Ingredient) {
-        console.log("highlighting ingredient: " + ing.name)
-        console.log(ing)
+        if (userData().debug) {
+            console.log("highlighting ingredient: " + ing.name)
+            console.log(ing)
+        }
         this.highlightIngredientRegretCopy = ing.copy();
         this.highlightIngredient = ing;
     }
@@ -169,18 +191,24 @@ class IngredientList {
     }
 
     async publishHighlightedIngredient() {
-        console.log("publishing ingredient: " + this.getHighlightIngredient().name)
-        console.log(this.getHighlightIngredient().cost)
+        if (userData().debug) {
+            console.log("publishing ingredient: " + this.getHighlightIngredient().name)
+            console.log(this.getHighlightIngredient().cost)
+        }
         await userData().api.getIngredientService().updateIngredient(this.getHighlightIngredient()).then(response => {
-            console.log("published ingredient: " + this.highlightIngredient.name);
+            if (userData().debug) {
+                console.log("published ingredient: " + this.highlightIngredient.name);
+            }
            this.updateHighlightIngredientCopy()
         })
     }
 
     highlightNextIngredient() :Ingredient {
         this.setHighlightIndex((this.getHighlightIndex() +1) % this.ingredients.length);
-        console.log("highligtIndex " + this.getHighlightIndex())
-        console.log("highlighting ingredient: " + this.ingredients[this.getHighlightIndex()].name)
+        if (userData().debug) {
+            console.log("highligtIndex " + this.getHighlightIndex())
+            console.log("highlighting ingredient: " + this.ingredients[this.getHighlightIndex()].name)
+        }
 
         this.setHighlightIngredient(this.ingredients[this.getHighlightIndex()]);
         return this.getHighlightIngredient();

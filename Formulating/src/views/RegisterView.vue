@@ -1,10 +1,9 @@
 <template>
-  <main class="register bg-cover" :style="{ 'background-image': `url(${imgUrl})` }">
-    {{ message }}
-    <div class="md:mx-24 flex flex-col md:pt-52 pb-72 bg-slate-300 bg-opacity-40">
+  <main class="register bg-cover min-h-screen" :style="{ 'background-image': `url(${imgUrl})` }">
+    <div class="md:mx-24 flex flex-col justify-center min-h-screen bg-slate-300 bg-opacity-40">
       <img class="md:mx-14 w-80" src="../assets/mySatchel_text.png" alt="mySatchel" />
       <section class="forms bg-slate-200 p-12 sm:mx-4 md:mx-12 shadow-lg shadow-slate-500">
-        <form class="register" @submit.prevent="submit">
+        <form @submit.prevent="submit">
           <div class="flex flex-col md:w-80">
             <h2 class="font-semibold mx-2">Register</h2>
             <div class="flex flex-col">
@@ -52,7 +51,7 @@ import {onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '../stores/account'
 import Notification from '../components/Notification.vue'
-import imgUrl from '/register_bg_compressed.jpg'
+import imgUrl from '/login_bg.jpg'
 
 export default {
   name: 'Login',
@@ -123,6 +122,7 @@ export default {
   .register {
     display: flex;
     align-items: center;
+    min-height: 100vh;
   }
 }
 </style>

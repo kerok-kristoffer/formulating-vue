@@ -102,6 +102,7 @@ import AlertPopup from "./AlertPopup.vue";
 import Units from "@/types/Units";
 import IngredientList from "@/types/IngredientList";
 import {useAccountStore} from "@/stores/account";
+import FormulaHelper from "@/types/FormulaHelper";
 const { item, ingredientList } = defineProps<{
   item: Ingredient,
   itemCopy: Ingredient,
@@ -134,7 +135,9 @@ function updateCost(cost :string) {
 
 // TODO move this to global Alert in userData
 async function handleAlertYesClick(callback: CallbackFunction) {
-  console.log("handleAlertYesClick, cost: ", ingredientList.getHighlightIngredient().getCost(userData().settings.preferredUnits))
+  if (userData().debug) {
+    console.log("handleAlertYesClick, cost: ", ingredientList.getHighlightIngredient().getCost(userData().settings.preferredUnits))
+  }
   isAlertVisible.value = false;
   await ingredientList.publishHighlightedIngredient()
   // console.log("setting highlight ingredient after publish")
@@ -143,7 +146,9 @@ async function handleAlertYesClick(callback: CallbackFunction) {
   data.updateDisplayFormulaWeightsAndCosts();
 
   // ingredientList.setHighlightIngredient(ingredientList.getHighlightIngredientCopy()); // Ensure the highlightIngredient is updated
-  console.log("handled AlertYesClick, running callback" + callback)
+  if (userData().debug) {
+    console.log("handled AlertYesClick, running callback" + callback)
+  }
   callback();
 }
 
@@ -228,8 +233,7 @@ const updateItem = (ing :Ingredient) => {
     useAccountStore().notify("Error updating ingredient", "error");
     console.error(error);
   }).finally(() => {
-    emit('close');
-    showEditWindow.value = false;
+    closeEditWindow()
   });
   // emit('close');
   // showEditWindow.value = false; // TODO does this do anything anymore?
@@ -241,9 +245,16 @@ const cancelEdit = () => {
     alertUnsavedChangesToIngredient();
     return;
   }
-  emit('close');
-  showEditWindow.value = false;
+  closeEditWindow()
 };
+
+function closeEditWindow() {
+  emit('close');
+  data.getReactiveDisplayFormula().phases.forEach(phase => {
+    FormulaHelper.updateIngredientProperties(phase, ingredientList.ingredients);
+  });
+  showEditWindow.value = false;
+}
 
 function addTag(event :any , ingredient :Ingredient) {
 

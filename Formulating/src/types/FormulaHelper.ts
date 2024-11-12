@@ -13,20 +13,26 @@ export default class FormulaHelper {
     phase.ingredients.forEach(ingredient => {
       const latestIngredient = ingredients.find((i: Ingredient) => i.ingredient_id === ingredient.ingredient_id);
       if (latestIngredient) {
-        console.log("updating formula ingredient: ", latestIngredient);
-        console.log("tags: " + latestIngredient.tags)
+        if (userData().debug) {
+          console.log("updating formula ingredient: ", latestIngredient);
+          console.log("tags: " + latestIngredient.tags)
+        }
         ingredient.name = latestIngredient.name;
         ingredient.inci = latestIngredient.inci;
         ingredient.cost = latestIngredient.cost;
         ingredient.tags = latestIngredient.tags;
       } else {
-        console.error("Ingredient not found in ingredient list: ", ingredient);
+        if (userData().debug) {
+          console.error("Ingredient not found in ingredient list: ", ingredient);
+        }
       }
     });
   }
 
   static restoreFormula(currentFormula: Formula, wantedFormula: Formula, unit: Units): void {
-    console.log("resetting all values for " + currentFormula.name)
+    if (userData().debug) {
+      console.log("resetting all values for " + currentFormula.name)
+    }
     currentFormula.name = wantedFormula.name
     currentFormula.totalWeight = wantedFormula.totalWeight
     currentFormula.totalWeightInOunces = wantedFormula.totalWeightInOunces
@@ -38,14 +44,18 @@ export default class FormulaHelper {
     currentFormula.updateWeights(unit)
     currentFormula.updateCost(unit)
 
-    console.log("comparing current to wanted formula")
-    if (!currentFormula.equals(wantedFormula)) {
-      console.log("current formula does not match wanted formula")
+    if (userData().debug) {
+      console.log("comparing current to wanted formula")
+      if (!currentFormula.equals(wantedFormula)) {
+        console.log("current formula does not match wanted formula")
+      }
     }
   }
 
   static async submitFormula(formula :Formula) {
-  console.log("submit formula called")
+    if (userData().debug) {
+      console.log("submit formula called")
+    }
     if(formula.saveStatus !== 'new') {
       await this.updateFormula(formula)
       userData().setDisplayFormula(formula, "updateFormula FormulaHelper 89")
@@ -59,21 +69,22 @@ export default class FormulaHelper {
   }
 
   static submitNewFormula(formula :Formula) {
-    console.log("submitting new formula: " + formula.name)
+    if (userData().debug) {
+      console.log("submitting new formula: " + formula.name)
+    }
     if (formula.id == undefined || formula.id != 0) {
+      if (userData().debug) {
         console.error("formulaId should be 0 for new formulas")
+      }
       formula.id = 0;
     }
 
-    console.log("creating formula: " + formula.toString())
     userData().api.getFormulaService().createFormula(formula).then(response => {
 
-      console.log("formula created " + formula.name)
       console.log(response)
 
       useAccountStore().notify(userData().displayFormula.name + " saved", "success")
       userData().displayFormula.saveStatus = 'saved'
-      console.log("setting formula id to " + response.id)
       userData().displayFormula.id = response.id
       userData().formulaList.addFormula(userData().getReactiveDisplayFormula())
 
@@ -84,32 +95,36 @@ export default class FormulaHelper {
   }
 
   static async updateFormula(formula :Formula) {
-    console.log("updating formula: " + formula.toString())
     await userData().api.getFormulaService().updateFormula(formula).then( (response) => {
 
-      console.log("formula updated: " + formula.toString())
     }).catch( (error) => {
+      if (userData().debug) {
         console.error("error updating formula", error)
+      }
 
     }).finally( () => {
-      console.log("formula updated finally")
+      if (userData().debug) {
+        console.log("formula updated finally")
+      }
     })
   }
 
   static duplicateFormula(formula :Formula) {
     let duplicate = FormulaFactory.duplicateFormula(formula)
-    console.log("duplicating formula: " + duplicate.toString())
     userData().api.getFormulaService().createFormula(duplicate).then( (response) => {
-      console.log(response)
+      if (userData().debug) {
+        console.log(response)
+      }
       duplicate = FormulaFactory.createFormulaFromData(response)
       userData().formulaList.addFormula(duplicate)
-      // userData().setDisplayFormula(duplicate) // TODO might not want this behavior right now as there might
-      //  be changes in original formula that we won't catch unless we force a manual switch to a new Formula.
-      // userData().setCachedFormula(duplicate)
-      console.log("formula duplicated successfully" + duplicate.toString())
+      if (userData().debug) {
+        console.log("formula duplicated successfully" + duplicate.toString())
+      }
 
     }).catch( (error) => {
+      if (userData().debug) {
         console.error("error duplicating formula", error)
+      }
       duplicate = null
     })
     return duplicate
@@ -145,10 +160,8 @@ export default class FormulaHelper {
 
   static async handleDirtyFormulaAlertResponse(saveChanges: boolean, pinListView: boolean, clickedFormula: Formula) {
     if (saveChanges) {
-      console.log("saving changes to formula")
       await this.saveDetectedChangesToFormula(clickedFormula);
     } else {
-        console.log("discarding changes to formula")
       await this.discardChangesToFormula();
     }
     if (pinListView) {
@@ -159,24 +172,29 @@ export default class FormulaHelper {
   }
 
   private static async discardChangesToFormula() {
-    console.log("resetting display formula to cached formula")
     let userDisplayFormula = FormulaFactory.createFormulaFromData(userData().displayFormula)
     userDisplayFormula.description = userData().displayFormula.description
     userDisplayFormula.updateWeights(userData().settings.preferredUnits)
     userDisplayFormula.updateCost(userData().settings.preferredUnits) // TODO this should really not be needed
     let resetFormula = userData().formulaList.resetFormulaToCookieFormula(userDisplayFormula)
 
-    console.log("resetting display formula resetFormula " + resetFormula.name)
+    if (userData().debug) {
+      console.log("resetting display formula resetFormula " + resetFormula.name)
+    }
     userData().resetDisplayFormula()
   }
 
   private static async saveDetectedChangesToFormula(clickedFormula: Formula) {
-    console.log("saving detected changes to formula: " + userData().getReactiveDisplayFormula().name)
     await this.updateFormula(userData().getReactiveDisplayFormula())
     // await this.submitFormula(userData().getReactiveDisplayFormula());
     userData().formulaList.updateFormulaInList(userData().getReactiveDisplayFormula())
-    console.log("done saving changes to formula: " + userData().getReactiveDisplayFormula().name)
-    // TODO update formulaList with changes to formula here?
+    if (userData().debug) {
+      console.log("done saving changes to formula: " + userData().getReactiveDisplayFormula().name)
+    }
+  }
+
+  public static formatDecimal(value: number): number {
+    return Number((Math.round(value * 100) / 100).toFixed(2))
   }
 
 }

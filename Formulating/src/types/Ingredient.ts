@@ -1,5 +1,6 @@
 import Units from "./Units";
 import Tag from "./Tag";
+import {userData} from "../stores/userData";
 
 class Ingredient {
     phase: number
@@ -34,9 +35,11 @@ class Ingredient {
             return false;
         }
         if (!Array.isArray(this.tags) || !Array.isArray(ingredient.tags) || this.tags.length !== ingredient.tags.length) {
-            console.log("tags length not equal")
-            console.log(this.tags)
-            console.log(ingredient.tags)
+            if (userData().debug) {
+                console.log("tags length not equal")
+                console.log(this.tags)
+                console.log(ingredient.tags)
+            }
             return false;
         }
         for (let i = 0; i < this.tags.length ; i++) {
@@ -58,9 +61,11 @@ class Ingredient {
         if (ingredient.cost !== this.cost) {
             return false;
         }
-        console.log("ingredient percentage")
-        console.log(ingredient.percentage)
-        console.log(this.percentage)
+        if (userData().debug) {
+            console.log("ingredient percentage")
+            console.log(ingredient.percentage)
+            console.log(this.percentage)
+        }
         if (ingredient.percentage !== this.percentage) {
             return false;
         }

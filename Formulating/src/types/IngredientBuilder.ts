@@ -1,5 +1,6 @@
 import Ingredient from './Ingredient';
 import Tag from "./Tag";
+import {userData} from "../stores/userData";
 
 export default class IngredientBuilder {
     static buildToList(ingredients :any[], list :Ingredient[]) {
@@ -19,7 +20,9 @@ export default class IngredientBuilder {
         let tagNames = new Set()
         for (let i in data) {
             let ing = data[i]
-            console.log("building ingredient " + ing.name)
+            if (userData().debug) {
+                console.log("building ingredient " + ing.name)
+            }
             ingredients.push(IngredientBuilder.build(ing))
             // let ingredient = new Ingredient(Number(i), ing.Id, ing.Name, ing.Inci, ing.cost, ing.tags)
             // this.ingredients.push(ingredient)

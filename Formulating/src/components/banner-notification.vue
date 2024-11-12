@@ -21,6 +21,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAccountStore } from '../stores/account'
+import {userData} from "@/stores/userData";
 
 const account = useAccountStore()
 
@@ -35,11 +36,15 @@ const updatePage = () => {
 }
 
 const performUpdateCheck = async () => {
-  console.log('current version from performUpdateCheck: ' + account.version)
+  if (userData().debug) {
+    console.log('current version from performUpdateCheck: ' + account.version)
+  }
   await account.versionCheck()
   isUpdateAvailable.value = account.newVersionAvailable
   if (account.newVersionAvailable) {
-    console.log('new version found from account')
+    if (userData().debug) {
+      console.log('new version found from account')
+    }
     // TODO Save token in cookies on reload so user does not have to login every time.
   }
   //isUpdateAvailable.value = isNewVersionAvailable;

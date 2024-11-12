@@ -9,7 +9,7 @@
         <div id="formula-print-box" class="w-full hidden print:flex flex-col mx-0 py-6 rounded-t-lg">
           <h2 class="font-bold text-lg text-center pb-3">{{ displayFormula.name }}</h2>
           <div class="flex flex-row w-full ml-6">
-            <div class="flex flex-col w-2/5">
+            <div class="flex flex-col w-1/5">
               <div class="flex flex-row">
                 <p class="font-bold w-20">amount:</p>
                 <p class="font-bold w-20">
@@ -32,7 +32,7 @@
               </div>
             </div>
 
-            <div v-if="userData().settings.printSettings.showNotes" class="w-3/5 flex flex-col">{{ displayFormula.description }}</div>
+            <div v-if="userData().settings.printSettings.showNotes" class="w-4/5 mr-4 flex flex-col">{{ displayFormula.description }}</div>
           </div>
 
           <div class="print:flex flex-col bg-white mt-4">
@@ -92,7 +92,7 @@
               </ul>
             </div>
             <div v-else class=""></div>
-            <div v-if="userData().settings.printSettings.showInciList" class="text-sm font-light">
+            <div v-if="userData().settings.printSettings.showInciList && sortedInciList.length > 0" class="text-sm font-light">
               <h2 class="font-bold mt-2">Inci</h2>
               <span v-for="(inci, index) in sortedInciList" :key="inci">
                 {{ inci }}<span v-if="index < sortedInciList.length - 1">, </span>

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import router from '../router'
 import { useAccountStore } from '@/stores/account'
+import {userData} from "@/stores/userData";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
 let refresh = false
@@ -11,7 +12,9 @@ axios.interceptors.response.use(
     const account = useAccountStore()
 
     if (error.response.status === 401 && !refresh) {
-      console.log('attempting to catch 401 and update refresh token')
+      if (userData().debug) {
+        console.log('attempting to catch 401 and update refresh token')
+      }
       refresh = true
       const refreshToken = account.refreshToken
 
@@ -28,22 +31,30 @@ axios.interceptors.response.use(
 
           return axios(originalRequest)
         } else {
-          console.log('status on first token renew not 200, status: ' + status)
+          if (userData().debug) {
+            console.log('status on first token renew not 200, status: ' + status)
+          }
           router.push('/login')
         }
       } catch (error) {
-        console.log('caught some error while getting renew token: ' + error)
+        if (userData().debug) {
+          console.log('caught some error while getting renew token: ' + error)
+        }
         router.push('/login')
       }
     } else {
       if (error.response.status) {
         // todo add interpretation to messages and show to users
-        console.log('printing error...')
+        if (userData().debug) {
+          console.log('printing error...')
+        }
 
         if (error.response.data) {
           // account.notify(error.response.data)
         } else {
-          console.log(error)
+          if (userData().debug) {
+            console.log(error)
+          }
         }
       }
     }

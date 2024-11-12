@@ -1,14 +1,15 @@
 <template>
   <main
-    class="login flex flex-row w-full h-full bg-cover"
+    class="login flex flex-row w-full flex-grow-y min-h-screen bg-cover bg-center"
     id="login-page-container"
-    :style="{ 'background-image': `url(${imgUrl})` }"
+    :style="{ 'background-image': `url(${imgUrl})`, 'background-size': 'cover'}"
   >
     <div
-      class="my-auto mx-0 md:mx-24 flex flex-col md:pt-96 pb-72 md:pb-72 bg-slate-300 bg-opacity-40 h-full md:h-4/5 md:w-2/5 w-full"
+      class="mx-0 md:mx-24 flex flex-col bg-slate-300 min-h-screen justify-center
+      bg-opacity-40 h-full md:h-4/5 md:w-2/5 w-full"
     >
       <section
-        class="forms bg-slate-200 shadow-lg shadow-slate-500 p-5 md:p-8 rounded-b-md md:rounded-md md:mx-12"
+        class="forms bg-slate-200 shadow-lg shadow-slate-500 p-5 h-3/5 md:p-8 rounded-b-md md:rounded-md md:mx-12"
       >
         <img class="w-full h-auto object-contain" src="../assets/mySatchel.png" alt="mySatchel" />
         <div class="flex flex-col justify-around">
@@ -74,6 +75,12 @@ const submit = async (e) => {
   const form = new FormData(e.target)
   const inputs = Object.fromEntries(form.entries())
 
+  // check min length of password
+  if (inputs.Password.length < 6) {
+    account.notify('Password must be at least 6 characters long', 'error')
+    return
+  }
+
   axios.defaults.headers.common['Authorization'] = `Bearer `
   let apiCreds = JSON.parse(import.meta.env.VITE_API_CREDS)
 
@@ -81,7 +88,19 @@ const submit = async (e) => {
 }
 </script>
 
-<style>
+<style scoped>
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#login-page-container {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+}
+
 @media (min-width: 1024px) {
   .login {
     display: flex;

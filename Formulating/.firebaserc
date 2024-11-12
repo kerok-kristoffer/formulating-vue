@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "mysatchel-e2f78",
+    "production": "mysatchel-21051"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

@@ -2,6 +2,7 @@
 
 import SubPlan from "./SubPlan";
 import axios from "axios";
+import {userData} from "../stores/userData";
 
 class Subscriptions {
     public subscriptions: SubPlan[] = [];
@@ -10,7 +11,9 @@ class Subscriptions {
     async populate() {
         // TODO replace direct call with api function in userData
         await axios.get('users/subscriptions').catch(error => {
-            console.log(error)
+            if (userData().debug) {
+                console.log(error)
+            }
         })
             .then((response :any) => {
                 let data = response.data

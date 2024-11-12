@@ -89,7 +89,6 @@ class SubPlan {
         }
     }
 
-    // TODO kerok : add more fields like cancel button link, etc
 }
 
 export default SubPlan;

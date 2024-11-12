@@ -12,7 +12,7 @@
                 <p class="hidden md:block w-3/12 font-bold">Tags</p>
               </li>
 
-              <li v-if="data.ingredientList.ingredients"  class="w-full h-9 md:h-5 pt-1 md:pt-0 even:bg-slate-100 odd:bg-slate-200 hover:bg-slate-300" v-for="ingredient in data.ingredientList.ingredients">
+              <li v-if="ingredients && ingredients.length"  class="w-full h-9 md:h-5 pt-1 md:pt-0 even:bg-slate-100 odd:bg-slate-200 hover:bg-slate-300" v-for="ingredient in data.ingredientList.ingredients" :key="ingredient.ingredient_id">
                 <div class="w-full flex flex-row">
                   <div @click="editIngredient(ingredient)" class="w-11/12 ml-0.5 flex flex-row hover:cursor-pointer">
                         <p class="font-bold w-9/12 md:w-4/12 whitespace-no-wrap" >{{ingredient.name}}</p>
@@ -81,7 +81,7 @@ import IngredientList from "@/types/IngredientList";
 
 const data = userData()
 const newIngredient = new Ingredient(0,0,"new ingredient", "", 0, null, [])
-const ingredients = ref<Ingredient[]>(data.ingredientList.ingredients)
+const ingredients = computed(() => data.ingredientList.ingredients);
 const showEditWindow = ref(false);
 
 let api = data.api;
@@ -105,23 +105,21 @@ const inFormulas = computed(() => {
     if (!formulas.value || formulas.value.length === 0) {
       return [];
     }
-    return formulas.value.filter((formula) => formula.hasIngredient(ingredient));
+    let foundFormulas = formulas.value.filter((formula) => formula.hasIngredient(ingredient));
+    if(foundFormulas.length > 0) {
+      return formulas.value.filter((formula) => formula.hasIngredient(ingredient));
+    }
+    if (data.getReactiveDisplayFormula().hasIngredient(ingredient)) {
+      console.log("ingredient is in display formula");
+      return [data.getReactiveDisplayFormula()];
+    }
+    return [];
+
   };
 });
 
 function isPartOfFormula(ingredient :Ingredient) :boolean {
-
   return inFormulas.value(ingredient).length > 0;
-
-  if (formulas !== undefined) {
-    for (let i = 0; i < formulas.length; i++) {
-      if(formulas[i].hasIngredient(ingredient)) {
-        return true;
-      }
-    }
-  }
-  return false;
-
 }
 
 function refreshInFormulaList() {
@@ -158,7 +156,6 @@ onMounted(async () => {
 
 async function refreshIngredients() {
   await data.refreshIngredientList()
-  ingredients.value = data.ingredientList.ingredients
 }
 
 const deleteIngredient = (ingredient :Ingredient) => {
@@ -173,9 +170,8 @@ function addIngredientClick() {
 }
 
 async function addIngredient(ingredient :Ingredient)  {
-  api.getIngredientService().createIngredient(ingredient).then(response => {
+  await api.getIngredientService().createIngredient(ingredient).then(response => {
     useAccountStore().notify(ingredient.name + " stored", "success" )
-    console.log(response);
   });
   showAddWindow.value = false;
 

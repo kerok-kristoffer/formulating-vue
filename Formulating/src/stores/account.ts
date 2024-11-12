@@ -5,6 +5,13 @@ import SubPlan, {AccessRank} from "../types/SubPlan";
 import Cookies from "js-cookie";
 import {globalState} from '../main';
 import {useRouter} from "vue-router";
+import {reactive, ref} from "vue";
+import IngredientList from "../types/IngredientList";
+import FormulaList from "../types/FormulaList";
+import FormulaFactory from "../types/FormulaFactory";
+import Settings from "../types/Settings";
+import Alert from "../types/Alert";
+import {userData} from "./userData";
 
 let currentVersion = import.meta.env.VITE_CURRENT_VERSION;
 
@@ -19,6 +26,7 @@ export const useAccountStore = defineStore('account', {
             keepLoggedIn: true,
             isLoading: false,
             router :useRouter(),
+            seenVersionNotice: ref(Cookies.get('hasSeenNotice') === 'true'),
             notification: {
                 message: "hello",
                 show: false,
@@ -29,7 +37,9 @@ export const useAccountStore = defineStore('account', {
     actions: {
         async versionCheck() {
             await axios.get("/version").catch((error) => {
-                console.log(error.message)
+                if (userData().debug) {
+                    console.log(error.message)
+                }
             }).then((response) => {
                 let latestVersion = response.data
 
@@ -37,6 +47,7 @@ export const useAccountStore = defineStore('account', {
                     if (latestVersion.version > this.version) {
                         this.notify("version can be updated", "success");
                         this.newVersionAvailable = true;
+                        // TODO : implement version update, and set seenVersionNotice to false, to show new updates
                     } else {
                         this.notify("already latest known version", "success");
                         this.newVersionAvailable = false;
@@ -58,9 +69,11 @@ export const useAccountStore = defineStore('account', {
                     await this.router.push('/formulas')
                 })
                 .catch((error) => {
-                    console.log(error)
-                    if (error.status === 401) {
-                        this.notify("Invalid credentials", "error")
+                    if (userData().debug) {
+                        console.log(error)
+                    }
+                    if (error.response.status === 401) {
+                        this.notify("Invalid login or password", "error")
                     } else {
                         this.notify("Something went wrong, try again later", "error")
                     }
@@ -80,22 +93,28 @@ export const useAccountStore = defineStore('account', {
             Cookies.set('accessToken', user.accessToken)
             Cookies.set('refreshToken', user.refreshToken)
             Cookies.set('user', JSON.stringify(user))
-            console.log("login successful")
+            if (userData().debug) {
+                console.log("login successful")
+            }
         },
         async register(inputs :any) {
             // TODO : implement registration, use api for axios call
             axios.post('users', inputs).then(async (response) => {
                 if (response.status === 200) {
-                    console.log(response)
-                    console.log(response.data)
-                    console.log(response.data.user)
+                    if (userData().debug) {
+                        console.log(response)
+                        console.log(response.data)
+                        console.log(response.data.user)
+                    }
 
                     let user = this.generateUser(response.data)
                     await this.setUser(user)
                     this.router.push('/formulas')
                 }
             }).catch((error) => {
-                console.log(error)
+                if (userData().debug) {
+                    console.log(error)
+                }
                 this.notify("Registration failed: " + error.response.data.error, "error")
                 throw error
             })
@@ -103,14 +122,22 @@ export const useAccountStore = defineStore('account', {
         async logout() {
             this.user = null
             this.refreshToken = null
+
             axios.defaults.headers.common['Authorization'] = ``
 
             Cookies.remove('accessToken');
             Cookies.remove('refreshToken');
             Cookies.remove('user');
             Cookies.remove('cachedFormula');
+            Cookies.remove('dirtyCachedFormula');
+            localStorage.removeItem('cachedFormula');
+            localStorage.removeItem('dirtyCachedFormula');
             globalState.isAuthenticated = false
-            console.log("logout successful")
+            if (userData().debug) {
+                console.log("logout successful")
+            }
+
+            window.location.reload()
         },
         notify(message, type) {
             this.notification.show = true;
@@ -125,11 +152,15 @@ export const useAccountStore = defineStore('account', {
             let isActive = false;
             try {
                 const response = await axios.get("users/sub/info");
-                console.log(response.data)
+                if (userData().debug) {
+                    console.log(response.data)
+                }
                 this.subPlan = SubPlan.fromResponseData(response.data);
                 isActive = true;
             } catch (error) {
-                console.log(error)
+                if (userData().debug) {
+                    console.log(error)
+                }
             }
             return isActive;
         },
@@ -137,7 +168,6 @@ export const useAccountStore = defineStore('account', {
             return this.subPlan;
         },
         generateUser(userData) :User {
-            console.log("userData", userData.user)
             return new User(
                 userData.user.userName,
                 userData.user.email,
@@ -146,6 +176,10 @@ export const useAccountStore = defineStore('account', {
                 userData.access_token,
                 userData.refresh_token,
                 userData.user.StripeCustomerId);
+        },
+        setSeenNotice(isSeen: boolean) {
+            this.seenVersionNotice = isSeen
+            Cookies.set('hasSeenNotice', isSeen)
         }
 
     },

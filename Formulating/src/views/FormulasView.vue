@@ -20,6 +20,7 @@ import FormulaFactory from "@/types/FormulaFactory";
 import FormulaHelper from "@/types/FormulaHelper";
 import FormulatingPanelMobile from "@/components/FormulatingPanelMobile.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
+import Cookies from "js-cookie";
 
 const formulaUnit = computed(() => userData().settings.preferredUnits)
 const formulaList = ref<Formula[]>([])
@@ -42,11 +43,15 @@ let displayFormula = ref<Formula>(FormulaFactory.createDefaultFormula())
 onMounted(async () => {
   // TODO evaluate if these are needed, or if they should be accessed directly from userData when needed
   filteredIngredients.value = data.ingredientList.getFilteredIngredients()
-  console.log("filtered ingredients: " + filteredIngredients.value.length)
+  if (userData().debug) {
+    console.log("filtered ingredients: " + filteredIngredients.value.length)
+  }
   formulaList.value = data.formulaList.formulas
 
   displayFormula = ref(data.getReactiveDisplayFormula() as Formula)
-  console.log("FormulasView mounted with displayFormula: " + displayFormula.value.name)
+  if (userData().debug) {
+    console.log("FormulasView mounted with displayFormula: " + displayFormula.value.name)
+  }
 
   // displayFormula.value.phases.forEach(phase => {
   //   FormulaHelper.updateIngredientProperties(phase, filteredIngredients.value);
@@ -83,8 +88,9 @@ const setDisplayFormula = (pinListView :boolean, clickedFormula :Formula) => { /
     phase.updateIngredientOrder();
     formulaIngredients.concat(phase.getIngredients());
   })
-
-  console.log("setting cached formula = display formula: " + clickedFormula.name)
+  if (userData().debug) {
+    console.log("setting cached formula = display formula: " + clickedFormula.name)
+  }
   data.setCachedFormula(clickedFormula);
 
   if (!pinListView) {
@@ -98,15 +104,21 @@ const toggleFilter = (tag :Tag)  => {
 }
 
 const resetDisplayFormula = () => {
-  console.log("resetting display formula to cookie value" )
+  if (userData().debug) {
+    console.log("resetting display formula to cookie value" )
+  }
   let resetFormula = data.formulaList.resetFormulaToCookieFormula(data.displayFormula)
 
-  console.log("resetting display formula resetFormula " + resetFormula.name)
+  if (userData().debug) {
+    console.log("resetting display formula resetFormula " + resetFormula.name)
+  }
   data.resetDisplayFormula()
 }
 
 function restoreFormula(currentFormula :Formula, wantedFormula :Formula) {
-  console.log("resetting all values for " + currentFormula.name)
+  if (userData().debug) {
+    console.log("resetting all values for " + currentFormula.name)
+  }
   currentFormula.name = wantedFormula.name
   currentFormula.totalWeight = wantedFormula.totalWeight
   currentFormula.totalWeightInOunces = wantedFormula.totalWeightInOunces
@@ -118,9 +130,11 @@ function restoreFormula(currentFormula :Formula, wantedFormula :Formula) {
   currentFormula.updateWeights(formulaUnit.value)
   currentFormula.updateCost(formulaUnit.value)
 
-  console.log("comparing current to wanted formula")
-  if (!currentFormula.equals(wantedFormula)) {
-    console.log("current formula does not match wanted formula")
+  if (userData().debug) {
+    console.log("comparing current to wanted formula")
+    if (!currentFormula.equals(wantedFormula)) {
+      console.log("current formula does not match wanted formula")
+    }
   }
 }
 
@@ -167,15 +181,19 @@ function editIngredient(ingredient :Ingredient) {
 
   displayFormulaIngredientsList.value.populateWithList(data.displayFormula.getIngredientList());
 
-  console.log("editIngredient: " + ingredient.name)
-  console.log(displayFormulaIngredientsList.value.ingredients)
+  if (userData().debug) {
+    console.log("editIngredient: " + ingredient.name)
+    console.log(displayFormulaIngredientsList.value.ingredients)
+  }
 
   displayFormulaIngredientsList.value.setHighlightIngredient(ingredient);
 
   let ingredientIndex = displayFormulaIngredientsList.value.ingredients.findIndex((ing) => ing.equals(ingredient));
   displayFormulaIngredientsList.value.setHighlightIndex(ingredientIndex);
-  console.log("highlight index: " + displayFormulaIngredientsList.value.getHighlightIndex())
-  console.log("highlight ingredient: " + displayFormulaIngredientsList.value.getHighlightIngredient().name)
+  if (userData().debug) {
+    console.log("highlight index: " + displayFormulaIngredientsList.value.getHighlightIndex())
+    console.log("highlight ingredient: " + displayFormulaIngredientsList.value.getHighlightIngredient().name)
+  }
   selectedItemCopy.value = displayFormulaIngredientsList.value.getHighlightIngredientCopy();
   showEditWindow.value = true;
 }
@@ -239,12 +257,16 @@ const toggleDescShow = (index :number) => {
 }
 
 function formulaSubmitted() {
-  console.log("formula submitted, add implementation...")
+  if (userData().debug) {
+    console.log("formula submitted, add implementation...")
+  }
 }
 
 const submitFormula = () => {
 
-  console.log("temporarily disabled submit formula in FormulasView...")
+  if (userData().debug) {
+    console.log("temporarily disabled submit formula in FormulasView...")
+  }
   return;
 
   if (displayFormula.value.saveStatus === 'new') {
@@ -311,7 +333,9 @@ function handleDirtyFormulaAlertResponse(saveChanges: boolean, pinListView: bool
   if (saveChanges) { // TODO consolidate delete and dirty to use same Alert component using better callbacks
     submitFormula();
   } else {
-    console.log("resetting display formula to cached formula")
+    if (userData().debug) {
+      console.log("resetting display formula to cached formula")
+    }
     resetDisplayFormula();
   }
 
@@ -486,20 +510,18 @@ watch(
   <LoadingIndicator v-else />
 
   <div v-if="userData().debug" class="debug-info fixed bottom-2 left-1/2 transform -translate-x-1/2 bg-white border-2 border-slate-400 rounded-md p-2 shadow-md">
-    <p>current displayFormula: {{data.getReactiveDisplayFormula().name}} id: {{data.getReactiveDisplayFormula().id}}</p>
-    <p>current cachedFormula: {{data.getCachedFormula().name}} id {{data.getCachedFormula().id}}</p>
+    <p >current displayFormula: {{data.getReactiveDisplayFormula().name}} id: {{data.getReactiveDisplayFormula().id}}</p>
+    <p v-if="data.getCachedFormula()">current cachedFormula: {{data.getCachedFormula().name}} id {{data.getCachedFormula().id}}</p>
+    <p v-if="data.getDirtyCachedFormula()">current dirtyCachedFormula: {{data.getDirtyCachedFormula()}}</p>
     <p>{{data.ingredientList.ingredients.length}}</p>
     <p>{{displayFormulaIngredientsList.ingredients.length}}</p>
+    <p>{{data.getReactiveDisplayFormula().toString()}}</p>
     <p v-if="displayFormulaIngredientsList.getHighlightIngredient()">{{displayFormulaIngredientsList.getHighlightIngredient().name}}</p>
     <p v-if="data.getDragIngredient()">dragging: {{data.getDragIngredient()}}</p>
     <div v-if="data.ingredientList.ingredients">
-<!--      <div v-for="ing in data.ingredientList.ingredients"  class="">
-        {{ing.tags}}
-      </div>-->
 
-    </div>
   </div>
-
+</div>
 
     <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" v-if="isDirtyDisplayFormulaAlertVisible">
       <AlertPopup

@@ -1,12 +1,18 @@
 <template>
   <div
     id="front-page-container"
-    class="flex flex-col w-full h-full bg-cover bg-fixed justify-center items-center"
+    class="flex flex-col w-full h-full min-h-screen bg-cover bg-fixed justify-center items-center"
   >
-    <div class="bg-slate-200 bg-opacity-90 p-4 md:p-8 rounded-lg shadow-lg max-w-full md:max-w-4xl custom-margin-right">
-      <img class="mb-4 h-16 md:h-24 w-auto mx-auto" src="../assets/mySatchel_text.png" alt="mySatchel" />
+    <div
+      class="bg-slate-200 bg-opacity-90 p-4 md:p-8 rounded-lg shadow-lg max-w-full md:max-w-4xl custom-margin-right"
+    >
+      <img
+        class="mb-4 h-16 md:h-24 w-auto mx-auto"
+        src="../assets/mySatchel_text.png"
+        alt="mySatchel"
+      />
       <h1 class="text-xl md:text-2xl font-extrabold text-center mb-4 md:mb-6">
-        Formulating Made Simple: Focus on Creation, Not Calculations
+        Formulating Made Simple: Focus on Creation, Not Calculations!
       </h1>
       <p class="text-base md:text-lg mb-2 md:mb-4">
         Are you tired of getting bogged down with spreadsheets, recalculations, and ingredient
@@ -18,19 +24,34 @@
         tedious parts of product formulation often stand in the way of your creativity.
       </p>
       <p class="text-base md:text-lg mb-2 md:mb-4">
-        <span class="font-bold">Enter mySatchel.</span> Our online tool takes care of the heavy lifting, so you can focus on what
-        you love most—creating.
+        <span class="font-bold">Enter mySatchel.</span> Our online tool takes care of the heavy
+        lifting, so you can focus on what you love most—creating.
       </p>
       <ul class="list-disc text-base md:text-lg list-inside mb-2 md:mb-4 space-y-1 md:space-y-2">
         <li>
-          <span class="font-bold">Automate calculations</span> like percentages and costs with a few clicks—no math or spreadsheets
-          needed.
+          <span class="font-bold">Automate calculations</span> like percentages and costs with a few
+          clicks—no math or spreadsheets needed.
         </li>
-        <li><span class="font-bold">Instant price analysis</span> for your products, no matter the batch size.</li>
-        <li><span class="font-bold">Organize and save formulas & ingredients</span> in one place, accessible from anywhere.</li>
-        <li><span class="font-bold">Beautiful, clean printable pages</span> so your formulas are presentation-ready.</li>
-        <li><span class="font-bold">Automated INCI list</span> generation saves you time and ensures accuracy.</li>
-        <li><span class="font-bold">Drag-and-drop simplicity</span> with our intuitive interface—no tech skills required.</li>
+        <li>
+          <span class="font-bold">Instant price analysis</span> for your products, no matter the
+          batch size.
+        </li>
+        <li>
+          <span class="font-bold">Organize and save formulas & ingredients</span> in one place,
+          accessible from anywhere.
+        </li>
+        <li>
+          <span class="font-bold">Built in, clean printable pages</span> so your formulas are
+          presentation-ready.
+        </li>
+        <li>
+          <span class="font-bold">Automated INCI list</span> generation saves you time and ensures
+          accuracy.
+        </li>
+        <li>
+          <span class="font-bold">Drag-and-drop simplicity</span> with our intuitive interface—no
+          tech skills required.
+        </li>
       </ul>
       <p class="text-base md:text-lg mb-4 md:mb-6">
         Whether you’re just starting out or you’ve been formulating for years, mySatchel is designed
@@ -40,10 +61,17 @@
 
       <form @submit.prevent="register" class="flex flex-col space-y-2 md:space-y-4">
         <input
-          v-model="form.firstName"
+          v-model="form.userName"
           type="text"
           class="rounded-md border-2 border-gray-300 p-2"
-          placeholder="First Name"
+          placeholder="User Name"
+          required
+        />
+        <input
+          v-model="form.fullName"
+          type="text"
+          class="rounded-md border-2 border-gray-300 p-2"
+          placeholder="Full Name"
           required
         />
         <input
@@ -72,46 +100,104 @@
         </button>
       </form>
     </div>
+
+    <!-- Floating div for already signed up notice -->
+    <div
+      class="hidden md:block fixed top-4 right-4 bg-slate-200 bg-opacity-90 p-4 rounded-lg shadow-lg"
+    >
+      <p class="text-center mb-2">Already signed up?</p>
+      <button
+        @click="goToLogin"
+        class="bg-slate-400 text-white rounded-md p-2 hover:bg-slate-500 w-full"
+      >
+        Login
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { useAccountStore } from '@/stores/account'
+import { userData } from '@/stores/userData'
 
 const router = useRouter()
-const authStore = useAuthStore()
 
 const form = ref({
-  firstName: '',
+  userName: '',
+  fullName: '',
   email: '',
   password: '',
   confirmPassword: ''
 })
 
+const goToLogin = () => {
+  router.push('/login')
+}
 const register = async () => {
-  if (form.value.password !== form.value.confirmPassword) {
+  const account = useAccountStore()
+
+  const inputs = {
+    userName: form.value.userName,
+    fullName: form.value.fullName,
+    email: form.value.email,
+    password: form.value.password,
+    password_repeat: form.value.confirmPassword
+  }
+
+  function isAlphaNumeric(str) {
+    return /^[a-z0-9]+$/i.test(str)
+  }
+
+  // TODO implement actual form data handling
+  // must match expected format of backend register endpoint
+  // check return data and that it is handled correctly in the store,
+  if (
+    inputs.userName.length < 1 ||
+    inputs.fullName.length < 1 ||
+    inputs.email.length < 1 ||
+    inputs.password.length < 1
+  ) {
+    account.notify('All fields must be filled!', 'error')
+    return
+  }
+
+  if (inputs.password !== inputs.password_repeat) {
+    account.notify('Password repeat does not match password', 'error')
+    return
+  }
+
+  if (!isAlphaNumeric(inputs.userName)) {
+    account.notify('Username can only contain numbers and letters', 'error')
+    return
+  }
+
+  if (inputs.password.length < 8) {
+    if (userData().debug) {
+      console.log('Password must be at least 8 characters long')
+    }
+    account.notify('Password must be at least 8 characters long', 'error')
+    return
+  }
+
+  if (inputs.password !== inputs.password_repeat) {
     alert('Passwords do not match')
     return
   }
 
-  try { // TODO add proper register functionality here
-    await authStore.register({
-      firstName: form.value.firstName,
-      email: form.value.email,
-      password: form.value.password
-    })
-    router.push('/home')
+  try {
+    // TODO add proper register functionality here
+    await account.register(inputs)
   } catch (error) {
-    alert('Registration failed')
+    console.log(error)
   }
 }
 </script>
 
 <style scoped>
 #front-page-container {
-  background-image: url('../assets/fp-bg-v1.png');
+  background-image: url('../assets/bg_home.png');
   background-size: cover;
   background-position: center;
 }

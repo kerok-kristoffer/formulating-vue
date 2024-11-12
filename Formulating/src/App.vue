@@ -15,8 +15,8 @@ import { ref, watchEffect } from 'vue'
 import { globalState } from '@/main'
 import { useAuthStore } from '@/stores/auth'
 import Notification from "@/components/Notification.vue";
-import BetaNotice from "@/components/BetaNotice.vue";
 import CookieNotice from "@/components/CookieNotice.vue";
+import {userData} from "@/stores/userData";
 
 const isDarkMode = ref(true)
 
@@ -26,17 +26,24 @@ watchEffect(async () => {
   if (Cookies.get('accessToken') && Cookies.get('refreshToken') && Cookies.get('user')) {
     account.setUser(JSON.parse(Cookies.get('user'))) // TODO check if this is necessary, do we want to store user info in cookies, or retreive from server?
     globalState.isAuthenticated = true
-    console.log('login successful through cookies')
+    if (userData().debug) {
+      console.log('login successful through cookies')
+    }
   } else if (Cookies.get('accessToken')) {
-    console.log('Only access token found')
-
-    console.log('reauthenticating')
+    if (userData().debug) {
+      console.log('Only access token found')
+      console.log('reauthenticating')
+    }
     await useAuthStore().reAuthenticate()
-    console.log('reauth successful through store')
+    if (userData().debug) {
+      console.log('reauth successful through store')
+    }
     globalState.isAuthenticated = true
   } else {
     globalState.isAuthenticated = false
-    console.log('no cookies found')
+    if (userData().debug) {
+      console.log('no cookies found')
+    }
   }
 })
 </script>

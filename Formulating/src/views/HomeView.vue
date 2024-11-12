@@ -1,15 +1,15 @@
 <template>
   <div
-    id="front-page-container"
-    class="flex flex-col w-full h-full bg-cover bg-fixed justify-center items-center"
+      id="front-page-container"
+      class="flex flex-col w-full h-full min-h-screen bg-cover bg-fixed justify-center items-center"
   >
     <div
-      class="bg-slate-200 bg-opacity-90 p-4 md:p-8 rounded-lg shadow-lg max-w-full md:max-w-4xl custom-margin-right"
+        class="bg-slate-200 bg-opacity-90 p-4 md:p-8 rounded-lg shadow-lg max-w-full md:max-w-4xl custom-margin-right"
     >
       <img
-        class="mb-4 h-16 md:h-24 w-auto mx-auto"
-        src="../assets/mySatchel_text.png"
-        alt="mySatchel"
+          class="mb-4 h-16 md:h-24 w-auto mx-auto"
+          src="../assets/mySatchel_text.png"
+          alt="mySatchel"
       />
       <h1 class="text-xl md:text-2xl font-extrabold text-center mb-4 md:mb-6">
         Formulating Made Simple: Focus on Creation, Not Calculations!
@@ -61,44 +61,57 @@
 
       <form @submit.prevent="register" class="flex flex-col space-y-2 md:space-y-4">
         <input
-          v-model="form.userName"
-          type="text"
-          class="rounded-md border-2 border-gray-300 p-2"
-          placeholder="User Name"
-          required
+            v-model="form.userName"
+            type="text"
+            class="rounded-md border-2 border-gray-300 p-2"
+            placeholder="User Name"
+            required
         />
         <input
-          v-model="form.fullName"
-          type="text"
-          class="rounded-md border-2 border-gray-300 p-2"
-          placeholder="Full Name"
-          required
+            v-model="form.fullName"
+            type="text"
+            class="rounded-md border-2 border-gray-300 p-2"
+            placeholder="Full Name"
+            required
         />
         <input
-          v-model="form.email"
-          type="email"
-          class="rounded-md border-2 border-gray-300 p-2"
-          placeholder="Enter your email address"
-          required
+            v-model="form.email"
+            type="email"
+            class="rounded-md border-2 border-gray-300 p-2"
+            placeholder="Enter your email address"
+            required
         />
         <input
-          v-model="form.password"
-          type="password"
-          class="rounded-md border-2 border-gray-300 p-2"
-          placeholder="Password"
-          required
+            v-model="form.password"
+            type="password"
+            class="rounded-md border-2 border-gray-300 p-2"
+            placeholder="Password"
+            required
         />
         <input
-          v-model="form.confirmPassword"
-          type="password"
-          class="rounded-md border-2 border-gray-300 p-2"
-          placeholder="Confirm Password"
-          required
+            v-model="form.confirmPassword"
+            type="password"
+            class="rounded-md border-2 border-gray-300 p-2"
+            placeholder="Confirm Password"
+            required
         />
         <button type="submit" class="bg-slate-400 text-white rounded-md p-2 hover:bg-slate-500">
           Sign Up for Free 7-Day Trial
         </button>
       </form>
+    </div>
+
+    <!-- Floating div for already signed up notice -->
+    <div
+        class="hidden md:block fixed top-4 right-4 bg-slate-200 bg-opacity-90 p-4 rounded-lg shadow-lg"
+    >
+      <p class="text-center mb-2">Already signed up?</p>
+      <button
+          @click="goToLogin"
+          class="bg-slate-400 text-white rounded-md p-2 hover:bg-slate-500 w-full"
+      >
+        Login
+      </button>
     </div>
   </div>
 </template>
@@ -107,6 +120,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '@/stores/account'
+import { userData } from '@/stores/userData'
 
 const router = useRouter()
 
@@ -118,6 +132,9 @@ const form = ref({
   confirmPassword: ''
 })
 
+const goToLogin = () => {
+  router.push('/login')
+}
 const register = async () => {
   const account = useAccountStore()
 
@@ -137,10 +154,10 @@ const register = async () => {
   // must match expected format of backend register endpoint
   // check return data and that it is handled correctly in the store,
   if (
-    inputs.userName.length < 1 ||
-    inputs.fullName.length < 1 ||
-    inputs.email.length < 1 ||
-    inputs.password.length < 1
+      inputs.userName.length < 1 ||
+      inputs.fullName.length < 1 ||
+      inputs.email.length < 1 ||
+      inputs.password.length < 1
   ) {
     account.notify('All fields must be filled!', 'error')
     return
@@ -157,7 +174,9 @@ const register = async () => {
   }
 
   if (inputs.password.length < 8) {
-    console.log('Password must be at least 8 characters long')
+    if (userData().debug) {
+      console.log('Password must be at least 8 characters long')
+    }
     account.notify('Password must be at least 8 characters long', 'error')
     return
   }

@@ -50,22 +50,24 @@ const getOrderedIngredients = (phase :Phase) => {
   return computed( () => phase.getOrderedIngredients())
 }
 
+function updateIngredientPercentage(ing, value) {
+  ing.percentage = FormulaHelper.formatDecimal(value)
+  FormulaHelper.updateIngredientWeight(displayFormula, data.settings.preferredUnits, ing)
+}
 
 </script>
 
 <template>
   <div id="mobile-formulating-panel" class="md:hidden print:hidden w-full bg-slate-100 pt-3 mb-14">
     <font-awesome-icon @click="data.toggleFormulaListPanel()" :icon="['fa', 'file-lines']" class=" ml-1 text-slate-400 text-3xl" />
-    <div class="inline-flex w-full text-xl text-center">
+    <div class="flex flex-wrap w-full text-xl text-center">
       <!-- add displayFormula.name input  -->
-      <input type="text" placeholder="New Formula" class="h-6 w-2/5 bg-transparent border-0" name="formula-name" id="formula-name" v-model.lazy="displayFormula.name">
-      <span class="inline-flex w-2/5 justify-start">
+      <input type="text" placeholder="New Formula" class="h-6 flex-grow bg-transparent border-0" name="formula-name" id="formula-name" v-model.lazy="displayFormula.name">
+      <span class="inline-flex w-full md:w-auto justify-start mt-2 md:mt-0">
           <input v-if="formulaUnit==='g'" type="number" v-model="displayFormula.totalWeight" v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)" class="h-6 text-right bg-transparent border-0">
           <input v-else-if="formulaUnit==='Oz'" type="number" v-model="displayFormula.totalWeightInOunces" v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)" class="h-6 text-right bg-transparent border-0">
           <UnitSelector class="w-1/5 h-6 mb-2 text-md" @unitSelected="data.setPreferredUnit(formulaUnit)" />
-        </span>
-
-
+      </span>
     </div>
 
     <ul v-for="(phase, phaseKey) in displayFormula.phases" class="flex flex-col odd:bg-slate-300 text-xs">
@@ -80,7 +82,7 @@ const getOrderedIngredients = (phase :Phase) => {
               {{ ing.name }}
             </div>
             <div class="w-2/12 inline-flex">
-              <input type="number" :value="ing.percentage" @input="ing.percentage = $event.target.value" @blur="FormulaHelper.updateIngredientWeight(displayFormula, data.settings.preferredUnits, ing)" class="text-xs text-right border-0 h-4 w-3/4 p-0.5 bg-transparent"/>%
+              <input type="number" :value="ing.percentage" @blur="updateIngredientPercentage(ing, $event.target.value)" class="text-xs text-right border-0 h-4 w-3/4 p-0.5 bg-transparent"/>%
             </div>
             <div v-if="ing.percentage" class="w-2/12 text-right"> <div class="">{{ Number(ing.getWeight(formulaUnit)).toFixed(2) }}{{ formulaUnit }}</div>   </div>
             <div class="w-2/12 inline-flex text-right">

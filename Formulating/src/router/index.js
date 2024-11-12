@@ -13,6 +13,9 @@ import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import RenewPasswordView from '@/views/RenewPasswordView.vue'
 import { useAuthStore } from '@/stores/auth'
 import ExitSurveyView from '@/views/ExitSurvey.vue'
+import {userData} from "@/stores/userData";
+import BetaLandingPage from "@/views/BetaLandingPage.vue";
+import FaqPage from "@/views/FaqPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +43,16 @@ const router = createRouter({
       name: 'register',
       component: RegisterView
     },
+    // {
+    //   path: '/beta',
+    //   name: 'beta',
+    //   component: BetaLandingPage
+    // },
+    // {
+    //   path: '/faq',
+    //   name: 'faq',
+    //   component: FaqPage
+    // },
     {
       path: '/login',
       name: 'Login',
@@ -62,7 +75,9 @@ const router = createRouter({
 
 async function attemptReauth(next) {
   const authStore = useAuthStore()
-  console.log('attempting re-authentication')
+  if (userData().debug) {
+    console.log('attempting re-authentication')
+  }
   try {
     await authStore.reAuthenticate()
 
@@ -70,28 +85,36 @@ async function attemptReauth(next) {
       globalState.isAuthenticated = true
       next()
     } else {
-      console.log('re-authentication attempt failed')
+      if (userData().debug) {
+        console.log('re-authentication attempt failed')
+      }
       globalState.isAuthenticated = false
       next({ name: 'Login' })
     }
   } catch (error) {
-    console.log('re-authentication attempt failed')
+    if (userData().debug) {
+      console.log('re-authentication attempt failed')
+    }
     globalState.isAuthenticated = false
     router.push('/login')
   }
 }
 
 router.beforeEach(async (to, from, next) => {
-  console.log('Navigation guard triggered', {
-    to: to.path,
-    from: from.path,
-    isAuthenticated: globalState.isAuthenticated
-  })
+  if (userData().debug) {
+    console.log('Navigation guard triggered', {
+      to: to.path,
+      from: from.path,
+      isAuthenticated: globalState.isAuthenticated
+    })
+  }
   if (
       (to.name === 'Login' || to.name === 'register') &&
       globalState.isAuthenticated
   ) {
-    console.log('Redirecting to /formulas from router: ' + to.name)
+    if (userData().debug) {
+      console.log('Redirecting to /formulas from router: ' + to.name)
+    }
     next('/formulas')
     return
   }
@@ -103,9 +126,19 @@ router.beforeEach(async (to, from, next) => {
     await attemptReauth(next)
     return
   }
-
-  console.log('Proceeding to next route')
+  if (userData().debug) {
+    console.log('Proceeding to next route')
+  }
   next()
 })
+
+
+router.afterEach((to) => {
+  if (window.gtag) {
+    window.gtag('config', 'YOUR_GA_MEASUREMENT_ID', {
+      page_path: to.fullPath,
+    });
+  }
+});
 
 export default router

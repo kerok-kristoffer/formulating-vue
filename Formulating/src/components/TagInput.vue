@@ -10,10 +10,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import {userData} from "@/stores/userData";
 const tags = ref([])
 onMounted(async () => {
   tags.value = ['hello', 'world']
-  console.log(tags.value)
+  if (userData().debug) {
+    console.log(tags.value)
+  }
 })
 </script>
 

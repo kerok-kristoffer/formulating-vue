@@ -10,9 +10,9 @@ import FormulaFactory from "../types/FormulaFactory";
 import FormulaHelper from "../types/FormulaHelper";
 import Alert from "../types/Alert";
 import Settings from "../types/Settings";
-import {watch} from "vue";
+import {reactive, watch} from "vue";
 
-let ingredientList = new IngredientList()
+let ingredientList = reactive(new IngredientList())
 let api = new BackendGateway('')
 let formulaList = new FormulaList()
 let displayFormulaList = false
@@ -20,19 +20,27 @@ let debug = false
 
 let alert = new Alert("test", (yesClicked) => {
     if(yesClicked) {
-        console.log("yes clicked!", "success")
+        if (debug) {
+            console.log("yes clicked!", "success")
+        }
     } else {
-        console.log("no clicked!", "failure")
+        if (debug) {
+            console.log("no clicked!", "failure")
+        }
     }
 })
 let dragIngredient = null as Ingredient | null
-let cookieFormula = Cookies.get('cachedFormula')
-let dirtyCookieFormula = Cookies.get('dirtyCachedFormula')
+// let cookieFormula = Cookies.get('cachedFormula')
+let cookieFormula = localStorage.getItem('cachedFormula')
+// let dirtyCookieFormula = Cookies.get('dirtyCachedFormula')
+let dirtyCookieFormula = localStorage.getItem('dirtyCachedFormula')
 let cachedFormula = null as Formula | null
 let displayFormula = null as Formula | null
 let cachedUnit :Units = Cookies.get('preferredUnits')
 if (cachedUnit === 'Oz') {
-    console.log("found cached units in cookies" + cachedUnit)
+    if (debug) {
+        console.log("found cached units in cookies" + cachedUnit)
+    }
 } else {
     cachedUnit = 'g'
 }
@@ -40,16 +48,22 @@ if(dirtyCookieFormula) {
     cookieFormula = dirtyCookieFormula
 }
 if (cookieFormula) {
-    console.log("found cached formula in cookies" + cookieFormula)
+    if (debug) {
+        console.log("found cached formula in cookies" + cookieFormula)
+    }
     cachedFormula = JSON.parse(cookieFormula)
     displayFormula = FormulaFactory.createFormulaFromData(cachedFormula)
 
     displayFormula.updateWeights(cachedUnit)
     displayFormula.updateCost(cachedUnit)
-    console.log("displayFormula loaded and updated with weights and costs")
+    if (debug) {
+        console.log("displayFormula loaded and updated with weights and costs")
+    }
 
 } else {
-    console.log("no cached formula found in cookies")
+    if (debug) {
+        console.log("no cached formula found in cookies")
+    }
     cachedFormula = null // TODO should this be null or defaultFormula? what are pros and cons?
     displayFormula = FormulaFactory.createDefaultFormula()
 }
@@ -77,7 +91,9 @@ export const userData = defineStore('data', {
       async initLists() {
 
           ingredientList.populateWithTags().then( () => {
-              console.log("ingredient list populated with tags from userData init")
+              if (this.debug) {
+                  console.log("ingredient list populated with tags from userData init")
+              }
 
               displayFormula.phases.forEach(phase => {
                   FormulaHelper.updateIngredientProperties(phase, ingredientList.ingredients);
@@ -85,15 +101,21 @@ export const userData = defineStore('data', {
               this.updateDisplayFormulaWeightsAndCosts()
               return Promise.resolve()
           }).catch((error) => {
-              console.log("error populating ingredient list with tags from userData init")
+              if (this.debug) {
+                  console.log("error populating ingredient list with tags from userData init")
+              }
               return Promise.reject(error)
           });
 
           formulaList.populate().then(() => {
-                console.log("formula list populated from userData init")
+              if (this.debug) {
+                  console.log("formula list populated from userData init")
+              }
                 return Promise.resolve()
           }).catch((error) => {
-                console.log("error populating formula list from userData init")
+              if (this.debug) {
+                  console.log("error populating formula list from userData init")
+              }
                 return Promise.reject(error)
           })
 
@@ -101,19 +123,25 @@ export const userData = defineStore('data', {
       },
       attemptSetDisplayFormula(formula :Formula) {
           let cookiesFormula = this.getCachedFormula()
-          console.log("attempting to set display formula" + formula.name)
+          if (this.debug) {
+              console.log("attempting to set display formula" + formula.name)
+          }
 
           if (cookiesFormula && !this.displayFormula.equals(cookiesFormula)) {
               this.triggerAlert("Save changes made to formula?",
                   (yesClicked) => FormulaHelper.handleDirtyFormulaAlertResponse(yesClicked, false, formula))
           } else {
-              console.log("no changes made to formula, redirecting")
+              if (this.debug) {
+                  console.log("no changes made to formula, redirecting")
+              }
               this.setDisplayFormula(formula, "attemptSetDisplayFormula, 112");
               this.setCachedFormula(formula);
           }
       },
       setDisplayFormula(formula :Formula, from :string) {
-          console.log("setting display formula " + formula.name + ", from: "  + from)
+          if (this.debug) {
+              console.log("setting display formula " + formula.name + ", from: "  + from)
+          }
           formula.phases.forEach(phase => {
               FormulaHelper.updateIngredientProperties(phase, this.ingredientList.ingredients);
           });
@@ -121,24 +149,44 @@ export const userData = defineStore('data', {
           this.displayFormula = formula
       },
     setCachedFormula(formula :Formula) {
-        console.log("setting cached formula " + formula.name)
+        if (this.debug) {
+            console.log("setting cached formula " + formula.name)
+        }
         this.cachedFormula = FormulaFactory.createFormulaFromData(formula);
-        Cookies.set('cachedFormula', JSON.stringify(formula))
+        localStorage.setItem('cachedFormula', JSON.stringify(formula))
+        // Cookies.set('cachedFormula', JSON.stringify(formula))
+        if (this.debug) {
+            console.log("cached formula set to " + formula.name)
+        }
         this.clearDirtyCachedFormula()
     },
     setDirtyCachedFormula(formula :Formula) {
-      Cookies.set('dirtyCachedFormula', JSON.stringify(formula))
+          localStorage.setItem('dirtyCachedFormula', JSON.stringify(formula))
+      // Cookies.set('dirtyCachedFormula', JSON.stringify(formula))
     },
     clearDirtyCachedFormula() {
-      Cookies.remove('dirtyCachedFormula')
+          localStorage.removeItem('dirtyCachedFormula')
+      // Cookies.remove('dirtyCachedFormula')
+    },
+    getDirtyCachedFormula() :Formula {
+      return FormulaFactory.createFormulaFromData(JSON.parse(localStorage.getItem('dirtyCachedFormula')))
     },
     getCachedFormula() :Formula {
-          if (Cookies.get('cachedFormula') != undefined) {
-              return FormulaFactory.createFormulaFromData(JSON.parse(Cookies.get('cachedFormula')))
-          } else {
+
+        const cachedFormula = localStorage.getItem('cachedFormula')
+
+        if (cachedFormula) {
+            return FormulaFactory.createFormulaFromData(JSON.parse(cachedFormula))
+        }
+
+      if (Cookies.get('cachedFormula') != undefined) {
+          // return FormulaFactory.createFormulaFromData(JSON.parse(Cookies.get('cachedFormula')))
+      } else {
+          if (this.debug) {
               console.log("no cached formula found in cookies")
-              return null
           }
+      return null
+  }
 
       // return this.cachedFormula // TODO this should now work as expected
         // since I am setting cachedFormula to a new Formula object with the FormulaFactory
@@ -161,8 +209,8 @@ export const userData = defineStore('data', {
       this.displayFormulaList = !this.displayFormulaList
     },
     async refreshIngredientList() {
-      this.ingredientList = new IngredientList()
-        await this.ingredientList.populate()
+        this.ingredientList.clear()
+        await this.ingredientList.populateWithTags()
     },
     triggerAlert(message :string, callback :Function) {
         this.alert = new Alert(message, callback)

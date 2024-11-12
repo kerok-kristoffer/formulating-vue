@@ -17,7 +17,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import {useRouter} from "vue-router";
 
 const sessionId = ref('')
 let sessionFound = ref(false)
@@ -26,14 +25,7 @@ onMounted(() => {
   if (query.get('session_id')) {
     sessionFound.value = true
     sessionId.value = query.get('session_id')
-    console.log(sessionId.value)
-    /*let accessToken = Cookies.get('accessToken')
-    let refreshToekn = Cookies.get('refreshToken')
-    let user = JSON.parse(Cookies.get('user'))
-    console.log(accessToken, refreshToekn, user)*/
-    // useAccountStore().setUser(user)
-    axios.post('/users/sub/confirm', { session_id: sessionId.value }).then((response) => {
-      console.log(response.data)
+    axios.post('/users/sub/confirm', { session_id: sessionId.value }).then(() => {
     })
   }
 })

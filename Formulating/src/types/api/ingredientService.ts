@@ -1,6 +1,7 @@
 import Ingredient from "../Ingredient";
 import {BaseApiService} from "./baseApiService";
 import {toRefs} from "vue";
+import {userData} from "../../stores/userData";
 
 export class IngredientService extends BaseApiService{
 
@@ -11,7 +12,9 @@ export class IngredientService extends BaseApiService{
     }
 
     async getIngredients() {
-        console.log(this.pageSize);
+        if (userData().debug) {
+            console.log(this.pageSize);
+        }
         return this.get('users/ingredients?page_id=1&page_size' + this.pageSize)
     }
 

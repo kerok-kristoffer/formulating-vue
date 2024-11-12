@@ -6,6 +6,7 @@ import Paginate from 'vuejs-paginate-next'
 import './interceptors/axios'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
+// import { faYoutube, faFacebook, faInstagram } from '@fortawesome/free-brands-svg-icons'
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css'
 
@@ -25,7 +26,7 @@ import {
   faCircleInfo,
   faLock,
   faLockOpen,
-    faThumbtack
+    faThumbtack,
 } from '@fortawesome/free-solid-svg-icons'
 export const globalState = reactive({
   isAuthenticated: false
@@ -76,7 +77,10 @@ library.add(
   faCircleInfo,
   faLock,
   faLockOpen,
-    faThumbtack
+    faThumbtack,
+    // faFacebook,
+    // faInstagram,
+    // faYoutube
 )
 
 app.component('font-awesome-icon', FontAwesomeIcon)

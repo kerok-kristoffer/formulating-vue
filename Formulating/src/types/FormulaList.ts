@@ -16,11 +16,15 @@ class FormulaList {
         this.formulas = []
 
         if (data === null) {
-            console.log("no formulas found")
+            if (userData().debug) {
+                console.log("no formulas found")
+            }
             return
         }
 
-        console.log("formulas found: " + data.length)
+        if (userData().debug) {
+            console.log("formulas found: " + data.length)
+        }
       for (const i in data) {
         let formulaData = data[i]
         this.addToFormulaListFromApiData(formulaData)
@@ -32,7 +36,9 @@ class FormulaList {
   public removeFormula(formula: Formula) {
       for (let i in this.formulas) {
           if (this.formulas[i].id == formula.id) {
-              console.log("deleting:" + formula.id + " at: " + i);
+              if (userData().debug) {
+                  console.log("deleting:" + formula.id + " at: " + i);
+              }
               this.formulas.splice(Number(i), 1)
               break;
           }

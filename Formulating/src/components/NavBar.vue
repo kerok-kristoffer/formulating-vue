@@ -49,6 +49,7 @@ import { useAccountStore } from '@/stores/account'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { navigation } from '@/navigation'
+import {userData} from "@/stores/userData";
 
 const router = useRouter()
 const account = useAccountStore()
@@ -57,7 +58,9 @@ const path = computed(() => router.currentRoute)
 
 async function logout() {
   await account.logout()
-  console.log('redirecting to login')
+  if (userData().debug) {
+    console.log('redirecting to login')
+  }
   router.push('/login')
 }
 </script>

@@ -1,4 +1,5 @@
 import Ingredient from './Ingredient'
+import {userData} from "../stores/userData";
 
 class Phase {
 
@@ -25,7 +26,9 @@ class Phase {
         for (let i = 0; i < this.ingredients.length ; i++) {
             const ingredient = this.ingredients[i] as Ingredient;
             if (!ingredient.equalsFormulaIngredient(phase.ingredients[i] as Ingredient)) {
-                console.log("ingredients not equal")
+                if (userData().debug) {
+                    console.log("ingredients not equal")
+                }
                 return false;
             }
         }
@@ -37,12 +40,22 @@ class Phase {
     }
 
     removeIngredientByIndex(index: number) :Ingredient {
+        this.ingredients = this.orderIngredientsByPercentage(this.ingredients)
         return this.ingredients.splice(index, 1)[0]
     }
 
-    getIngredientbyId(index: number) :Ingredient {
-        console.log(index)
-        return this.ingredients[index]
+    removeIngredientById(id: number) :Ingredient {
+        return this.getIngredientById(id)
+    }
+
+    getIngredientById(id: number) :Ingredient {
+        this.ingredients.find(ingredient => ingredient.id === id)
+        for (let i in this.ingredients) {
+            if (this.ingredients[i].id == id) {
+                return this.ingredients[i]
+            }
+        }
+        return null
     }
 
     getIngredients() :Ingredient[] {
@@ -55,15 +68,25 @@ class Phase {
 
     getOrderedIngredients() :Ingredient[] {
         return this.ingredients.slice().sort( (a: Ingredient, b: Ingredient) => {
+            if (a.percentage === b.percentage) {
+                return a.name.localeCompare(b.name);
+            }
             return a.percentage < b.percentage ? 1 : -1
         })
         return this.orderIngredientsByPercentage(this.ingredients)
     }
 
-    private orderIngredientsByPercentage = (unorderedIngredients :Ingredient[]) :Ingredient[]  => {
+    public orderIngredientsByPercentage = (unorderedIngredients :Ingredient[]) :Ingredient[]  => {
         return unorderedIngredients.sort( (a: Ingredient, b: Ingredient) => {
+            if (a.percentage === b.percentage) {
+                return a.name.localeCompare(b.name);
+            }
                 return a.percentage < b.percentage ? 1 : -1
             })
+    }
+
+    updateIngredientOrderByPercentageAndName() :void {
+        this.orderIngredientsByPercentage(this.ingredients)
     }
 
     updateIngredientOrderByName() :void {

@@ -2,6 +2,10 @@ import Units from './Units'
 import Phase from './Phase'
 import Ingredient from './Ingredient'
 import FormulaSaveStatus from './FormulaSaveStatus'
+import {userData} from "../stores/userData";
+import * as util from "util";
+import FormulaHelper from "./FormulaHelper";
+import FormulaFactory from "./FormulaFactory";
 
 class Formula {
     public totalWeight: number
@@ -27,43 +31,59 @@ class Formula {
 
     equals(formula :Formula) :boolean {
         if (formula.name !== this.name) {
-            console.log("name not equal, " + formula.name + ", vs " + this.name)
+            if (userData().debug) {
+                console.log("name not equal, " + formula.name + ", vs " + this.name)
+            }
             return false;
         }
         if (formula.totalWeight !== this.totalWeight) {
-            console.log("totalWeight not equal")
+            if (userData().debug) {
+                console.log("totalWeight not equal")
+            }
             return false;
         }
         if (formula.totalWeightInOunces !== this.totalWeightInOunces) {
-            console.log("totalWeightInOunces not equal")
+            if (userData().debug) {
+                console.log("totalWeightInOunces not equal")
+            }
             return false;
         }
         if (formula.phases.length !== this.phases.length) {
-            console.log("phases length not equal")
+            if (userData().debug) {
+                console.log("phases length not equal")
+            }
             return false;
         }
         if(formula.description != this.description) {
-            console.log("description not equal")
-            console.log("cached:" + formula.description)
-            console.log("display:" + this.description)
+            if (userData().debug) {
+                console.log("description not equal")
+                console.log("cached:" + formula.description)
+                console.log("display:" + this.description)
+            }
             return false;
         }
         if (formula.allocatedPercentage !== this.allocatedPercentage) {
-            console.log("allocatedPercentage not equal")
+            if (userData().debug) {
+                console.log("allocatedPercentage not equal")
+            }
             return false;
         }
         if (formula.estimatedCost !== this.estimatedCost) {
-            console.log("estimatedCost not equal")
+            if (userData().debug) {
+                console.log("estimatedCost not equal")
 
-            console.log("cached" + formula.estimatedCost)
-            console.log("display" + this.estimatedCost)
+                console.log("cached" + formula.estimatedCost)
+                console.log("display" + this.estimatedCost)
+            }
             return false;
         }
 
         for (let i = 0; i < this.phases.length ; i++) {
             const phase = this.phases[i] as Phase;
             if (!phase.equals(formula.phases[i] as Phase)) {
-                console.log("phases not equal")
+                if (userData().debug) {
+                    console.log("phases not equal")
+                }
                 return false;
             }
         }
@@ -90,7 +110,7 @@ class Formula {
     }
 
     getAllocatedPercentagesRemaining() :Number {
-        return 100 - this.allocatedPercentage
+        return FormulaHelper.formatDecimal(100 - this.allocatedPercentage)
     }
 
     updateWeights(unit :Units) :void {
@@ -109,18 +129,21 @@ class Formula {
         }
 
         if(this.phases === undefined) {
-            console.log("phases are undefined")
+            if (userData().debug) {
+                console.log("phases are undefined")
+            }
             return
         }
         this.allocatedPercentage = 0
         this.phases.forEach(p => {
             p.ingredients.forEach(ingredient => {
                 let ingredientWeight = this.totalWeight * Number(ingredient.percentage) * 0.01
-                ingredient.setWeight(ingredientWeight, 'g')
+                ingredient.setWeight(FormulaHelper.formatDecimal(ingredientWeight), 'g')
                 if(ingredient.percentage) {
-                    this.allocatedPercentage += Number(ingredient.percentage)
+                    this.allocatedPercentage += FormulaHelper.formatDecimal(ingredient.percentage)
                 }
             })
+            this.allocatedPercentage = FormulaHelper.formatDecimal(this.allocatedPercentage)
         })
     }
 
@@ -154,7 +177,6 @@ class Formula {
     }
 
     hasIngredient(ingredient :Ingredient) :boolean {
-
         for (let i = 0; i < this.phases.length; i++) {
             let phasesWithIngredient = this.phases[i].ingredients.filter(ing => {
                 return ing.ingredient_id == ingredient.ingredient_id;
@@ -168,12 +190,16 @@ class Formula {
 
     getIngredientList() :Ingredient[] {
         let ingredients :Ingredient[] = []
-        console.log("getting ingredient list from Formula " + this.name)
+        if (userData().debug) {
+            console.log("getting ingredient list from Formula " + this.name)
+        }
         this.phases.forEach(p => {
             ingredients = ingredients.concat(p.ingredients)
-            p.ingredients.forEach(i => {
-                console.log(i.tags)
-            })
+            if (userData().debug) {
+                p.ingredients.forEach(i => {
+                    console.log(i.tags)
+                })
+            }
         })
         return ingredients
     }

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="showNotice"
-    class="fixed bottom-0 left-0 right-0 mb-0 bg-slate-100 border-t-2 border-slate-300 p-2 shadow-lg flex justify-between items-center z-50"
+    class="fixed bottom-0 print:hidden left-0 right-0 mb-0 bg-slate-100 border-t-2 border-slate-300 p-2 shadow-lg flex justify-between items-center z-50"
   >
     <p class="text-sm px-2">
       mySatchel.app uses cookies to ensure the proper functionality of our website. No external

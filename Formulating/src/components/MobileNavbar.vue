@@ -76,6 +76,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { navigation } from '@/navigation'
 import { useAccountStore } from '@/stores/account'
+import {userData} from "@/stores/userData";
 
 const router = useRouter()
 const path = computed(() => router.currentRoute)
@@ -84,7 +85,9 @@ let isMobileMenuOpen = ref(false)
 
 async function logout() {
   await account.logout()
-  console.log('redirecting to login')
+  if (userData().debug) {
+    console.log('redirecting to login')
+  }
   router.push('/login')
 }
 
