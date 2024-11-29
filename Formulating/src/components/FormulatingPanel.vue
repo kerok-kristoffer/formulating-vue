@@ -36,10 +36,7 @@ function editIngredient(ingredient :Ingredient) {
 }
 
 const submitFormula = async () => {
-  console.log("submitting formula" + data.displayFormula.name + " id: " + data.displayFormula.id)
-
   await FormulaHelper.submitFormula(data.getReactiveDisplayFormula())
-  console.log("submitted formula, updating cached formula")
   data.setCachedFormula(data.getReactiveDisplayFormula())
 }
 
@@ -260,6 +257,7 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
           <label :for="'phase-name-' + phaseKey" class="px-2">Phase:</label>
           <input
             :id="'phase-name-' + phaseKey"
+            placeholder="New Phase"
             v-model="phase.name"
             class="border-2 border-slate-400 rounded-md"
           />

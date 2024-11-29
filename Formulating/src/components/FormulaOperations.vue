@@ -56,7 +56,6 @@ const submitFormula = () => emit('submitFormula');
 const deleteFormula = () => emit('deleteFormula');
 const resetDisplayAndCachedFormula = () => emit('resetDisplayAndCachedFormula');
 const submitUpdateFormula = () => {
-  console.log('clicked submitUpdateFormula');
   emit('submitFormula');
 }
 const duplicateFormula = () => emit('duplicateFormula');

@@ -55,13 +55,14 @@ import UnitSelector from "@/components/UnitSelector.vue";
 import {userData} from "@/stores/userData";
 import Units from "@/types/Units";
 import Formula from "@/types/Formula";
+import {useAccountStore} from "@/stores/account";
 
 const { item } = defineProps<{
   item: Ingredient,
 }>();
 const emit = defineEmits(['updateItem', 'cancel']);
 
-const editedItem = ref(new Ingredient(0, 0, item.name, item.inci, item.percentage, item.cost, item.tags));
+const editedItem = ref(new Ingredient(0, 0, "", item.inci, item.percentage, item.cost, item.tags));
 const showEditWindow = ref(true);
 
 const computedCost = computed(() => {
@@ -80,6 +81,12 @@ const setUnit = (unit :Units) => { // TODO could this be achieved using the unit
 }
 
 const updateItem = () => {
+
+  if (editedItem.value.name === undefined || editedItem.value.name.length === 0) {
+    useAccountStore().notify("Name cannot be empty", "error");
+    return;
+  }
+
   emit('updateItem', editedItem.value);
   showEditWindow.value = false;
 };

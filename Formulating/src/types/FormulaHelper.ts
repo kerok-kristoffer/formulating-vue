@@ -53,9 +53,12 @@ export default class FormulaHelper {
   }
 
   static async submitFormula(formula :Formula) {
-    if (userData().debug) {
-      console.log("submit formula called")
+
+    if (formula.name == undefined || formula.name == "") {
+      useAccountStore().notify("Formula name is required", "error")
+      return
     }
+
     if(formula.saveStatus !== 'new') {
       await this.updateFormula(formula)
       userData().setDisplayFormula(formula, "updateFormula FormulaHelper 89")
@@ -81,8 +84,6 @@ export default class FormulaHelper {
 
     userData().api.getFormulaService().createFormula(formula).then(response => {
 
-      console.log(response)
-
       useAccountStore().notify(userData().displayFormula.name + " saved", "success")
       userData().displayFormula.saveStatus = 'saved'
       userData().displayFormula.id = response.id
@@ -95,6 +96,12 @@ export default class FormulaHelper {
   }
 
   static async updateFormula(formula :Formula) {
+
+    if (formula.name == undefined || formula.name == "") {
+      useAccountStore().notify("Formula name is required", "error")
+      return
+    }
+
     await userData().api.getFormulaService().updateFormula(formula).then( (response) => {
 
     }).catch( (error) => {
@@ -111,6 +118,7 @@ export default class FormulaHelper {
 
   static duplicateFormula(formula :Formula) {
     let duplicate = FormulaFactory.duplicateFormula(formula)
+
     userData().api.getFormulaService().createFormula(duplicate).then( (response) => {
       if (userData().debug) {
         console.log(response)

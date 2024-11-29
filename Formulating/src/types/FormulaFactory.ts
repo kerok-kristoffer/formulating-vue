@@ -59,7 +59,7 @@ class FormulaFactory {
 
   static createDefaultFormula(): Formula {
     const defaultEmptyPhases = [this.createEmptyPhase()];
-    return new Formula( 0, "New Formula", defaultEmptyPhases, 100, 'new', '', '');
+    return new Formula( 0, "", defaultEmptyPhases, 100, 'new', '', '');
   }
 
   private static isValidFormulaData(data: any): boolean {

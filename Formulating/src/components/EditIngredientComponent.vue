@@ -139,8 +139,12 @@ async function handleAlertYesClick(callback: CallbackFunction) {
     console.log("handleAlertYesClick, cost: ", ingredientList.getHighlightIngredient().getCost(userData().settings.preferredUnits))
   }
   isAlertVisible.value = false;
+
+  if (ingredientList.highlightIngredient.name == undefined || ingredientList.highlightIngredient.name == "") {
+    useAccountStore().notify("Ingredient name is required", "error")
+    return
+  }
   await ingredientList.publishHighlightedIngredient()
-  // console.log("setting highlight ingredient after publish")
   ingredientList.refreshIngredient(ingredientList.getHighlightIngredient())
   ingredientList.updateHighlightIngredientCopy();
   data.updateDisplayFormulaWeightsAndCosts();
@@ -224,19 +228,20 @@ function nextIngredientClick() {
 }
 
 const updateItem = (ing :Ingredient) => {
-  console.log("emit from updateItem: ", ing)
+
+
+  if (ing.name === undefined || ing.name.length === 0) {
+    useAccountStore().notify("Name cannot be empty", "error");
+    return;
+  }
+
   data.api.getIngredientService().updateIngredient(ing).then(response => {
-    console.log(response);
     data.updateDisplayFormulaWeightsAndCosts();
-    console.log("updated ingredient from save click: ", ing)
   }).catch(error => {
     useAccountStore().notify("Error updating ingredient", "error");
-    console.error(error);
   }).finally(() => {
     closeEditWindow()
   });
-  // emit('close');
-  // showEditWindow.value = false; // TODO does this do anything anymore?
 }
 
 const cancelEdit = () => {
