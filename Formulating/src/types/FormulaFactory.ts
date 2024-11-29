@@ -54,7 +54,7 @@ class FormulaFactory {
   }
 
   static createEmptyPhase(): Phase {
-    return new Phase(0, 'New Phase', []);
+    return new Phase(0, '', []);
   }
 
   static createDefaultFormula(): Formula {
