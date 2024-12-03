@@ -10,7 +10,7 @@ import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css'
 
 import {
-  faSearch, // add icons plus, trashcan, save icon, new icon.
+  faSearch,
   faFileCircleExclamation,
   faFolder,
   faFileLines,
@@ -25,8 +25,9 @@ import {
   faCircleInfo,
   faLock,
   faLockOpen,
-  faThumbtack
+  faThumbtack,
 } from '@fortawesome/free-solid-svg-icons'
+import { faFacebookF, faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons'
 export const globalState = reactive({
   isAuthenticated: false
 })
@@ -75,10 +76,10 @@ library.add(
   faCircleInfo,
   faLock,
   faLockOpen,
-  faThumbtack
-  // faFacebook,
-  // faInstagram,
-  // faYoutube
+  faThumbtack,
+  faFacebookF,
+  faInstagram,
+  faYoutube
 )
 
 app.component('font-awesome-icon', FontAwesomeIcon)

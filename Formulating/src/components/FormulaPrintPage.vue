@@ -24,11 +24,11 @@
               </div>
               <div class="flex flex-row" v-if="displayFormula.created_at">
                 <p class="w-20">created:</p>
-                <p class="">{{ displayFormula.created_at }}</p>
+                <p class="w-20 text-sm">{{ displayFormula.created_at }}</p>
               </div>
               <div class="flex flex-row" v-if="displayFormula.updated_at">
                 <p class="w-20">updated:</p>
-                <p class="">{{ displayFormula.updated_at }}</p>
+                <p class="w-20 text-sm">{{ displayFormula.updated_at }}</p>
               </div>
             </div>
 
@@ -47,7 +47,7 @@
                 <li class="w-24 ml-10 font-bold">cost</li>
               </ul>
             </div>
-            <ul
+            <div
                 v-for="phase in displayFormula.phases"
                 class="print:flex flex-col m-0 px-0 w-full pb-2 pt-2 border-2 border-t-0 border-slate-300 last:bg-slate-800 last:rounded-b-lg"
             >
@@ -77,7 +77,7 @@
                   }}
                 </li>
               </ul>
-            </ul>
+            </div>
             <div v-if="userData().settings.printSettings.showInstructions" class="flex flex-col">
               <ul
                   v-for="phase in displayFormula.phases"

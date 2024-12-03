@@ -25,7 +25,7 @@
         Click here to see
       </a>
     </p>
-    <p class="text-xl my-10">Select a plan and start our free 7 day trial!</p>
+    <p class="text-xl my-10">Select a plan!</p>
     <p class="text-xl mb-10">Sign up yearly and <strong>get 2 months free!</strong></p>
     <stripe-pricing-table
       pricing-table-id="prctbl_1QB66gAyAF7HunP427mYj67X"
@@ -55,6 +55,7 @@ let loaded = ref(false)
 let authorized = ref(false)
 
 onMounted(async () => {
+  // TODO need to add a check for no connection to the server before auth step and show proper error.
   authorized.value = await account.hasActiveSubscription()
 
   loaded.value = true

@@ -1,16 +1,11 @@
 import {defineStore} from 'pinia'
 import axios from "axios";
 import User from "../types/User";
-import SubPlan, {AccessRank} from "../types/SubPlan";
+import SubPlan from "../types/SubPlan";
 import Cookies from "js-cookie";
 import {globalState} from '../main';
 import {useRouter} from "vue-router";
-import {reactive, ref} from "vue";
-import IngredientList from "../types/IngredientList";
-import FormulaList from "../types/FormulaList";
-import FormulaFactory from "../types/FormulaFactory";
-import Settings from "../types/Settings";
-import Alert from "../types/Alert";
+import {ref} from "vue";
 import {userData} from "./userData";
 
 let currentVersion = import.meta.env.VITE_CURRENT_VERSION;
@@ -109,7 +104,7 @@ export const useAccountStore = defineStore('account', {
 
                     let user = this.generateUser(response.data)
                     await this.setUser(user)
-                    this.router.push('/formulas')
+                    await this.router.push('/formulas')
                 }
             }).catch((error) => {
                 if (userData().debug) {

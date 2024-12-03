@@ -7,7 +7,6 @@ import IngredientsView from '../views/IngredientsView.vue'
 import FormulasView from '../views/FormulasView.vue'
 import SubscriptionsView from '../views/SubscriptionView.vue'
 import SuccessView from '../views/SubscriptionSuccessPage.vue'
-import CancelView from '../views/SubscriptionCancelPage.vue'
 import { globalState } from '@/main'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import RenewPasswordView from '@/views/RenewPasswordView.vue'
@@ -43,16 +42,16 @@ const router = createRouter({
       name: 'register',
       component: RegisterView
     },
-    // {
-    //   path: '/beta',
-    //   name: 'beta',
-    //   component: BetaLandingPage
-    // },
-    // {
-    //   path: '/faq',
-    //   name: 'faq',
-    //   component: FaqPage
-    // },
+    {
+      path: '/beta',
+      name: 'beta',
+      component: BetaLandingPage
+    },
+    {
+      path: '/faq',
+      name: 'faq',
+      component: FaqPage
+    },
     {
       path: '/login',
       name: 'Login',

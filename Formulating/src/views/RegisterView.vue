@@ -47,11 +47,12 @@
 
 <script>
 import axios from 'axios'
-import {onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountStore } from '../stores/account'
 import Notification from '../components/Notification.vue'
 import imgUrl from '/login_bg.jpg'
+import User from '@/types/User'
 
 export default {
   name: 'Login',
@@ -92,17 +93,27 @@ export default {
         account.notify('Username can only contain numbers and letters', 'error')
         return
       }
-      // TODO start using backend api service
 
-      // TODO seems like login is bypassing the cookie functionality somehow. Need to investigate why I saw ingredients for a new user after logging out and registering a new one.
-      // TODO seems most likely a cookies issue, perhaps not cleared when logging out, or not set when registering a new user.
-      axios.post('users', inputs).then((response) => {
+      await axios.post('users', inputs).then(async (response) => {
         if (response.status === 200) {
-          let data = response.data
+          console.log(response.data)
+          let userData = response.data
+
+          console.log(userData.accessToken)
+          console.log(userData.refreshToken)
+          let user = new User(
+            userData.user.userName,
+            userData.user.email,
+            userData.user.fullName,
+            new Date(userData.user.created_at),
+            userData.access_token,
+            userData.refresh_token,
+            userData.user.StripeCustomerId
+          )
 
           const account = useAccountStore()
-          account.setUser(data.user, data.access_token, data.refresh_token)
-          router.push('/formulas')
+          await account.setUser(user)
+          await router.push('/formulas')
         }
       })
     }
