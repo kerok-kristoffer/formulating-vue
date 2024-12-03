@@ -11,7 +11,7 @@
       <section
         class="forms bg-slate-200 shadow-lg shadow-slate-500 p-5 h-3/5 md:p-8 rounded-b-md md:rounded-md md:mx-12"
       >
-        <img class="w-full h-auto object-contain" src="../assets/mySatchel.png" alt="mySatchel" />
+        <img @click="goToMain" class="w-full h-auto object-contain hover:cursor-pointer" src="../assets/mySatchel.png" alt="mySatchel" />
         <div class="flex flex-col justify-around">
           <h2 class="font-semibold mx-2">Login</h2>
           <form class="flex flex-col login justify-end" @submit.prevent="submit">
@@ -61,6 +61,7 @@ import axios from 'axios'
 import { useAccountStore } from '@/stores/account'
 import imgUrl from '/login_bg.jpg'
 import Notification from '@/components/Notification.vue'
+import router from "@/router";
 
 let account
 
@@ -70,6 +71,10 @@ onMounted(() => {
   image.onload = () => {}
   account = useAccountStore()
 })
+
+function goToMain() {
+  router.push('/')
+}
 
 const submit = async (e) => {
   const form = new FormData(e.target)

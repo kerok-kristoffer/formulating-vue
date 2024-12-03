@@ -92,7 +92,7 @@
               easily without having to redo every bit of math I have worked out.
             </p>
             <p class="text-gray-600 mb-4">mySatchel is the answer to my formulating needs."</p>
-            <h3 class="text-lg lg:text-xl font-bold">- Karen</h3>
+            <h3 class="text-lg lg:text-xl font-bold">- Beta User</h3>
           </div>
           <!--          <div class="w-full lg:max-w-xs p-4 bg-white rounded-lg shadow-md">-->
           <!--            <p class="text-gray-600 mb-4">-->

@@ -96,11 +96,7 @@ export default {
 
       await axios.post('users', inputs).then(async (response) => {
         if (response.status === 200) {
-          console.log(response.data)
           let userData = response.data
-
-          console.log(userData.accessToken)
-          console.log(userData.refreshToken)
           let user = new User(
             userData.user.userName,
             userData.user.email,
