@@ -112,7 +112,7 @@
             <p class="text-gray-600 mb-2 line-through">$7.5/month</p>
             <p class="text-gray-600 mb-4 text-2xl">$5.25/month</p>
             <p class="text-gray-600 mb-4">
-              Sign up during Cyber Week using coupon code CYBER30 and get 30% off the first 6 months
+              Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the first 6 months
             </p>
             <p class="text-gray-600 mb-4">Register now to get access to the 7-day free trial!</p>
             <RouterLink
@@ -120,7 +120,7 @@
               class="bg-slate-500 text-white rounded-md py-2 px-4 hover:bg-slate-600"
               >Register</RouterLink
             >
-            <p class="text-xs italic mt-2">*Promo code expires on Monday December 9th</p>
+            <p class="text-xs italic mt-2">*Promo code expires on January 1st, 2025</p>
 
             <!--            <stripe-buy-button-->
             <!--              buy-button-id="buy_btn_1QRfN7AyAF7HunP4A1WWcjKA"-->
@@ -133,7 +133,7 @@
             <p class="text-gray-600 mb-2 line-through">$6.25/month</p>
             <p class="text-gray-600 mb-4 text-2xl">$4.38/month</p>
             <p class="text-gray-600 mb-4">
-              Sign up during Cyber Week using coupon code CYBER30 and get 30% off the first year
+              Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the first year
             </p>
             <p class="text-gray-600 mb-4">Register now to get access to the 7-day free trial!</p>
             <RouterLink
@@ -142,7 +142,7 @@
               text="Register"
               >Register</RouterLink
             >
-            <p class="text-xs italic mt-2">*Promo code expires on Monday December 9th</p>
+            <p class="text-xs italic mt-2">*Promo code expires on January 1st, 2025</p>
             <!--            <stripe-buy-button-->
             <!--              buy-button-id="buy_btn_1QRfVYAyAF7HunP4tIJ6Hweu"-->
             <!--              publishable-key="pk_live_51OPmhJAyAF7HunP4jDglwW09eX9oixSs91nlyxRt1VjxIxbmMihTAL2G7tSEwtWNoquaKHjCiY5aeHuLAxyo8AEK00kyKKMDMA"-->

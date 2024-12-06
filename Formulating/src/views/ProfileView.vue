@@ -76,11 +76,8 @@ function formatDate(date) {
                 <p class="text-gray-600 mb-2 line-through">$7.5/month</p>
                 <p class="text-gray-600 mb-4 text-2xl">$5.25/month</p>
                 <p class="text-gray-600 mb-4">
-                  Sign up during Cyber Week* using coupon code CYBER30 and get 30% off the first 6
-                  months
-                </p>
-                <p class="text-gray-600 mb-4">
-                  Register now to get access to the 7-day free trial!
+                  Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the
+                  first 6 months
                 </p>
 
                 <stripe-buy-button
@@ -88,25 +85,22 @@ function formatDate(date) {
                   publishable-key="pk_live_51OPmhJAyAF7HunP4jDglwW09eX9oixSs91nlyxRt1VjxIxbmMihTAL2G7tSEwtWNoquaKHjCiY5aeHuLAxyo8AEK00kyKKMDMA"
                 >
                 </stripe-buy-button>
-                <p class="text-xs italic">*Promo code expires on Monday December 9th</p>
+                <p class="text-xs italic">*Promo code expires on January 1st, 2025</p>
               </div>
               <div class="w-full lg:max-w-xs p-4 bg-white rounded-lg shadow-md">
                 <h3 class="text-lg lg:text-xl font-bold mb-2">Beta Yearly</h3>
                 <p class="text-gray-600 mb-2 line-through">$6.25/month</p>
                 <p class="text-gray-600 mb-4 text-2xl">$4.38/month</p>
                 <p class="text-gray-600 mb-4">
-                  Sign up during Cyber Week* using coupon code CYBER30 and get 30% off the first
-                  year
-                </p>
-                <p class="text-gray-600 mb-4">
-                  Register now to get access to the 7-day free trial!
+                  Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the
+                  first year
                 </p>
                 <stripe-buy-button
                   buy-button-id="buy_btn_1QRfVYAyAF7HunP4tIJ6Hweu"
                   publishable-key="pk_live_51OPmhJAyAF7HunP4jDglwW09eX9oixSs91nlyxRt1VjxIxbmMihTAL2G7tSEwtWNoquaKHjCiY5aeHuLAxyo8AEK00kyKKMDMA"
                 >
                 </stripe-buy-button>
-                <p class="text-xs italic">*Promo code expires on Monday December 9th</p>
+                <p class="text-xs italic">*Promo code expires on January 1st, 2025</p>
               </div>
             </div>
           </div>
