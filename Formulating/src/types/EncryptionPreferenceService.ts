@@ -3,7 +3,7 @@ export class EncryptionPreferenceService {
     private readonly userKey: string;
 
     constructor(useEncryption: boolean, userKey: string) {
-        if (useEncryption && (!userKey || userKey.length < 8)) {
+        if (useEncryption && (!userKey || userKey.length < 16)) {
             throw new Error('Invalid user key');
         }
         this.useEncryption = useEncryption;
@@ -16,5 +16,16 @@ export class EncryptionPreferenceService {
 
     getUserKey(): string {
         return this.userKey;
+    }
+
+    toJSON(): { useEncryption: boolean, userKey: string } {
+        return {
+            useEncryption: this.useEncryption,
+            userKey: this.userKey
+        };
+    }
+
+    static fromJSON(json: { useEncryption: boolean, userKey: string }): EncryptionPreferenceService {
+        return new EncryptionPreferenceService(json.useEncryption, json.userKey);
     }
 }
