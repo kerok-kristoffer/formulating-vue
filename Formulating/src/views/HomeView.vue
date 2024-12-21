@@ -28,7 +28,7 @@
         <RouterLink
           to="/beta"
           class="bg-slate-500 text-white rounded-md py-2 px-4 mb-4 hover:bg-slate-600"
-          >Try the Beta</RouterLink
+          >Try the Beta for FREE!</RouterLink
         >
       </section>
 
@@ -103,6 +103,12 @@
         </div>
       </section>
 
+<!--      <section class="text-center mb-16 w-full px-4 lg:w-auto lg:px-0">-->
+<!--        <div class="p-4 bg-white rounded-lg shadow-md">-->
+<!--          <ComparisonTable />-->
+<!--        </div>-->
+<!--      </section>-->
+
       <!-- Pricing Section -->
       <section class="text-center mb-16 w-full px-4 lg:w-auto lg:px-0">
         <h2 class="text-2xl lg:text-3xl font-semibold mb-4">Pricing</h2>
@@ -112,14 +118,15 @@
             <p class="text-gray-600 mb-2 line-through">$7.5/month</p>
             <p class="text-gray-600 mb-4 text-2xl">$5.25/month</p>
             <p class="text-gray-600 mb-4">
-              Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the first 6 months
+              Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the
+              first 6 months
             </p>
             <p class="text-gray-600 mb-4">Register now to get access to the 7-day free trial!</p>
             <RouterLink
-              to="/register"
+              to="/beta"
               class="bg-slate-500 text-white rounded-md py-2 px-4 hover:bg-slate-600"
-              >Register</RouterLink
-            >
+              text="Access FREE trial now!"
+            ></RouterLink>
             <p class="text-xs italic mt-2">*Promo code expires on January 1st, 2025</p>
 
             <!--            <stripe-buy-button-->
@@ -133,15 +140,15 @@
             <p class="text-gray-600 mb-2 line-through">$6.25/month</p>
             <p class="text-gray-600 mb-4 text-2xl">$4.38/month</p>
             <p class="text-gray-600 mb-4">
-              Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the first year
+              Sign up before the end of the year using coupon code* YEAR2024 and get 30% off the
+              first year
             </p>
             <p class="text-gray-600 mb-4">Register now to get access to the 7-day free trial!</p>
             <RouterLink
-              to="/register"
+              to="/beta"
               class="bg-slate-500 text-white rounded-md py-2 px-4 hover:bg-slate-600"
-              text="Register"
-              >Register</RouterLink
-            >
+              text="Access FREE trial now!"
+            ></RouterLink>
             <p class="text-xs italic mt-2">*Promo code expires on January 1st, 2025</p>
             <!--            <stripe-buy-button-->
             <!--              buy-button-id="buy_btn_1QRfVYAyAF7HunP4tIJ6Hweu"-->
@@ -212,6 +219,7 @@ import { faFacebookF, faYoutube, faInstagram } from '@fortawesome/free-brands-sv
 import imgUrl from '/mySatchel_bg-3.png'
 import { onMounted } from 'vue'
 import router from '@/router'
+import ComparisonTable from '@/components/ComparisonTable.vue'
 
 onMounted(() => {
   const script = document.createElement('script')
