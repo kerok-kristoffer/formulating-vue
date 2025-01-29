@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, nextTick, onMounted, provide, ref, toRef, unref, watch} from "vue";
+import {computed, nextTick, onBeforeUnmount, onMounted, provide, ref, toRef, unref, watch} from "vue";
 import axios from 'axios';
 import Ingredient from "../types/Ingredient";
 import Formula from "../types/Formula";
@@ -52,6 +52,7 @@ onMounted(async () => {
   if (userData().debug) {
     console.log("FormulasView mounted with displayFormula: " + displayFormula.value.name)
   }
+  window.addEventListener('keydown', handleKeydown);
 
   // displayFormula.value.phases.forEach(phase => {
   //   FormulaHelper.updateIngredientProperties(phase, filteredIngredients.value);
@@ -59,6 +60,42 @@ onMounted(async () => {
 
   loaded.value = true
 });
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
+
+function handleKeydown(event) {
+  const target = event.target as HTMLElement;
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+    return;
+  }
+
+  if (event.key === 'Escape') {
+    if (showEditWindow.value) {
+      closeEditIngredientWindow();
+      return
+    } // todo perhaps move these to the actual components, or make a 'closable' interface that handles it
+    if (isDeleteAlertVisible.value) {
+      handleDeleteAlertNoClick();
+      return
+    }
+    if (isDirtyDisplayFormulaAlertVisible.value) {
+      handleDirtyFormulaAlertCancelClick();
+      return
+    }
+    closePanels()
+  }
+
+  if (event.key === ' ') {
+    closePanels()
+  }
+}
+
+function closePanels() {
+  data.displayFormulaList = false;
+  displayIngredientList.value = false;
+}
 
 function toggleDisplayFormulaList() {
   data.toggleFormulaListPanel()
@@ -162,7 +199,7 @@ const startDrag = (event, ingredientId: number | string) => {
 }
 
 const onDrop = (event) => {
-    
+    event.stopPropagation();
     const ingredientId = event.dataTransfer.getData('ingredientPhaseIndex')
     const phaseKey = event.dataTransfer.getData('phaseKey')
     const phase = data.getReactiveDisplayFormula().phases[phaseKey]
@@ -306,7 +343,9 @@ function deleteFormulaConfirmed() {
 
   FormulaHelper.deleteFormula(data.displayFormula).then(() => {
     data.formulaList.removeFormula(data.displayFormula)
-    resetDisplayAndCachedFormula();
+    let cleanFormula = FormulaFactory.createDefaultFormula();
+    data.setDisplayFormula(cleanFormula, "deleteFormulaConfirmed, FormulasView 77")
+    data.setCachedFormula(cleanFormula)
   })
 }
 
@@ -348,7 +387,6 @@ function handleDirtyFormulaAlertResponse(saveChanges: boolean, pinListView: bool
 function handleDirtyFormulaAlertCancelClick() {
   callBack = () => void{};
   isDirtyDisplayFormulaAlertVisible.value = false;
-
 }
 
 const submitUpdateFormula = () => {
@@ -399,25 +437,40 @@ watch(
 </script>
 
 <template>
-  <div v-if="loaded" class="">
+  <div v-if="loaded" class="drop-zone h-full"
+       @drop="onDrop($event)"
+       @dragenter.prevent
+       @dragover.prevent
+  >
     <div id="formula-list-panel"
+         @click="toggleDisplayFormulaList"
          class="fixed top-28 md:top-20 z-10 h-4/5
        md:h-5/6 md:bg-slate-200 rounded-r-xl
        md:flex md:flex-row md:border-2 md:border-l-0 border-slate-400">
       <formula-list v-if="data.displayFormulaList" @clickFormula="triggerSetDisplayFormula" class="overflow-y-auto w-72 print:hidden"/>
-      <font-awesome-icon @click="toggleDisplayFormulaList" :icon="['fa', 'file-lines']" class="top-1/2 mx-1 hidden md:flex text-slate-400 text-3xl" />
+      <font-awesome-icon
+          v-if="!data.displayFormulaList"
+          :icon="['fa', 'file-lines']"
+          class="top-1/2 mx-1 hidden md:flex text-slate-400 text-3xl" />
     </div>
 
-    <div id="ingredient-list-panel" class="fixed top-20 hidden md:flex md:flex-row z-10 right-0 rounded-l-xl bg-slate-200 h-5/6 border-2 border-r-0 border-slate-400">
-      <font-awesome-icon @click="toggleDisplayIngredientList" :icon="['fa', 'file-lines']" class="top-1/2 ml-1 text-slate-400 text-3xl" />
-      <div v-if="displayIngredientList" id="ingredient-list" class="right-0 w-72 ml-2 hidden bg-slate-200 md:block h-full">
+    <div id="ingredient-list-panel"
+         @click="toggleDisplayIngredientList"
+         class="fixed top-20 hidden md:flex md:flex-row z-10 right-0 rounded-l-xl bg-slate-200 h-5/6 border-2 border-r-0 border-slate-400">
+      <font-awesome-icon
+          v-if="!displayIngredientList"
+          :icon="['fa', 'file-lines']"
+          class="top-1/2 ml-1 text-slate-400 text-3xl" />
+      <div v-if="displayIngredientList" id="ingredient-list"
+           class="right-0 w-72 hidden bg-slate-200 rounded-l-xl md:block h-full">
         <div class="drop-zone w-full h-3/4 overflow-y-scroll"
              @drop="onDrop($event)"
              @dragenter.prevent
              @dragover.prevent
         >
 
-          <h2 class="py-1 w-full bg-slate-300 font-bold rounded-t-md text-center">Ingredients</h2>
+          <h2
+              class="py-1 w-full bg-slate-300 font-bold rounded-tl-xl text-center">Ingredients</h2>
           <div class="w-full overflow-auto">
             <ul
                 v-for="item in data.ingredientList.getFilteredIngredients()"
@@ -434,14 +487,13 @@ watch(
                 @dragstart="startDrag($event, item.id)"
             >
               <li class="flex flex-row w-full">
-                <p class="w-1/2 font-semibold">{{ item.name }}</p>
-                <p class="w-1/2 font-thin italic">{{ item.inci}}</p>
+                <p class="w-full font-semibold">{{ item.name }}</p>
               </li>
             </ul>
           </div>
         </div>
 
-        <div class="flex flex-row w-full h-1/12 my-3">
+        <div class="flex flex-row w-full h-1/12 my-3 ml-1">
           <input
               class="w-1/2 font-thin text-xs"
               placeholder="new ingredient"
@@ -450,12 +502,6 @@ watch(
               name="Name"
               ref="ingInput"
           />
-          <input
-              class="w-1/3 font-thin text-xs"
-              v-model="newIngredient.inci"
-              placeholder="INCI"
-              type="text"
-              name="Inci" />
 
           <button
               class="bg-slate-400 px-2 hover:bg-slate-300 mx-1 rounded-md text-sm font-semibold"
@@ -477,10 +523,9 @@ watch(
         @editIngredient="editIngredient"
     />
 
-
-
     <FormulatingPanel
         :displayFormula="data.getReactiveDisplayFormula()"
+        :freeVersion="false"
         @submitFormula="formulaSubmitted"
         @deleteFormula="deleteFormula"
         @print="print"

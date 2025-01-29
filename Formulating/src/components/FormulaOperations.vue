@@ -12,8 +12,20 @@
       <button @click="submitFormula" class="operation-button">
         <font-awesome-icon icon="floppy-disk" /> Save
       </button>
-      <button @click="toggleShowDetails" class="operation-button">
-        <font-awesome-icon icon="gears" /> Details
+    </div>
+
+<!-- todo for free version, we want reset button, rest should offer payment by showing Stripe overlay-->
+
+<!-- todo this should probably be controlled by the login status, not the status of the displayFormula -->
+    <div v-else-if="displayFormula.saveStatus === 'free'" class="flex flex-row justify-end">
+      <button @click="displayStripeOverlay" class="operation-button" v-tooltip="'Subscribe to save your formulas'">
+        <font-awesome-icon icon="floppy-disk" /> Save
+      </button>
+      <button @click="displayStripeOverlay" class="operation-button" v-tooltip="'Subscribe to duplicate your formulas'">
+        <font-awesome-icon icon="copy" /> Duplicate
+      </button>
+      <button @click="resetDisplayAndCachedFormula" class="operation-button" v-tooltip="'Clear formula'">
+        <font-awesome-icon icon="trash-can" /> Reset
       </button>
     </div>
     <div v-else class="flex flex-row justify-end">
@@ -28,7 +40,6 @@
       </button>
       <button @click="deleteFormula" class="operation-button">
         <font-awesome-icon icon="trash-can" /> Delete
-
       </button>
     </div>
   </div>
@@ -50,15 +61,28 @@ const emit = defineEmits([
   'duplicateFormula',
   'print'
 ]);
-
-const emitPrint = () => emit('print');
-const submitFormula = () => emit('submitFormula');
-const deleteFormula = () => emit('deleteFormula');
-const resetDisplayAndCachedFormula = () => emit('resetDisplayAndCachedFormula');
-const submitUpdateFormula = () => {
+function emitPrint() {
+  emit('print');
+}
+function submitFormula() {
   emit('submitFormula');
 }
-const duplicateFormula = () => emit('duplicateFormula');
+function deleteFormula() {
+  emit('deleteFormula');
+}
+function resetDisplayAndCachedFormula() {
+  emit('resetDisplayAndCachedFormula');
+}
+function submitUpdateFormula() {
+  emit('submitFormula');
+}
+function duplicateFormula() {
+  emit('duplicateFormula');
+}
+function displayStripeOverlay() {
+  console.log('displayStripeOverlay')
+}
+// todo take a look at delete funcitonality, seems to ask for confirmation twice
 </script>
 
 <style scoped>

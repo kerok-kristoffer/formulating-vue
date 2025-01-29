@@ -15,6 +15,7 @@ import ExitSurveyView from '@/views/ExitSurvey.vue'
 import {userData} from "@/stores/userData";
 import BetaLandingPage from "@/views/BetaLandingPage.vue";
 import FaqPage from "@/views/FaqPage.vue";
+import FreeCalculatorView from "@/views/FreeCalculatorView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,6 +37,11 @@ const router = createRouter({
         { path: '/ingredients', name: 'ingredients', component: IngredientsView },
         { path: '/plans', name: 'plans', component: SubscriptionsView }
       ]
+    },
+    {
+      path: '/free',
+      name: 'free',
+      component: FreeCalculatorView
     },
     {
       path: '/register',

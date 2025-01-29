@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <div class="flex flex-row  justify-center gap-1 py-1">
+    <div class="flex flex-row  justify-end gap-1 py-1">
       <label class="" for="phase_add_ingredient">Add ingredient: </label>
       <input
           v-model="phase.searchIngredient"
@@ -14,7 +14,8 @@
           id="phase_add_ingredient"
           class="h-6 w-42">
       <font-awesome-icon :icon="['fas', 'search']" class="mr-1 mt-1" />
-      <button v-show="phase.searchIngredient" @click="addNewSearchIngredient(phase, phase.searchIngredient)" class="h-6 w-14 bg-slate-400 rounded-md font-semibold">Create</button>
+      <button v-show="phase.searchIngredient" @click="addNewSearchIngredient(phase, phase.searchIngredient)"
+              class="h-6 bg-slate-400 px-1 rounded-md font-semibold text-white">Create</button>
 
     </div>
     <div v-if="phaseCurrentlySearching === phaseKey && searchIngredientList" class="flex flex-row justify-end">
@@ -41,21 +42,28 @@
 import Phase from "../types/Phase";
 import Ingredient from "../types/Ingredient";
 import {computed, nextTick, ref} from "vue";
-import axios from 'axios';// TODO move API calls to backend api service
 import {userData} from "../stores/userData";
 
 const data = userData()
 
 const { phase, phaseKey } = defineProps<{
     phase: Phase,
-    phaseKey: Number
-  }>();
+    phaseKey: Number,
+
+}>();
+
+const emit = defineEmits([
+  'addNewSearchIngredient',
+    'addExistingIngredient'
+]);
 
 const searchIngredientList = ref<Ingredient[]>([])
 const phaseCurrentlySearching = ref(-1)
 const ingredients = computed(() => data.ingredientList.ingredients);
+const focusedSearchIngredientIndex = ref<number>(-1);
 
 const searchIngredient = (phaseKey :number, phaseSearchTerm :string) => {
+  focusedSearchIngredientIndex.value = -1
 
   if(phaseSearchTerm.length < 1) {
     searchIngredientList.value = []
@@ -70,34 +78,13 @@ const searchIngredient = (phaseKey :number, phaseSearchTerm :string) => {
 }
 
 const addNewSearchIngredient = (phase :Phase, input :string) => {
-
-  let requestIngredient = new Ingredient(0, 0, input, "", 0, 0, [])
-
-  axios.post('users/ingredients', requestIngredient).then(response => {
-    if (response.status !== 200) {
-      return
-    }
-    let ing = response.data
-
-    let responseIngredient = new Ingredient(ingredients.value.length, Number(ing.Id), ing.Name, ing.Inci, ing.percentage, ing.cost, [])
-    ingredients.value.push(responseIngredient)
-    ingredients.value.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
-    addSearchIngredient(phase, responseIngredient)
-  });
-}
-// TODO add Ingredient and Formula factory to avoid calling constructor directly
-// TODO introduce new FormulaIngredient class to differentiate between Ingredients and FormulaIngredients
-const addSearchIngredient = (phase :Phase, ingredient :Ingredient) => {
-  let newFormulaIngredient = new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci, 0, ingredient.cost, ingredient.tags)
-  ingredient.formula_ingredient_id = 0
-  phase.addIngredient(newFormulaIngredient)
-  data.getReactiveDisplayFormula().updateWeights(data.settings.preferredUnits)
-  data.getReactiveDisplayFormula().updateCost(data.settings.preferredUnits)
-  phase.searchIngredient = ""
+  emit('addNewSearchIngredient', phase, input)
   searchIngredientList.value = []
 }
-let focusedSearchIngredientIndex = ref<number>(-1);
-
+function addExistingIngredient(phase :Phase, ingredient :Ingredient) {
+  emit('addExistingIngredient', phase, ingredient)
+  searchIngredientList.value = []
+}
 
 async function focusNextSearchIngredient() {
   let index = focusedSearchIngredientIndex.value
@@ -133,10 +120,10 @@ const focusSearchResultIngredientIndex = (index :number) => {
 }
 
 const selectFocusedSearchIngredient = (phase :Phase) => {
-  if(focusedSearchIngredientIndex.value == -1) {
+  if(focusedSearchIngredientIndex.value < 0 || focusedSearchIngredientIndex.value >= searchIngredientList.value.length) {
     addNewSearchIngredient(phase, phase.searchIngredient)
   } else {
-    addSearchIngredient(phase, searchIngredientList.value[focusedSearchIngredientIndex.value])
+    addExistingIngredient(phase, searchIngredientList.value[focusedSearchIngredientIndex.value])
     focusedSearchIngredientIndex.value = -1
   }
 }

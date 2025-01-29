@@ -168,8 +168,14 @@ export const userData = defineStore('data', {
           localStorage.removeItem('dirtyCachedFormula')
       // Cookies.remove('dirtyCachedFormula')
     },
-    getDirtyCachedFormula() :Formula {
-      return FormulaFactory.createFormulaFromData(JSON.parse(localStorage.getItem('dirtyCachedFormula')))
+    getDirtyCachedFormula(): Formula {
+      const formulaData = localStorage.getItem('dirtyCachedFormula')
+      if (typeof formulaData == 'string') {
+        return FormulaFactory.createFormulaFromData(
+            JSON.parse(formulaData)
+        )
+      }
+      return FormulaFactory.createDefaultFormula()
     },
     getCachedFormula() :Formula {
 

@@ -14,8 +14,9 @@ import Ingredient from "@/types/Ingredient";
 import FormulaFactory from "@/types/FormulaFactory";
 
 const data = userData()
-const { displayFormula } = defineProps<{
+const { displayFormula, freeVersion } = defineProps<{
   displayFormula: Formula,
+  freeVersion: boolean
 }>();
 
 onMounted(() => {
@@ -35,7 +36,30 @@ function editIngredient(ingredient :Ingredient) {
   emit('editIngredient', ingredient)
 }
 
+async function addNewIngredientFromSearch(phase :Phase, input :string) {
+  let newIngredient = new Ingredient(0, 0, input, "", 0, 0, [])
+
+  if (!freeVersion) {
+    await data.api.getIngredientService().createIngredient(newIngredient).then((ing) => {
+
+      newIngredient = FormulaFactory.createIngredientFromAPIData(ing, data.ingredientList.ingredients.length)
+      data.ingredientList.ingredients.push(newIngredient)
+      data.ingredientList.ingredients.sort((t1, t2) => {return  t1.name.toLowerCase() > t2.name.toLowerCase() ? 1 : -1 });
+    })
+  }
+  addExistingIngredientFromSearch(phase, newIngredient)
+}
+
+function addExistingIngredientFromSearch(phase :Phase, ingredient :Ingredient) {
+  phase.addIngredient(ingredient)
+  phase.updateIngredientOrderByPercentageAndName()
+  phase.searchIngredient = ""
+}
+
 const submitFormula = async () => {
+  if (data.debug) {
+    console.log("submitting formula")
+  }
   await FormulaHelper.submitFormula(data.getReactiveDisplayFormula())
   data.setCachedFormula(data.getReactiveDisplayFormula())
 }
@@ -55,7 +79,6 @@ function toggleShowDetails() {
 }
 
 const deleteFormula = () => {
-
   emit('deleteFormula')
 }
 
@@ -82,6 +105,7 @@ const duplicateFormula = () => {
 
 const onDropFormula = (event, dropPhase :Phase) => {
   // todo: possible to transfer Ingredient object instead of strings?
+  event.stopPropagation()
   let ingredientListIndex = event.dataTransfer.getData('ingredientListIndex')
   let ingredientIndex = event.dataTransfer.getData('ingredientPhaseIndex')
 
@@ -242,9 +266,10 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
               </div>
               <div class="flex flex-row px-2">
                 <p class="">cost:</p>
-                <p class="font-semibold px-4 text-end" v-if="displayFormula.estimatedCost">
+                <p class="font-semibold px-4 text-end" v-if="!freeVersion && displayFormula.estimatedCost">
                   ${{ Number(displayFormula.estimatedCost.toFixed(2)) }}
                 </p>
+                <p v-else-if="freeVersion" class="font-semibold px-4 text-end" v-tooltip="'purchase full version for quick cost estimates'"> ?</p>
               </div>
             </div>
           </div>
@@ -344,21 +369,37 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
                       </p>
                     </div>
                     <font-awesome-icon
+                        v-if="!freeVersion"
                       @click="editIngredient(ingredient)"
                       :icon="['fa', 'gears']"
-                      class="my-1 hover:cursor-pointer flex text-slate-600 hover:text-slate-500 text-md"
+                      class="my-1 hover:cursor-pointer flex text-slate-500 hover:text-slate-500 text-md"
+                    />
+                    <font-awesome-icon
+                      v-else
+                      :icon="['fa', 'gears']"
+                      class="my-1 hover:cursor-pointer flex text-slate-500 text-md"
+                      v-tooltip="'subscribe to edit ingredients'"
                     />
                     <font-awesome-icon
                       @click="phase.removeIngredientByIndex(ingredientKey)"
                       :icon="['fa', 'circle-xmark']"
-                      class="my-1 hover:cursor-pointer flex hover:text-red-700 text-slate-600 text-md"
+                      v-tooltip="'delete ingredient'"
+                      class="my-1 hover:cursor-pointer flex hover:text-red-500 text-slate-500 text-md"
                     />
                   </div>
                 </div>
               </div>
 
               <div class="flex flex-row justify-between">
-                <div class="flex flex-col w-1/2 pt-0">
+                <div class="flex flex-col w-full pt-0">
+
+                  <search-ingredient-box
+                        :phase-key="phaseKey"
+                        :phase="phase"
+                        :ingredients="data.ingredientList.ingredients"
+                       @addNewSearchIngredient="addNewIngredientFromSearch"
+                       @addExistingIngredient="addExistingIngredientFromSearch"
+                  />
                   <div class="flex-row">
                     <button
                       @click="FormulaHelper.removePhase(displayFormula, phaseKey)"
@@ -389,7 +430,6 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
                     </div>
                   </div>
                 </div>
-                <search-ingredient-box :phase-key="phaseKey" :phase="phase" />
               </div>
             </div>
           </div>
@@ -402,22 +442,20 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
             >
               <font-awesome-icon icon="plus" /> Add Phase
             </button>
-            <!--                        <button @click="addPhase" class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 rounded-md font-semibold">Add Phase</button>-->
-            <!--                        <button @click="print(displayFormula)" class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 rounded-md font-semibold">Print</button>-->
           </div>
 
-          <div v-if="displayFormula.saveStatus === 'new'" class="flex flex-row justify-end">
+          <div class="flex flex-row justify-end">
             <button
+                v-if="!freeVersion"
               @click="toggleShowDetails"
-              class="bg-slate-400 hover:bg-slate-300 px-2 mx-2 h-8 rounded-md font-semibold text-white"
+              class="bg-slate-400 hover:bg-slate-500 px-2 mx-2 h-8 rounded-md font-semibold text-white"
             >
               <font-awesome-icon icon="fa-circle-info" /> Details
             </button>
-          </div>
-          <div v-else class="flex flex-row justify-end">
             <button
-              @click="toggleShowDetails"
+                v-else
               class="bg-slate-400 hover:bg-slate-500 px-2 mx-2 h-8 rounded-md font-semibold text-white"
+              v-tooltip="'subscribe for Inci list and more'"
             >
               <font-awesome-icon icon="fa-circle-info" /> Details
             </button>

@@ -51,9 +51,9 @@ app.directive('tooltip', {
     })
   },
   updated(el, binding) {
-    tippy(el, {
-      content: binding.value
-    })
+    if (el._tippy) {
+      el._tippy.setContent(binding.value);
+    }
   },
   unmounted(el) {
     tippy(el).destroy()

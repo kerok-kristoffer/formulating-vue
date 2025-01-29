@@ -2,7 +2,7 @@
   <p class="py-1 mb-2 bg-slate-300 font-semibold rounded-t-md text-center">Filters</p>
   <p></p>
   <div class="w-full">
-    <div class="flex flex-row flex-wrap justify-items-start h-14 pr-2">
+    <div class="flex flex-row flex-wrap justify-items-start h-14 px-2">
       <ul v-for="(tag, index) in tags" :key="tag.id" class="">
         <li
           @click="toggleFilter(tag)"

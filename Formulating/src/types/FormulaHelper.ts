@@ -9,29 +9,40 @@ import {useAccountStore} from "../stores/account";
 
 export default class FormulaHelper {
 
+  /**
+   * Updates the ingredient properties in the formula phase with the latest ingredient properties from the ingredient list.
+   * @param phase
+   * @param ingredients
+   */
   static updateIngredientProperties(phase: Phase, ingredients: Ingredient[]): void {
-    phase.ingredients.forEach(ingredient => {
+    phase.ingredients.forEach((ingredient) => {
       const latestIngredient = ingredients.find((i: Ingredient) => i.ingredient_id === ingredient.ingredient_id);
       if (latestIngredient) {
         if (userData().debug) {
-          console.log("updating formula ingredient: ", latestIngredient);
-          console.log("tags: " + latestIngredient.tags)
+          console.log('updating formula ingredient: ', latestIngredient)
+          console.log('tags: ' + latestIngredient.tags)
         }
-        ingredient.name = latestIngredient.name;
-        ingredient.inci = latestIngredient.inci;
-        ingredient.cost = latestIngredient.cost;
-        ingredient.tags = latestIngredient.tags;
+        ingredient.name = latestIngredient.name
+        ingredient.inci = latestIngredient.inci
+        ingredient.cost = latestIngredient.cost
+        ingredient.tags = latestIngredient.tags
       } else {
         if (userData().debug) {
-          console.error("Ingredient not found in ingredient list: ", ingredient);
+          console.error('Ingredient not found in ingredient list: ', ingredient)
         }
       }
     });
   }
 
+  /**
+   * Overrides values of the current formula with the values of the wanted formula.
+   * @param currentFormula
+   * @param wantedFormula
+   * @param unit
+   */
   static restoreFormula(currentFormula: Formula, wantedFormula: Formula, unit: Units): void {
     if (userData().debug) {
-      console.log("resetting all values for " + currentFormula.name)
+      console.log('resetting all values for ' + currentFormula.name)
     }
     currentFormula.name = wantedFormula.name
     currentFormula.totalWeight = wantedFormula.totalWeight
@@ -44,12 +55,6 @@ export default class FormulaHelper {
     currentFormula.updateWeights(unit)
     currentFormula.updateCost(unit)
 
-    if (userData().debug) {
-      console.log("comparing current to wanted formula")
-      if (!currentFormula.equals(wantedFormula)) {
-        console.log("current formula does not match wanted formula")
-      }
-    }
   }
 
   static async submitFormula(formula :Formula) {
@@ -166,7 +171,11 @@ export default class FormulaHelper {
     formula.phases.push(FormulaFactory.createEmptyPhase())
   }
 
-  static async handleDirtyFormulaAlertResponse(saveChanges: boolean, pinListView: boolean, clickedFormula: Formula) {
+  static async handleDirtyFormulaAlertResponse(
+    saveChanges: boolean,
+    pinListView: boolean,
+    clickedFormula: Formula
+  ) {
     if (saveChanges) {
       await this.saveDetectedChangesToFormula(clickedFormula);
     } else {
@@ -180,11 +189,21 @@ export default class FormulaHelper {
   }
 
   private static async discardChangesToFormula() {
-    let userDisplayFormula = FormulaFactory.createFormulaFromData(userData().displayFormula)
+    if (userData().displayFormula === null || userData().displayFormula === undefined) {
+      return
+    }
+    if (userData().displayFormula.saveStatus === 'new') {
+        userData().setDisplayFormula(FormulaFactory.createDefaultFormula(), "discardChangesToFormula FormulaHelper 171")
+        userData().setCachedFormula(userData().displayFormula)
+        return
+    }
+    const userDisplayFormula = FormulaFactory.createFormulaFromData(userData().displayFormula)
     userDisplayFormula.description = userData().displayFormula.description
     userDisplayFormula.updateWeights(userData().settings.preferredUnits)
+
     userDisplayFormula.updateCost(userData().settings.preferredUnits) // TODO this should really not be needed
-    let resetFormula = userData().formulaList.resetFormulaToCookieFormula(userDisplayFormula)
+
+    const resetFormula = userData().formulaList.resetFormulaToCookieFormula(userDisplayFormula)
 
     if (userData().debug) {
       console.log("resetting display formula resetFormula " + resetFormula.name)
