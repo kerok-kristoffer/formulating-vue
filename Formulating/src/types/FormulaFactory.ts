@@ -58,8 +58,33 @@ class FormulaFactory {
   }
 
   static createDefaultFormula(): Formula {
-    const defaultEmptyPhases = [this.createEmptyPhase()];
-    return new Formula( 0, "", defaultEmptyPhases, 100, 'new', '', '');
+    const defaultEmptyPhases = [this.createEmptyPhase()]
+    return new Formula(0, '', defaultEmptyPhases, 100, 'new', '', '')
+  }
+
+  static createIngredientFromAPIData(data: any, optionalId: number): Ingredient {
+    if (!this.isValidIngredientAPIData(data)) {
+      throw new Error('Invalid ingredient data')
+    }
+    console.log('creating ingredient from API data: ' + data) // data.Id seems to not be correct here, it seems to be same as ingredient_id)
+    return new Ingredient(optionalId, data.Id, data.Name, data.Inci, 0, data.cost, data.tags)
+  }
+
+  private static isValidIngredientAPIData(data: any): boolean {
+    if (data.tags === null) {
+      // workaround for bad Ingredients on load
+      data.tags = []
+    }
+
+    const isValidApiData =
+      data &&
+      typeof data.Id == 'number' &&
+      typeof data.Name == 'string' &&
+      typeof data.Inci == 'string' &&
+      typeof data.cost == 'number' &&
+      (data.tags == undefined || Array.isArray(data.tags))
+
+    return isValidApiData
   }
 
   private static isValidFormulaData(data: any): boolean {
@@ -91,18 +116,29 @@ class FormulaFactory {
   }
 
   private static isValidIngredientData(data: any): boolean {
-    let isValid = data &&
-        typeof data.id === 'number' &&
-        typeof data.ingredient_id === 'number' &&
-        typeof data.name === 'string' &&
-        typeof data.inci === 'string' &&
-        typeof data.cost === 'number' &&
-        (data.tags == undefined || Array.isArray(data.tags));
-    if (!isValid) {
-      console.log('Invalid ingredient data', data);
+    if (data.tags === null) {
+      // workaround for bad Ingredients on load
+      data.tags = []
     }
-    return isValid;
+
+    if (!data.ingredient_id) {
+      // workaround for bad Ingredients on load
+      data.ingredient_id = 0
+    }
+
+    const isValid =
+      data &&
+      typeof data.id === 'number' &&
+      typeof data.ingredient_id === 'number' &&
+      typeof data.name === 'string' &&
+      typeof data.inci === 'string' &&
+      typeof data.cost === 'number' &&
+      (data.tags == undefined || Array.isArray(data.tags))
+
+    return isValid
   }
 }
+
+export default FormulaFactory
 
 export default FormulaFactory;
