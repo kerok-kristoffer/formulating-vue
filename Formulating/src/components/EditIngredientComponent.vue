@@ -113,8 +113,6 @@ const { item, ingredientList } = defineProps<{
 const emit = defineEmits(['close', 'refresh']);
 
 const router = useRouter();
-const formulas = userData().formulaList.formulas;
-const showEditWindow = ref(true);
 const isAlertVisible = ref(false);
 const alertText = ref('Save changes made to ingredient?');
 const data = userData()
@@ -255,10 +253,6 @@ const cancelEdit = () => {
 
 function closeEditWindow() {
   emit('close');
-  data.getReactiveDisplayFormula().phases.forEach(phase => {
-    FormulaHelper.updateIngredientProperties(phase, ingredientList.ingredients);
-  });
-  showEditWindow.value = false;
 }
 
 function addTag(event :any , ingredient :Ingredient) {
