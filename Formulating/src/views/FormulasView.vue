@@ -186,8 +186,6 @@ const deletePhase = (index :number) => {
 
 const resetDisplayAndCachedFormula = () => {
   data.attemptSetDisplayFormula(FormulaFactory.createDefaultFormula())
-    // data.setDisplayFormula(FormulaFactory.createDefaultFormula())
-  // data.setCachedFormula(data.getReactiveDisplayFormula())
 }
 
 const startDrag = (event, ingredientId: number | string) => {
@@ -211,10 +209,7 @@ const onDrop = (event) => {
     }
 }
 
- // TODO probably need to give a list of ingredients to component depending on which view we are in
 function editIngredient(ingredient :Ingredient) {
-  // data.ingredientList.setHighlightIngredient(ingredient);
-  // data.ingredientList.setHighlightIndex(data.ingredientList.value.indexOf(ingredient))
 
   displayFormulaIngredientsList.value.populateWithList(data.displayFormula.getIngredientList());
 
@@ -226,7 +221,7 @@ function editIngredient(ingredient :Ingredient) {
   displayFormulaIngredientsList.value.setHighlightIngredient(ingredient);
 
   let ingredientIndex = displayFormulaIngredientsList.value.ingredients.findIndex((ing) => ing.equals(ingredient));
-  displayFormulaIngredientsList.value.setHighlightIndex(ingredientIndex);
+  displayFormulaIngredientsList.value.setHighlightIndex(ingredientIndex); // todo move this to IngredientList
   if (userData().debug) {
     console.log("highlight index: " + displayFormulaIngredientsList.value.getHighlightIndex())
     console.log("highlight ingredient: " + displayFormulaIngredientsList.value.getHighlightIngredient().name)
@@ -242,7 +237,7 @@ const closeEditIngredientWindow = () => {
     () => {
       data.ingredientList.filterIngredientList();
       data.ingredientList.refreshIngredient(displayFormulaIngredientsList.value.getHighlightIngredient());
-
+// todo - make sure this updates the costs displayed in the display formula
       nextTick(() => {
         filteredIngredients.value = data.ingredientList.getFilteredIngredients();
         updateFormulaCost();
@@ -516,6 +511,7 @@ watch(
 
     <FormulatingPanelMobile
         :displayFormula="data.getReactiveDisplayFormula()"
+        :freeVersion="false"
         @submitFormula="formulaSubmitted"
         @deleteFormula="deleteFormula"
         @print="print"

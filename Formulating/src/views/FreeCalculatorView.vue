@@ -7,6 +7,7 @@ import FormulaFactory from "@/types/FormulaFactory";
 import {userData} from "@/stores/userData";
 import FormulaPrintPage from "@/components/FormulaPrintPage.vue";
 import Ingredient from "@/types/Ingredient";
+import FormulatingPanelMobile from "@/components/FormulatingPanelMobile.vue";
 
 let displayFormula = FormulaFactory.createDefaultFormula()
 
@@ -62,6 +63,27 @@ const weightUpdate = (formula :Formula) :void => {
        @drop="onDrop($event)"
        @dragenter.prevent
        @dragover.prevent>
+
+    <div class="banner-header flex items-center justify-center bg-slate-200 shadow-md shadow-slate-300">
+      <img
+          class="my-4 h-12 w-34"
+          src="../assets/mySatchel_text.png"
+          alt="mySatchel"
+      />
+      <h1 class="text-2xl font-bold">Free Calculator</h1>
+    </div>
+
+
+    <FormulatingPanelMobile
+        :displayFormula="data.getReactiveDisplayFormula()"
+        :freeVersion="true"
+        @submitFormula="formulaSubmitted"
+        @deleteFormula="deleteFormula"
+        @print="print"
+        @resetDisplayAndCachedFormula="resetDisplayAndCachedFormula"
+        @editIngredient="editIngredient"
+    />
+
     <FormulatingPanel
         :displayFormula="data.getReactiveDisplayFormula()"
         :freeVersion="true"

@@ -12,6 +12,7 @@ import {useAccountStore} from "@/stores/account";
 import Phase from "@/types/Phase";
 import Ingredient from "@/types/Ingredient";
 import FormulaFactory from "@/types/FormulaFactory";
+import {selectNextPercentageInputOnEnterClick} from "@/types/UIHelper";
 
 const data = userData()
 const { displayFormula, freeVersion } = defineProps<{
@@ -51,6 +52,7 @@ async function addNewIngredientFromSearch(phase :Phase, input :string) {
 }
 
 function addExistingIngredientFromSearch(phase :Phase, ingredient :Ingredient) {
+  ingredient.percentage = 0;
   phase.addIngredient(ingredient)
   phase.updateIngredientOrderByPercentageAndName()
   phase.searchIngredient = ""
@@ -94,6 +96,10 @@ function attemptDuplicateFormula() {
   data.attemptSetDisplayFormula(data.getReactiveDisplayFormula())
   console.log("dirty check completed")
   // duplicateFormula()
+}
+
+function selectText(event) {
+  event.target.select()
 }
 
 const duplicateFormula = () => {
@@ -157,32 +163,13 @@ const updateIngredientInputs = async () => {
 // Watch for changes in the ingredient list
 watch(() => displayFormula.phases, updateIngredientInputs, { deep: true });
 
-async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number, phaseKey: number) {
-  event.preventDefault();
-  await nextTick();
+function deleteFormulaIngredient(phase :Phase, ingKey :number) {
+  phase.removeIngredientByIndex(ingKey)
 
-  const nextIngredientKey = ingredientKey + 1;
-  const nextElementId = `ingredient-input-${phaseKey}-${nextIngredientKey}`;
-  let nextElement = document.getElementById(nextElementId) as HTMLElement;
+  displayFormula.updateWeights(data.settings.preferredUnits)
+  displayFormula.updateCost(data.settings.preferredUnits)
 
-  if(!nextElement) {
-    const nextPhaseKey = phaseKey + 1;
-    const nextElementId = `ingredient-input-${nextPhaseKey}-0`;
-    nextElement = document.getElementById(nextElementId) as HTMLElement;
-  }
-
-  if (nextElement) {
-    nextElement.focus();
-    nextElement.select();
-  } else {
-    const currentElementId = `ingredient-input-${phaseKey}-${ingredientKey}`;
-    const currentElement = ingredientInputs.value[currentElementId] as HTMLElement;
-    if (currentElement) {
-      currentElement.blur();
-    }
-  }
 }
-
 
 </script>
 
@@ -304,7 +291,6 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
                     >
                       Ingredient
                     </div>
-                    <div class="hidden w-1/2 font-semibold">Inci</div>
                   </div>
 
                   <div class="w-4/6 flex flex-row px-2 mr-10 justify-end gap-3">
@@ -323,29 +309,29 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
                 </div>
 
                 <div
-                  v-for="(ingredient, ingredientKey) in getOrderedIngredients(phase).value"
-                  :key="ingredientKey"
+                  v-for="(ingredient, ingKey) in getOrderedIngredients(phase).value"
+                  :key="ingKey"
                   class="drag-el flex flex-row even:bg-slate-200 odd:bg-slate-300 hover:cursor-grab active:cursor-grabbing hover:bg-slate-400"
                   draggable="true"
-                  @dragstart="startDragFormula($event, phaseKey, ingredientKey)"
+                  @dragstart="startDragFormula($event, phaseKey, ingKey)"
                 >
-                  <label :for="'ingredient-' + ingredientKey" class="w-2/5 flex flex-row">
+                  <label :for="'ingredient-' + ingKey" class="w-2/5 flex flex-row">
                     <div class="w-full px-2">{{ ingredient.name }}</div>
-                    <div class="w-1/2 hidden font-thin italic">{{ ingredient.inci }}</div>
                   </label>
 
                   <div class="w-3/5 flex flex-row mx-2 justify-end gap-1">
                     <div class="flex flex-row w-20 mr-2">
                       <input
+                          type="number" step="0.01"
                           v-model.lazy="ingredient.percentage"
+                          :id="'ingredient-input-' + phaseKey + '-' + ingKey"
+                          :ref="'ingredientInput-' + phaseKey + '-' + ingKey"
+                          @focus="selectText"
                           @keydown.up.prevent
                           @keydown.down.prevent
-                          @keydown.enter="enterClickPercentage($event, ingredientKey, phaseKey)"
+                          @keydown.enter="selectNextPercentageInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-input')"
                           v-on:blur="FormulaHelper.updateIngredientWeight(displayFormula, data.settings.preferredUnits, ingredient)"
-                          type="number" step="0.01"
                           name="percentage"
-                          :id="'ingredient-input-' + phaseKey + '-' + ingredientKey"
-                          :ref="'ingredientInput-' + phaseKey + '-' + ingredientKey"
                           class="h-6 w-16 justify-end pl-1"
                       />
                       <p>%</p>
@@ -381,7 +367,7 @@ async function enterClickPercentage(event :KeyboardEvent, ingredientKey: number,
                       v-tooltip="'subscribe to edit ingredients'"
                     />
                     <font-awesome-icon
-                      @click="phase.removeIngredientByIndex(ingredientKey)"
+                      @click="deleteFormulaIngredient(phase, ingKey)"
                       :icon="['fa', 'circle-xmark']"
                       v-tooltip="'delete ingredient'"
                       class="my-1 hover:cursor-pointer flex hover:text-red-500 text-slate-500 text-md"
