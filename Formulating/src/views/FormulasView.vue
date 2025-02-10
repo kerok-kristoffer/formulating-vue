@@ -54,10 +54,6 @@ onMounted(async () => {
   }
   window.addEventListener('keydown', handleKeydown);
 
-  // displayFormula.value.phases.forEach(phase => {
-  //   FormulaHelper.updateIngredientProperties(phase, filteredIngredients.value);
-  // });
-
   loaded.value = true
 });
 
@@ -175,15 +171,6 @@ function restoreFormula(currentFormula :Formula, wantedFormula :Formula) {
   }
 }
 
-const addPhase = () => {
-    displayFormula.value.phases.push(new Phase(0, 'New Phase', []))
-}
-
-const deletePhase = (index :number) => {
-  // TODO perhaps add a check and alert if the phase has ingredients?
-    displayFormula.value.phases.splice(index, 1)
-}
-
 const resetDisplayAndCachedFormula = () => {
   data.attemptSetDisplayFormula(FormulaFactory.createDefaultFormula())
 }
@@ -246,29 +233,9 @@ const closeEditIngredientWindow = () => {
   );
 }
 
-function inFormulas(ingredient :Ingredient) :Formula[] {
-
-  let filter = formulaList.value.filter((formula) => {
-    return formula.hasIngredient(ingredient);
-  });
-  return filter;
-}
-
-function setMeasurement(unit :Units) {
-    data.setPreferredUnit(unit)
-}
-
 const weightUpdate = (formula :Formula) :void => {
     formula.updateWeights(formulaUnit.value)
     formula.updateCost(formulaUnit.value)
-}
-
-const updateIngredientWeight = (ingredient :Ingredient, phase :Phase) :void => {
-    let ingredientWeight = displayFormula.value.getWeight(formulaUnit.value) * ingredient.percentage * 0.01
-    ingredient.setWeight(ingredientWeight, formulaUnit.value)
-    
-    displayFormula.value.updateWeights(formulaUnit.value)
-    displayFormula.value.updateCost(formulaUnit.value)
 }
 
 const updateFormulaCost = () => {
@@ -277,15 +244,6 @@ const updateFormulaCost = () => {
 
 const print = () => {
     window.print()
-}
-
-const toggleDescShow = (index :number) => {
-    if (showPhaseDescs.value.has(index)) {
-        showPhaseDescs.value.delete(index)
-    } else {
-        showPhaseDescs.value.add(index)
-    }
-    
 }
 
 function formulaSubmitted() {
@@ -374,9 +332,6 @@ function handleDirtyFormulaAlertResponse(saveChanges: boolean, pinListView: bool
   }
 
   setDisplayFormula(pinListView, clickedFormula)
-
-  // isDirtyDisplayFormulaAlertVisible.value = false;
-  // callBack();
 }
 
 function handleDirtyFormulaAlertCancelClick() {
@@ -403,6 +358,11 @@ const submitUpdateFormula = () => {
 
 const submitIngredient = (ingredient :Ingredient) => {
 
+  if (ingredient.name === "") {
+    accountStore.notify("Ingredient name cannot be empty", "error")
+    return
+  }
+
     axios.post('users/ingredients', ingredient).then(response => {
         if (response.status !== 200) {
             return
@@ -413,10 +373,6 @@ const submitIngredient = (ingredient :Ingredient) => {
         newIngredient.value = new Ingredient(0, 0, "", "", 0, 0, [])
         ingInput.value.focus()
     });
-}
-
-function toggleShowDetails() {
-  showDetails.value = !showDetails.value;
 }
 
 watch(
@@ -496,12 +452,13 @@ watch(
               type="text"
               name="Name"
               ref="ingInput"
+              @click.stop
           />
 
           <button
               class="bg-slate-400 px-2 hover:bg-slate-300 mx-1 rounded-md text-sm font-semibold"
               value="Add"
-              @click="submitIngredient(newIngredient)">Add</button>
+              @click="submitIngredient(newIngredient)" @click.stop>Add</button>
         </div>
 
         <FilterBox v-if="data.ingredientList.tags" :tags="data.ingredientList.tags" @toggleFilter="toggleFilter" class="h-1/12"/>

@@ -5,7 +5,7 @@
     <div class="flex flex-row flex-wrap justify-items-start h-14 px-2">
       <ul v-for="(tag, index) in tags" :key="tag.id" class="">
         <li
-          @click="toggleFilter(tag)"
+          @click="toggleFilter(tag)" @click.stop
           class="h-5 font-extralight float-left mr-1 hover:bg-slate-400 hover:cursor-pointer rounded-md px-1 my-0.5 py-0"
           :class="tag.isActive ? 'bg-slate-400' : 'bg-slate-300'"
         >
