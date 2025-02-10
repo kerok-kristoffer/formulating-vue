@@ -1,6 +1,5 @@
 <template>
   <div class="hidden print:flex w-full justify-around">
-    <Watermark :options="waterMarkOptions" >
       <div class="">
         <div class="absolute flex flex-row w-full justify-start">
           <img class="mb-4 h-10 w-24 object-contain" src="../assets/mySatchel_text.png" alt="mySatchel" />
@@ -94,7 +93,7 @@
             <div v-else class=""></div>
             <div v-if="userData().settings.printSettings.showInciList && sortedInciList.length > 0" class="text-sm font-light">
               <h2 class="font-bold mt-2">Inci</h2>
-              <span v-for="(inci, index) in sortedInciList" :key="inci">
+              <span v-for="(inci, index) in sortedInciList" :key="index">
                 {{ inci }}<span v-if="index < sortedInciList.length - 1">, </span>
               </span>
             </div>
@@ -102,17 +101,15 @@
 
         </div>
       </div>
-    </Watermark>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, defineProps, defineEmits, computed} from 'vue'
+import {ref, defineProps, computed} from 'vue'
 import Formula from "../types/Formula";
 import Units from "../types/Units";
-import {Watermark} from "@watermarkify/vue-watermark";
-import Phase from "@/types/Phase";
-import {userData} from "@/stores/userData";
+import Phase from "../types/Phase";
+import {userData} from "../stores/userData";
 
 const { displayFormula, formulaUnit } = defineProps<{
   displayFormula: Formula,

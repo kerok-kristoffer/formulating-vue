@@ -426,6 +426,7 @@ watch(
             <ul
                 v-for="item in data.ingredientList.getFilteredIngredients()"
                 :key="item.id"
+                @click.stop
                 class="drag-el
                             px-1 py-1
                             even:bg-slate-100
