@@ -1,25 +1,16 @@
 <script setup lang="ts">
 
 import FormulatingPanel from "@/components/FormulatingPanel.vue";
-import {onMounted} from "vue";
 import Formula from "@/types/Formula";
 import FormulaFactory from "@/types/FormulaFactory";
 import {userData} from "@/stores/userData";
 import FormulaPrintPage from "@/components/FormulaPrintPage.vue";
 import Ingredient from "@/types/Ingredient";
 import FormulatingPanelMobile from "@/components/FormulatingPanelMobile.vue";
-
-let displayFormula = FormulaFactory.createDefaultFormula()
+import UpsellBanner from "@/components/UpsellBanner.vue";
 
 const data = userData()
 data.getReactiveDisplayFormula().saveStatus = "free"
-/*
-* displayFormula should be saved in local storage as normal, so that when the user comes back to the page, the formula is still there,
-* and if they register, they can simply save their formula to the backend.
-*  One thing to keep in mind though, is that the Ingredients need to be saved before the formula, so that the formula can reference the ingredients.
-*
-*
-* */
 
 function formulaSubmitted(formula: string) {
 
@@ -94,6 +85,9 @@ const weightUpdate = (formula :Formula) :void => {
         @editIngredient="editIngredient"
     />
     <formula-print-page :display-formula="userData().displayFormula" :formula-unit="data.settings.preferredUnits" />
+
+    <upsell-banner/>
+
   </div>
 
 </template>
