@@ -171,6 +171,13 @@ function deleteFormulaIngredient(phase :Phase, ingKey :number) {
 
 }
 
+function targetSearchBox(phaseKey :number) {
+  const searchBox = document.getElementById('phase_add_ingredient-' + phaseKey)
+  if (searchBox) {
+    searchBox.focus()
+  }
+}
+
 </script>
 
 <template>
@@ -269,6 +276,7 @@ function deleteFormulaIngredient(phase :Phase, ingKey :number) {
           <label :for="'phase-name-' + phaseKey" class="px-2">Phase:</label>
           <input
             :id="'phase-name-' + phaseKey"
+            @keydown.enter="targetSearchBox(phaseKey)"
             placeholder="New Phase"
             v-model="phase.name"
             class="border-2 border-slate-400 rounded-md"

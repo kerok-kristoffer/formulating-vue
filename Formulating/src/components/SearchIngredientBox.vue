@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col">
     <div class="flex flex-row  justify-end gap-1 py-1">
-      <label class="" for="phase_add_ingredient">Add ingredient: </label>
+      <label class="" :for="'phase_add_ingredient-'+ phaseKey">Add ingredient: </label>
       <input
           v-model="phase.searchIngredient"
           autocomplete="off" type="text"
@@ -11,7 +11,7 @@
           @keydown.enter="selectFocusedSearchIngredient(phase)"
           @blur="hideIngredientSearchResults"
           name="phaseAddIngredient"
-          id="phase_add_ingredient"
+          :id="'phase_add_ingredient-' + phaseKey"
           class="h-6 w-42">
       <font-awesome-icon :icon="['fas', 'search']" class="mr-1 mt-1" />
       <button v-show="phase.searchIngredient" @click="addNewSearchIngredient(phase, phase.searchIngredient)"
@@ -48,7 +48,7 @@ const data = userData()
 
 const { phase, phaseKey } = defineProps<{
     phase: Phase,
-    phaseKey: Number,
+    phaseKey: number,
 
 }>();
 
