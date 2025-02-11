@@ -3,8 +3,6 @@ import {computed, nextTick, onBeforeUnmount, onMounted, provide, ref, toRef, unr
 import axios from 'axios';
 import Ingredient from "../types/Ingredient";
 import Formula from "../types/Formula";
-import Phase from "../types/Phase";
-import Units from "../types/Units";
 import Tag from "../types/Tag";
 import { useAccountStore } from "../stores/account";
 import { userData } from "../stores/userData";
@@ -20,7 +18,6 @@ import FormulaFactory from "@/types/FormulaFactory";
 import FormulaHelper from "@/types/FormulaHelper";
 import FormulatingPanelMobile from "@/components/FormulatingPanelMobile.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
-import Cookies from "js-cookie";
 
 const formulaUnit = computed(() => userData().settings.preferredUnits)
 const formulaList = ref<Formula[]>([])
@@ -28,14 +25,12 @@ const newIngredient = ref(new Ingredient(0, 0, "", "", 0, 0,  []))
 const ingInput = ref<any>(null)
 const accountStore = useAccountStore()
 const filteredIngredients = ref<Ingredient[]>([])
-const showPhaseDescs = ref(new Set())
 const data = userData()
 const displayFormulaList = ref(data.displayFormulaList);
 const displayIngredientList = ref(false);
 let foundInFormulasList = ref<Formula[]>([]);
 const showEditWindow = ref(false);
 const selectedItemCopy = ref<Ingredient>(newIngredient.value)
-let showDetails = ref(false);
 const displayFormulaIngredientsList = ref(new IngredientList()) ;
 const loaded = ref(false)
 
@@ -113,8 +108,7 @@ const setDisplayFormula = (pinListView :boolean, clickedFormula :Formula) => { /
 
   clickedFormula.saveStatus = 'edited'
   data.setDisplayFormula(clickedFormula, "setDisplayFormula, FormulasView 77")
-    // displayFormula.value = <Formula>clickedFormula
-    clickedFormula.updateCost(data.settings.preferredUnits)
+  clickedFormula.updateCost(data.settings.preferredUnits)
   let formulaIngredients: Ingredient[] = [];
 
   clickedFormula.phases.forEach((phase) => {

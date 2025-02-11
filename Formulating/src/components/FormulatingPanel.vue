@@ -171,8 +171,8 @@ function deleteFormulaIngredient(phase :Phase, ingKey :number) {
 
 }
 
-function targetSearchBox(phaseKey :number) {
-  const searchBox = document.getElementById('phase_add_ingredient-' + phaseKey)
+function targetSearchBox(prefix :string, phaseKey :number) {
+  const searchBox = document.getElementById(prefix + phaseKey)
   if (searchBox) {
     searchBox.focus()
   }
@@ -276,7 +276,7 @@ function targetSearchBox(phaseKey :number) {
           <label :for="'phase-name-' + phaseKey" class="px-2">Phase:</label>
           <input
             :id="'phase-name-' + phaseKey"
-            @keydown.enter="targetSearchBox(phaseKey)"
+            @keydown.enter="targetSearchBox('phase_add_ingredient-', phaseKey)"
             placeholder="New Phase"
             v-model="phase.name"
             class="border-2 border-slate-400 rounded-md"
@@ -391,6 +391,7 @@ function targetSearchBox(phaseKey :number) {
                         :phase-key="phaseKey"
                         :phase="phase"
                         :ingredients="data.ingredientList.ingredients"
+                        :mobile="false"
                        @addNewSearchIngredient="addNewIngredientFromSearch"
                        @addExistingIngredient="addExistingIngredientFromSearch"
                   />

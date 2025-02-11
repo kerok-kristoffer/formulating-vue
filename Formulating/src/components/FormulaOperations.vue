@@ -82,7 +82,6 @@ function duplicateFormula() {
 function displayStripeOverlay() {
   console.log('displayStripeOverlay')
 }
-// todo take a look at delete funcitonality, seems to ask for confirmation twice
 </script>
 
 <style scoped>

@@ -11,7 +11,7 @@
           @keydown.enter="selectFocusedSearchIngredient(phase)"
           @blur="hideIngredientSearchResults"
           name="phaseAddIngredient"
-          :id="'phase_add_ingredient-' + phaseKey"
+          :id="'phase_add_ingredient-' + phaseKey +  mobileText"
           class="h-6 w-42">
       <font-awesome-icon :icon="['fas', 'search']" class="mr-1 mt-1" />
       <button v-show="phase.searchIngredient" @click="addNewSearchIngredient(phase, phase.searchIngredient)"
@@ -46,10 +46,10 @@ import {userData} from "../stores/userData";
 
 const data = userData()
 
-const { phase, phaseKey } = defineProps<{
+const { phase, phaseKey, mobile } = defineProps<{
     phase: Phase,
     phaseKey: number,
-
+  mobile: boolean
 }>();
 
 const emit = defineEmits([
@@ -61,6 +61,7 @@ const searchIngredientList = ref<Ingredient[]>([])
 const phaseCurrentlySearching = ref(-1)
 const ingredients = computed(() => data.ingredientList.ingredients);
 const focusedSearchIngredientIndex = ref<number>(-1);
+const mobileText = mobile ? '-mob' : ''
 
 const searchIngredient = (phaseKey :number, phaseSearchTerm :string) => {
   focusedSearchIngredientIndex.value = -1
@@ -120,6 +121,9 @@ const focusSearchResultIngredientIndex = (index :number) => {
 }
 
 const selectFocusedSearchIngredient = (phase :Phase) => {
+  if (phase.searchIngredient == undefined || phase.searchIngredient.length < 1) {
+    return
+  }
   if(focusedSearchIngredientIndex.value < 0 || focusedSearchIngredientIndex.value >= searchIngredientList.value.length) {
     addNewSearchIngredient(phase, phase.searchIngredient)
   } else {

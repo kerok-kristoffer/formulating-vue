@@ -36,11 +36,7 @@ function selectText(event) {
 const ingredientInputs = ref({});
 
 const submitFormula = async () => {
-  console.log("submitting formula" + data.displayFormula.name + " id: " + data.displayFormula.id)
-
   await FormulaHelper.submitFormula(data.displayFormula)
-  console.log("submitted formula, updating cached formula")
-  data.setCachedFormula(data.displayFormula)
 }
 
 const resetDisplayAndCachedFormula = () => {
@@ -53,8 +49,7 @@ const deleteFormula = () => {
 
 const duplicateFormula = () => {
   let duplicate = FormulaHelper.duplicateFormula(data.displayFormula)
-  console.log("duplicated formula: ", duplicate.name)
-  useAccountStore().notify(data.displayFormula.name + " duplicated", "success")
+  useAccountStore().notify(duplicate.name + " duplicated", "success")
 }
 
 const getOrderedIngredients = (phase :Phase) => {
@@ -90,6 +85,7 @@ function addExistingIngredientFromSearch(phase :Phase, ingredient :Ingredient) {
 
 function showStripeOverlay() {
   console.log('showStripeOverlay')
+  useAccountStore().notify("Subscribe for premium features", "error")
 }
 
 function deleteFormulaIngredient(phase, ingKey) {
@@ -148,8 +144,9 @@ function deleteFormulaIngredient(phase, ingKey) {
           </li>
 
         </ul>
-        <search-ingredient-box :phase="phase" :phase-key="phase"
+        <search-ingredient-box :phase="phase" :phase-key="phaseKey"
                                :ingredients="data.ingredientList.ingredients"
+                               :mobile="true"
                                @addNewSearchIngredient="addNewIngredientFromSearch"
                                @addExistingIngredient="addExistingIngredientFromSearch"
                                class="w-full"
@@ -180,8 +177,8 @@ function deleteFormulaIngredient(phase, ingKey) {
 <!--  todo: implement below buttons adapted for free version -->
         <font-awesome-icon @click="showStripeOverlay" :icon="['fas', 'floppy-disk']" class="top-1/2 mx-1 flex text-slate-400 text-3xl hover:cursor-pointer" />
         <!--          <ButtonStandard :text="'New'" @click="resetDisplayAndCachedFormula" class="w-full"/>-->
-        <font-awesome-icon @click="resetDisplayAndCachedFormula" :icon="['fas', 'file-circle-plus']" class="top-1/2 mx-1 flex text-slate-400 text-3xl hover:cursor-pointer" />
         <font-awesome-icon @click="showStripeOverlay" :icon="['fas', 'copy']" class="top-1/2 mx-1 flex text-slate-400 text-3xl hover:cursor-pointer" />
+        <font-awesome-icon @click="resetDisplayAndCachedFormula" :icon="['fas', 'trash-can']" class="top-1/2 mx-1 flex text-slate-400 text-3xl hover:cursor-pointer" />
       </div>
     </div>
 
