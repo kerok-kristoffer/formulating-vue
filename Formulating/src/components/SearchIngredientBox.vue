@@ -14,7 +14,9 @@
           :id="'phase_add_ingredient-' + phaseKey +  mobileText"
           class="h-6 w-42">
       <font-awesome-icon :icon="['fas', 'search']" class="mr-1 mt-1" />
-      <button v-show="phase.searchIngredient" @click="addNewSearchIngredient(phase, phase.searchIngredient)"
+      <button v-show="phase.searchIngredient"
+              :id="'add-search-ingredient-button-' + phaseKey"
+              @click="addNewSearchIngredient(phase, phase.searchIngredient)"
               class="h-6 bg-slate-400 px-1 rounded-md font-semibold text-white">Create</button>
 
     </div>

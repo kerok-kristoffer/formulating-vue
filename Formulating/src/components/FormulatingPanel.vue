@@ -346,7 +346,8 @@ function targetSearchBox(prefix :string, phaseKey :number) {
                     </div>
 
                     <div class="flex flex-row w-10">
-                      <p v-if="ingredient.percentage">
+                      <p v-if="ingredient.percentage"
+                        :id="'ingredient-amount-' + phaseKey + '-' + ingKey">
                         {{ Number(ingredient.getWeight(formulaUnit)).toFixed(2) }}{{ formulaUnit }}
                       </p>
                     </div>
@@ -432,6 +433,7 @@ function targetSearchBox(prefix :string, phaseKey :number) {
         <div class="flex flex-row w-full justify-between mt-1">
           <div class="flex flex-row justify-start">
             <button
+              id="add-phase-button"
               @click="FormulaHelper.addPhase(displayFormula)"
               class="bg-slate-400 hover:bg-slate-500 px-2 mx-2 h-8 rounded-md font-semibold text-white"
             >
