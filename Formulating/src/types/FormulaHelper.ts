@@ -1,6 +1,5 @@
 import Phase from '../types/Phase';
 import Ingredient from '../types/Ingredient';
-import IngredientList from "./IngredientList";
 import Formula from "./Formula";
 import Units from "./Units";
 import {userData} from "../stores/userData";
@@ -100,6 +99,10 @@ export default class FormulaHelper {
     })
   }
 
+    /**
+     * Sends an update request to the server to update the formula.
+     * @param formula
+     */
   static async updateFormula(formula :Formula) {
 
     if (formula.name == undefined || formula.name == "") {
@@ -121,6 +124,10 @@ export default class FormulaHelper {
     })
   }
 
+    /**
+     * Duplicates a formula and sends it to the server.
+     * @param formula
+     */
   static duplicateFormula(formula :Formula) {
     let duplicate = FormulaFactory.duplicateFormula(formula)
 
@@ -143,6 +150,10 @@ export default class FormulaHelper {
     return duplicate
   }
 
+    /**
+     * Deletes a formula from the server.
+     * @param formula
+     */
   static deleteFormula(formula :Formula) {
     return userData().api.getFormulaService().deleteFormula(formula)
   }

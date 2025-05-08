@@ -12,7 +12,7 @@ import {useAccountStore} from "@/stores/account";
 import Phase from "@/types/Phase";
 import Ingredient from "@/types/Ingredient";
 import FormulaFactory from "@/types/FormulaFactory";
-import {selectNextPercentageInputOnEnterClick} from "@/types/UIHelper";
+import {selectNextInputOnEnterClick} from "@/types/UIHelper";
 
 const data = userData()
 const { displayFormula, freeVersion } = defineProps<{
@@ -32,6 +32,17 @@ const emit = defineEmits([
   'resetDisplayAndCachedFormula',
     'editIngredient'
 ])
+
+const getDynamicCost = (ingredient: Ingredient) => computed({
+  get() {
+    // Format the cost dynamically based on the formulaUnit
+    return ingredient.getCost(formulaUnit.value)
+  },
+  set(value: number) {
+    // Update the cost dynamically based on the formulaUnit
+    ingredient.setCost(value, formulaUnit.value)
+  }
+});
 
 function editIngredient(ingredient :Ingredient) {
   emit('editIngredient', ingredient)
@@ -260,10 +271,9 @@ function targetSearchBox(prefix :string, phaseKey :number) {
               </div>
               <div class="flex flex-row px-2">
                 <p class="">cost:</p>
-                <p class="font-semibold px-4 text-end" v-if="!freeVersion && displayFormula.estimatedCost">
+                <p class="font-semibold px-4 text-end" >
                   ${{ Number(displayFormula.estimatedCost.toFixed(2)) }}
                 </p>
-                <p v-else-if="freeVersion" class="font-semibold px-4 text-end" v-tooltip="'purchase full version for quick cost estimates'"> ?</p>
               </div>
             </div>
           </div>
@@ -306,10 +316,10 @@ function targetSearchBox(prefix :string, phaseKey :number) {
                       Percentage
                     </div>
                     <div class="w-12 font-semibold">Amount</div>
-                    <div class="w-24 mr-5 ml-6 font-semibold" v-show="formulaUnit === 'g'">
+                    <div class="w-24 mr-5 ml-6 font-semibold text-center" v-show="formulaUnit === 'g'">
                       $/kg
                     </div>
-                    <div class="w-24 mr-5 ml-6 font-semibold" v-show="formulaUnit === 'Oz'">
+                    <div class="w-24 mr-5 ml-6 font-semibold text-center" v-show="formulaUnit === 'Oz'">
                       $/Oz
                     </div>
                     <div class="w-8 font-semibold">Cost</div>
@@ -337,10 +347,10 @@ function targetSearchBox(prefix :string, phaseKey :number) {
                           @focus="selectText"
                           @keydown.up.prevent
                           @keydown.down.prevent
-                          @keydown.enter="selectNextPercentageInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-input')"
+                          @keydown.enter="selectNextInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-input')"
                           v-on:blur="FormulaHelper.updateIngredientWeight(displayFormula, data.settings.preferredUnits, ingredient)"
                           name="percentage"
-                          class="h-6 w-16 justify-end pl-1"
+                          class="h-6 w-16 text-right justify-end pl-1"
                       />
                       <p>%</p>
                     </div>
@@ -353,7 +363,18 @@ function targetSearchBox(prefix :string, phaseKey :number) {
                     </div>
                     <!--TODO replace with common div that uses global Unit as input to getCost instead of hard coded, same for $/Unit-->
                     <div class="flex flex-row w-24 mr-5 ml-6">
-                      <div>{{ Number(ingredient.getCost(formulaUnit)).toFixed(2) }}</div>
+                      <input
+                          type="number"
+                          step="0.01"
+                          v-model.lazy="getDynamicCost(ingredient).value"
+                          :id="'ingredient-cost-' + phaseKey + '-' + ingKey"
+                          class="w-full text-right h-6 pl-1"
+                          @focus="selectText"
+                          @keydown.up.prevent
+                          @keydown.down.prevent
+                          @keydown.enter="selectNextInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-cost')"
+                          @blur="displayFormula.updateCost()"
+                      >
                       <div v-if="formulaUnit === 'g'">/kg</div>
                       <div v-else>/Oz</div>
                     </div>

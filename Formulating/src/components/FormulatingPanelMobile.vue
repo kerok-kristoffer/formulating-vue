@@ -12,7 +12,7 @@ import {useAccountStore} from "@/stores/account";
 import Phase from "@/types/Phase";
 import Ingredient from "@/types/Ingredient";
 import FormulaFactory from "@/types/FormulaFactory";
-import {selectNextPercentageInputOnEnterClick} from "@/types/UIHelper";
+import {selectNextInputOnEnterClick} from "@/types/UIHelper";
 import ingredient from "@/types/Ingredient";
 
 const { displayFormula, freeVersion } = defineProps<{
@@ -28,6 +28,17 @@ const emit = defineEmits([
   'resetDisplayAndCachedFormula',
   'editIngredient'
 ])
+
+const getDynamicCost = (ingredient: Ingredient) => computed({
+  get() {
+    // Format the cost dynamically based on the formulaUnit
+    return ingredient.getCost(formulaUnit.value)
+  },
+  set(value: number) {
+    // Update the cost dynamically based on the formulaUnit
+    ingredient.setCost(value, formulaUnit.value)
+  }
+});
 
 function selectText(event) {
   event.target.select()
@@ -118,7 +129,7 @@ function deleteFormulaIngredient(phase, ingKey) {
         </div>
         <ul v-for="(ing, ingKey) in getOrderedIngredients(phase).value" class="flex flex-col ml-2">
           <li class="flex flex-row my-0.5">
-            <div class="w-4/12">
+            <div class="w-3/12 sm:w-4/12">
               {{ ing.name }}
             </div>
             <div class="w-2/12 inline-flex">
@@ -127,18 +138,29 @@ function deleteFormulaIngredient(phase, ingKey) {
                      :ref="'ingredientMobInput-' + phaseKey + '-' + ingKey"
                      @focus="selectText"
                      @blur="updateIngredientPercentage(ing, $event.target.value)"
-                     @keydown.enter="selectNextPercentageInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-mob-input')"
+                     @keydown.enter="selectNextInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-mob-input')"
                      class="text-xs text-right border-0 h-4 w-3/4 p-0.5 bg-transparent"/>%
             </div>
             <div class="w-2/12 text-right">
               <div v-if="ing.percentage" class="">{{ Number(ing.getWeight(formulaUnit)).toFixed(2) }}{{ formulaUnit }}</div>
             </div>
-            <div class="w-2/12 hidden sm:inline-flex text-right">
-              <div class="w-full text-right" v-if="!freeVersion" v-show="formulaUnit==='g'" > ${{ Number(ing.getCost(formulaUnit)).toFixed(2) }}/kg</div>
-              <div class="w-full text-right" v-if="!freeVersion" v-show="formulaUnit==='Oz'"> ${{ Number(ing.getCost(formulaUnit)).toFixed(2) }}/Oz</div>
+            <div class="w-3/12 inline-flex text-right">
+              <input
+                  type="number"
+                  v-model.lazy="getDynamicCost(ing).value"
+                  :id="'ingredient-mob-cost-' + phaseKey + '-' + ingKey"
+                  class="text-xs text-right border-0 h-4 w-3/4 p-0.5 bg-transparent"
+                  @focus="selectText"
+                  @keydown.up.prevent
+                  @keydown.down.prevent
+                  @keydown.enter="selectNextInputOnEnterClick($event, ingKey, phaseKey, ingredientInputs, 'ingredient-mob-cost')"
+                  @blur="displayFormula.updateCost()"
+              >
+              <div class=""  v-show="formulaUnit==='g'" >/kg</div>
+              <div class=""  v-show="formulaUnit==='Oz'">/Oz</div>
             </div>
             <div class="w-2/12 text-right pr-1">
-              <div  v-if="!freeVersion && ing.percentage">${{Number((ing.getWeight('g') * ing.cost * 0.001 ).toFixed(2)) }}</div>
+              <div  v-if="ing.percentage">${{Number((ing.getWeight('g') * ing.cost * 0.001 ).toFixed(2)) }}</div>
             </div>
             <font-awesome-icon @click="deleteFormulaIngredient(phase, ingKey)" :icon="['fa', 'circle-xmark']" class="mx-1 text-slate-400 text-md" />
           </li>
