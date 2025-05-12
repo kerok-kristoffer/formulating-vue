@@ -271,8 +271,8 @@ function targetSearchBox(prefix :string, phaseKey :number) {
               </div>
               <div class="flex flex-row px-2">
                 <p class="">cost:</p>
-                <p class="font-semibold px-4 text-end" >
-                  ${{ Number(displayFormula.estimatedCost.toFixed(2)) }}
+                <p v-if="displayFormula.estimatedCost" class="font-semibold px-4 text-end" >
+                  ${{Number(displayFormula.estimatedCost.toFixed(2)) }}
                 </p>
               </div>
             </div>
