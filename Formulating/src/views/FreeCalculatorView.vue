@@ -55,7 +55,7 @@ const weightUpdate = (formula :Formula) :void => {
        @dragenter.prevent
        @dragover.prevent>
 
-    <div class="banner-header flex items-center justify-center bg-slate-200 shadow-md shadow-slate-300">
+    <div class="print:hidden banner-header flex items-center justify-center bg-slate-200 shadow-md shadow-slate-300">
       <img
           class="my-4 h-12 w-34"
           src="../assets/mySatchel_text.png"

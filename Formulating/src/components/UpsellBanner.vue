@@ -10,7 +10,7 @@ function redirect(path: string) {
 </script>
 
 <template>
-  <div class="flex justify-between p-5 border border-gray-300 rounded-none md:rounded-lg bg-gray-100 w-full md:w-3/5 md:content-center md:mx-auto box-border flex-col md:flex-row mb-10">
+  <div class="print:hidden flex justify-between p-5 border border-gray-300 rounded-none md:rounded-lg bg-gray-100 w-full md:w-3/5 md:content-center md:mx-auto box-border flex-col md:flex-row mb-10">
     <div class="flex-1 w-4/5 md:w-full mx-auto md:mx-2 text-center mb-6 md:mb-0">
       <h2 class="text-xl font-bold mb-2">Premium Service</h2>
       <p class="mb-4">Access exclusive features with our premium service. Now offering a 7-day free trial</p>
