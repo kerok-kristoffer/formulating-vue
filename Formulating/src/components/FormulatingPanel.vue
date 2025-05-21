@@ -287,9 +287,9 @@ function targetSearchBox(prefix :string, phaseKey :number) {
           <input
             :id="'phase-name-' + phaseKey"
             @keydown.enter="targetSearchBox('phase_add_ingredient-', phaseKey)"
-            placeholder="New Phase"
+            :placeholder="'Phase-' + (phaseKey + 1)"
             v-model="phase.name"
-            class="border-2 border-slate-400 rounded-md"
+            class="border-2 h-8 border-slate-400 rounded-md"
           />
           <div
             class="drop-zone w-full flex flex-row"

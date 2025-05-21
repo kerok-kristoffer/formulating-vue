@@ -1,10 +1,11 @@
 <template>
   <div class="flex flex-col">
     <div class="flex flex-row  justify-end gap-1 py-1">
-      <label class="" :for="'phase_add_ingredient-'+ phaseKey">Add ingredient: </label>
+      <label class="mt-1 md:mt-0" :for="'phase_add_ingredient-'+ phaseKey">Add ingredient: </label>
       <input
           v-model="phase.searchIngredient"
           autocomplete="off" type="text"
+          @focus="dismissTutorial"
           @input="searchIngredient(phaseKey, phase.searchIngredient)"
           @keydown.down="focusNextSearchIngredient"
           @keydown.up="focusPreviousSearchIngredient"
@@ -13,12 +14,25 @@
           name="phaseAddIngredient"
           :id="'phase_add_ingredient-' + phaseKey +  mobileText"
           class="h-6 w-42">
-      <font-awesome-icon :icon="['fas', 'search']" class="mr-1 mt-1" />
+      <font-awesome-icon
+          :icon="['fas', 'search']"
+          @click="toggleTutorial"
+          class="mr-1 mt-1"
+          v-tooltip="'subscribe to reuse saved ingredients'"
+      />
       <button v-show="phase.searchIngredient"
               :id="'add-search-ingredient-button-' + phaseKey"
               @click="addNewSearchIngredient(phase, phase.searchIngredient)"
               class="h-6 bg-slate-400 px-1 rounded-md font-semibold text-white">Create</button>
 
+      <div
+          v-if="showTutorial"
+          class="absolute justify-start bottom-10 md:left-70 md:flex bg-slate-100 text-black p-2 rounded-md shadow-md"
+          style="white-space: nowrap;"
+      >
+        Enter an ingredient to start formulating
+        <div class="tooltip-arrow"></div>
+      </div>
     </div>
     <div v-if="phaseCurrentlySearching === phaseKey && searchIngredientList" class="flex flex-row justify-end">
       <ul class="absolute z-50 bg-slate-200 drop-shadow-lg flex flex-col gap-1 max-h-64 overflow-y-auto overflow-x-hidden">
@@ -64,6 +78,7 @@ const phaseCurrentlySearching = ref(-1)
 const ingredients = computed(() => data.ingredientList.ingredients);
 const focusedSearchIngredientIndex = ref<number>(-1);
 const mobileText = mobile ? '-mob' : ''
+const showTutorial = computed(() => data.showTutorial);
 
 const searchIngredient = (phaseKey :number, phaseSearchTerm :string) => {
   focusedSearchIngredientIndex.value = -1
@@ -87,6 +102,18 @@ const addNewSearchIngredient = (phase :Phase, input :string) => {
 function addExistingIngredient(phase :Phase, ingredient :Ingredient) {
   emit('addExistingIngredient', phase, ingredient)
   searchIngredientList.value = []
+}
+
+function dismissTutorial() {
+  userData().hideTutorial()
+}
+
+function toggleTutorial() {
+  if (showTutorial.value) {
+    userData().hideTutorial()
+  } else {
+    userData().resetTutorial()
+  }
 }
 
 async function focusNextSearchIngredient() {
@@ -148,5 +175,14 @@ async function hideIngredientSearchResults() {
 </script>
 
 <style scoped>
-
+.tooltip-arrow {
+  position: absolute;
+  bottom: -6px;
+  left: 40%;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #f1f5f9;  /* Matches tooltip background */
+}
 </style>

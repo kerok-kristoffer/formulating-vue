@@ -18,6 +18,11 @@ const formulaList = new FormulaList()
 const displayFormulaList = false
 const debug = false
 
+let showTutorial = true
+if (Cookies.get('hideTutorial') == 'true') {
+  showTutorial = false
+}
+
 const alert = new Alert('test', (yesClicked) => {
   if (yesClicked) {
     if (debug) {
@@ -82,7 +87,8 @@ export const userData = defineStore('data', {
     alert: alert,
     displayFormulaList: displayFormulaList,
     debug: debug,
-    dragIngredient: dragIngredient
+    dragIngredient: dragIngredient,
+    showTutorial: showTutorial,
   }),
   getters: {},
   actions: {
@@ -123,6 +129,14 @@ export const userData = defineStore('data', {
         })
 
       return Promise.resolve()
+    },
+    hideTutorial() {
+      Cookies.set('hideTutorial', true)
+      this.showTutorial = false
+    },
+    resetTutorial() {
+      Cookies.set('hideTutorial', false)
+      this.showTutorial = true
     },
     attemptSetDisplayFormula(formula: Formula) {
       const cookiesFormula = this.getCachedFormula()

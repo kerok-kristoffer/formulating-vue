@@ -115,8 +115,8 @@ function deleteFormulaIngredient(phase, ingKey) {
       <input type="text" placeholder="New Formula" class="h-6 flex-grow bg-transparent border-0" name="formula-name" id="formula-name" v-model.lazy="displayFormula.name">
       <span class="inline-flex w-full mt-2 md:mt-0">
           <label for="totalWeight" class="text-lg w-1/5">Amount:</label>
-          <input v-if="formulaUnit==='g'" type="number" v-model="displayFormula.totalWeight" v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)" class="h-6 w-2/5 text-right bg-transparent border-0">
-          <input v-else-if="formulaUnit==='Oz'" type="number" v-model="displayFormula.totalWeightInOunces" v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)" class="h-6 w-2/5 text-right bg-transparent border-0">
+          <input v-if="formulaUnit==='g'" type="number" v-model="displayFormula.totalWeight" v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)" class="mt-1 h-6 w-2/5 text-right bg-transparent border-0">
+          <input v-else-if="formulaUnit==='Oz'" type="number" v-model="displayFormula.totalWeightInOunces" v-on:blur="FormulaHelper.weightUpdate(displayFormula, formulaUnit)" class="mt-1 h-6 w-2/5 text-right bg-transparent border-0">
           <UnitSelector class="h-6 mb-2 text-md w-2/5 justify-end" @unitSelected="data.setPreferredUnit(formulaUnit)" />
       </span>
     </div>
@@ -124,7 +124,7 @@ function deleteFormulaIngredient(phase, ingKey) {
     <ul v-for="(phase, phaseKey) in displayFormula.phases" class="flex flex-col odd:bg-slate-300 text-xs">
       <li class="w-full flex flex-col mb-2" :key="phaseKey" :id="'phase-' + phaseKey">
         <div class="flex flex-row justify-between mb-0.5 pt-0.5">
-          <input :id="'mobile-phase-name-' + phaseKey" v-model="phase.name" :placeholder="'Phase-' + (phaseKey + 1)" class="text-lg bg-transparent"/>
+          <input :id="'mobile-phase-name-' + phaseKey" v-model="phase.name" :placeholder="'Phase-' + (phaseKey + 1)" class="ml-1 text-lg bg-transparent border-hidden  border-2 border-slate-300 rounded-md"/>
           <font-awesome-icon @click="FormulaHelper.removePhase(displayFormula, phaseKey)" :icon="['fa', 'circle-xmark']" class="mx-1 text-slate-400 text-xl" />
         </div>
         <ul v-for="(ing, ingKey) in getOrderedIngredients(phase).value" class="flex flex-col ml-2">
