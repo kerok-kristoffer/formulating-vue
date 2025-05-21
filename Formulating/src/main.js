@@ -9,6 +9,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css'
 
+import { loadFacebookPixel } from '@/utils/facebookPixel';
+
 import {
   faSearch,
   faFileCircleExclamation,
@@ -39,6 +41,8 @@ app.use(pinia)
 
 app.use(router)
 app.provide('globalState', globalState)
+
+loadFacebookPixel('980100807292797');
 
 app.directive('tooltip', {
   beforeMount(el, binding) {

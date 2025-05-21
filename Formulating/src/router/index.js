@@ -144,6 +144,11 @@ router.afterEach((to) => {
       page_path: to.fullPath,
     });
   }
+
+  if (typeof window.fbq === 'function') {
+    window.fbq('track', 'PageView');
+  }
+
 });
 
 export default router
