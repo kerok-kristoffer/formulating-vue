@@ -3,7 +3,7 @@
     class="faq flex flex-col w-full min-h-screen bg-cover bg-center p-8 items-center"
     :style="{ 'background-image': `url(${imgUrl})` }"
   >
-    <div class="bg-slate-300 bg-opacity-80 p-8 w-5/6 rounded-lg shadow-lg">
+    <div class="bg-slate-300 p-8 w-5/6 rounded-lg shadow-lg">
       <h1 class="text-4xl font-bold mb-8 text-center text-slate-800">Frequently Asked Questions</h1>
       <div v-for="(qa, index) in faqList" :key="index" class="mb-6">
         <div class="bg-slate-200 bg-opacity-60 p-4 rounded-lg">

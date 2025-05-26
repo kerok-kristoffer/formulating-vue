@@ -59,6 +59,7 @@ const emit = defineEmits([
   'toggleShowDetails',
   'submitUpdateFormula',
   'duplicateFormula',
+  'displayStripeOverlay',
   'print'
 ]);
 function emitPrint() {
@@ -80,7 +81,7 @@ function duplicateFormula() {
   emit('duplicateFormula');
 }
 function displayStripeOverlay() {
-  console.log('displayStripeOverlay')
+  emit('displayStripeOverlay');
 }
 </script>
 

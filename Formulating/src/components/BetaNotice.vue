@@ -42,6 +42,7 @@
         <p>Thank you for being part of this journey!</p>
 
         <p class="mt-5">The mySatchel Team</p>
+        <p class="mt-5">support@mysatchel.app</p>
       </div>
 
       <ButtonStandard :text="'Got it!'" @click="closeNotice" />

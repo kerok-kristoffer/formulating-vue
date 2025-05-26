@@ -52,7 +52,7 @@
             >
               <ul
                   v-for="ingredient in getOrderedIngredients(phase).value"
-                  class="flex flex-row w-full odd:bg-slate-100 even:bg-white"
+                  class="flex flex-row w-full odd:bg-slate-200 even:bg-white"
               >
                 <svg width="20" height="20" class="w-12 pl-2">
                   <rect
@@ -67,7 +67,7 @@
                 <li class="w-48">{{ ingredient.name }}</li>
                 <li class="w-24 hidden font-thin italic">{{ ingredient.inci }}</li>
                 <li class="w-24 text-end">{{ ingredient.percentage }}%</li>
-                <li class="w-20 text-end ml-6" v-if="ingredient.percentage">
+                <li class="w-20 font-bold text-end ml-6" v-if="ingredient.percentage">
                   {{ Number(ingredient.getWeight(formulaUnit)).toFixed(2) }}{{ formulaUnit }}
                 </li>
                 <li class="w-24 ml-10" v-if="ingredient.percentage">

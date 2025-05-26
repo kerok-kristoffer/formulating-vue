@@ -30,6 +30,7 @@ const emit = defineEmits([
   'deleteFormula',
   'print',
   'resetDisplayAndCachedFormula',
+    'displayStripeOverlay',
     'editIngredient'
 ])
 
@@ -205,6 +206,7 @@ function targetSearchBox(prefix :string, phaseKey :number) {
           @print="print"
           @resetDisplayAndCachedFormula="resetDisplayAndCachedFormula"
           @duplicateFormula="duplicateFormula"
+          @displayStripeOverlay="emit('displayStripeOverlay')"
           class="w-full md:full mb-6 h-12 bg-slate-200 rounded-b-xl"
         />
 
