@@ -15,6 +15,7 @@
           <img
             src="@/assets/mySatchel_text.png"
             alt="mySatchel"
+            @click="goToFree"
             class="inline-block h-10 align-middle pb-2 pl-0 ml-0"
           />
         </h1>
@@ -23,12 +24,12 @@
         class="text-center mb-12 w-full px-4 lg:w-auto lg:px-0 flex flex-row items-center justify-center space-x-4"
       >
         <h2 class="text-2xl lg:text-3xl font-bold mb-4">
-          Experience the future of formulating with our beta version.
+          Take full advantage of mySatchel with our beta version.
         </h2>
         <RouterLink
           to="/beta"
           class="bg-slate-500 text-white rounded-md py-2 px-4 mb-4 hover:bg-slate-600"
-          >Try the Beta for FREE!</RouterLink
+          >Try the Beta 7 days for FREE!</RouterLink
         >
       </section>
 
@@ -74,6 +75,14 @@
             </p>
           </div>
         </div>
+      </section>
+
+      <section class="text-center mb-16 w-full px-4 lg:w-auto lg:px-0">
+        <p class="text-2xl lg:text-3xl font-bold mb-4">Start formulating with our basic calculator now!</p>
+        <RouterLink
+            to="/"
+            class="bg-slate-500 text-white rounded-md py-2 px-4 mb-4 hover:bg-slate-600"
+        >Try the Free Calculator</RouterLink>
       </section>
 
       <!-- Testimonials Section -->
@@ -218,6 +227,10 @@ onMounted(() => {
 
 const goToLogin = () => {
   router.push('/login')
+}
+
+function goToFree() {
+  router.push('/')
 }
 </script>
 

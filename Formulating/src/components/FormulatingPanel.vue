@@ -474,6 +474,7 @@ function targetSearchBox(prefix :string, phaseKey :number) {
             </button>
             <button
                 v-else
+                @click="emit('displayStripeOverlay')"
               class="bg-slate-400 hover:bg-slate-500 px-2 mx-2 h-8 rounded-md font-semibold text-white"
               v-tooltip="'subscribe for Inci list and more'"
             >

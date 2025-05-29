@@ -110,7 +110,6 @@ const inFormulas = computed(() => {
       return formulas.value.filter((formula) => formula.hasIngredient(ingredient));
     }
     if (data.getReactiveDisplayFormula().hasIngredient(ingredient)) {
-      console.log("ingredient is in display formula");
       return [data.getReactiveDisplayFormula()];
     }
     return [];

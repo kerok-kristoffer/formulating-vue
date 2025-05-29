@@ -52,12 +52,6 @@ const sortedInciList =  computed(() => {
 })
 
 onMounted(() => {
-  console.log('mounted');
-  console.log('formula:', formula);
-  console.log('formula.getInciList():', formula.getInciList());
-  console.log('formula.description:', formula.description);
-  console.log('formula.created_at:', formula.created_at);
-  console.log('formula.updated_at:', formula.updated_at);
 });
 
 const emit = defineEmits(['close']);

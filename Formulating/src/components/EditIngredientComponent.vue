@@ -219,7 +219,6 @@ function nextIngredientClick() {
     alertUnsavedChangesToIngredient();
     return;
   }
-  console.log("dirty check passed, moving to next ingredient")
   ingredientList.highlightNextIngredient();
   // updateCost(ingredientList.getHighlightIngredient().getCost(userData().settings.preferredUnits).toString())
   emit("refresh");
