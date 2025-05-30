@@ -10,10 +10,13 @@
           <label for="inci" class="block text-gray-600">Inci</label>
           <input v-model="editedItem.inci" type="text" id="inci" class="w-full border rounded-md p-2 dark:bg-slate-100" />
         </div>
-        <div class="mb-4 flex flex-row w-full items-end">
+        <div class="mb-4 ">
           <label for="cost" class="block text-gray-600 w-1/12">Cost</label>
-          <input :value="computedCost" @input="updateCost($event.target.value)" type="number" id="cost" class="w-10/12 border rounded-md p-2 dark:bg-slate-100" />
-          <UnitSelector class="w-1/12" @unitSelected="setUnit"></UnitSelector>
+          <div class="flex flex-row w-full items-end">
+            <input :value="computedCost" @input="updateCost($event.target.value)" type="number" id="cost" class="w-10/12 border rounded-md p-2 dark:bg-slate-100" />
+            <UnitSelector class="w-1/12" @unitSelected="setUnit"></UnitSelector>
+          </div>
+
         </div>
         <div class="mb-4">
           <div class="block tag-input h-24 border border-solid border-slate-500 dark:bg-slate-100">

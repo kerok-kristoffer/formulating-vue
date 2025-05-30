@@ -23,8 +23,14 @@ export default class FormulaHelper {
         }
         ingredient.name = latestIngredient.name
         ingredient.inci = latestIngredient.inci
-        ingredient.cost = latestIngredient.cost
         ingredient.tags = latestIngredient.tags
+
+        let isPromptForUpdatingIngredientCostChoiceImplemented = false;
+
+        if ((!ingredient.cost || ingredient.cost === 0) && latestIngredient.cost !== 0 && isPromptForUpdatingIngredientCostChoiceImplemented) {
+          console.log('setting ingredient cost to ' + latestIngredient.cost)
+          ingredient.cost = latestIngredient.cost
+        }
       } else {
         if (userData().debug) {
           console.error('Ingredient not found in ingredient list: ', ingredient)
