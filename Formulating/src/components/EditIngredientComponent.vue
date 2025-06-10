@@ -1,7 +1,7 @@
 <template> <!--todo : have to make In Formulas list scrollable for longer lists-->
 <!--todo otherwise long lists pushes buttons outside of edit box-->
-  <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center gap-2 ">
-    <div v-if="item" class="bg-slate-100 dark:bg-slate-200 h-full md:h-4/5 pt-6 md:p-8 flex flex-col rounded-sm shadow-lg w-full md:w-2/3 pb-12 md:pb-0">
+  <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center gap-2">
+    <div v-if="item" class="bg-slate-100 dark:bg-slate-200 h-full md:h-4/5 pt-6 md:p-8 flex flex-col rounded-sm shadow-lg w-full md:w-2/3 pb-12 md:pb-0 max-h-[90vh] overflow-y-auto">
       <h2 class="text-xl font-semibold mb-4 ">Edit Ingredient</h2>
        <!-- todo: add a swipe left/right function that emits prev-next -->
         <div class="mb-4">
@@ -20,6 +20,12 @@
 <!--          <input :value="computedCost" @input="updateCost($event.target.value)" type="number" id="cost" class="w-10/12 border rounded-md p-2 dark:bg-slate-100" />
           unit:<UnitSelector class="w-1/12" @unitSelected="setUnit"></UnitSelector>-->
         </div>
+      <div class="mb-4">
+        <label for="info" class="block text-gray-600">Info</label>
+        {{ingredientInFormulas.length}}
+        <textarea v-model="item.info" rows="5" id="info" class="w-full border rounded-md p-2 dark:bg-slate-100" />
+      </div>
+
         <div class="mb-4">
           <div class="block tag-input h-24 border border-solid border-slate-500 bg-white dark:bg-slate-100">
             <div
@@ -45,17 +51,20 @@
                               "
             />
           </div>
+
+          <div class="flex flex-col flex-grow overflow-y-auto">
+
+            <div v-if="ingredientInFormulas.length > 0" >
+              <p class="text-xl">In Formulas:</p>
+              <ul v-for="formula in ingredientInFormulas" >
+                <!--           todo: add a clickableRow Component that does all the styling for this type of thing -->
+                <li @click="moveToFormula(formula)" class="hover:bg-slate-300 hover:cursor-pointer">{{formula.name}}</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
-      <div class="flex flex-col flex-grow overflow-y-auto">
-        <div v-if="ingredientInFormulas.length > 0" >
-          <p class="text-xl">In Formulas:</p>
-            <ul v-for="formula in ingredientInFormulas" >
-              <!--           todo: add a clickableRow Component that does all the styling for this type of thing -->
-              <li @click="moveToFormula(formula)" class="hover:bg-slate-300 hover:cursor-pointer">{{formula.name}}</li>
-            </ul>
-        </div>
-      </div>
+
 
       <div v-if="userData().debug" class="debug-info fixed bottom-2 left-1/2 transform -translate-x-1/2 bg-white border-2 border-slate-400 rounded-md p-2 shadow-md">
         <p>  </p>

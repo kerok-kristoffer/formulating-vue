@@ -101,7 +101,7 @@ export const userData = defineStore('data', {
           }
 
           displayFormula.phases.forEach((phase) => {
-            FormulaHelper.updateIngredientProperties(phase, ingredientList.ingredients)
+            FormulaHelper.updateIngredientProperties(phase, this.ingredientList.ingredients)
           })
           this.updateDisplayFormulaWeightsAndCosts()
           return Promise.resolve()

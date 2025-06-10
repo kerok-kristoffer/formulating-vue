@@ -1,6 +1,7 @@
 import Units from "./Units";
 import Tag from "./Tag";
 import {userData} from "../stores/userData";
+import IngredientBuilder from "./IngredientBuilder";
 
 class Ingredient {
     phase: number
@@ -16,6 +17,7 @@ class Ingredient {
         public inci: string,
         public percentage: number,
         public cost: number,
+        public info: string = '',
         public tags: Tag[],
         ) {
             if (tags === null || tags === undefined) {
@@ -32,6 +34,9 @@ class Ingredient {
             return false;
         }
         if (ingredient.cost !== this.cost) {
+            return false;
+        }
+        if (ingredient.info !== this.info) {
             return false;
         }
         if (!Array.isArray(this.tags) || !Array.isArray(ingredient.tags) || this.tags.length !== ingredient.tags.length) {
@@ -144,13 +149,7 @@ class Ingredient {
     }
 
     copy() :Ingredient{
-        return new Ingredient(this.id,
-            this.ingredient_id,
-            this.name,
-            this.inci,
-            this.percentage,
-            this.cost,
-            Array.isArray( this.tags) ? Array.from(this.tags) : [])
+        return new IngredientBuilder().data(this).setTags(this.tags).build()
     }
         
 }

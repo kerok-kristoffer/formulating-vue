@@ -1,6 +1,7 @@
 import Formula from './Formula'
 import Phase from './Phase'
 import Ingredient from './Ingredient'
+import IngredientBuilder from "./IngredientBuilder";
 
 class FormulaFactory {
   static createFormulaFromData(data: any): Formula {
@@ -38,7 +39,6 @@ class FormulaFactory {
   }
 
   static setFormulaIngredientIdsToZero(formula: Formula) {
-    console.log('Setting formula ingredient ids to zero', formula.name)
     formula.phases.forEach((phase: Phase) => {
       phase.ingredients.forEach((ingredient: Ingredient) => {
         ingredient.id = 0
@@ -64,15 +64,11 @@ class FormulaFactory {
     if (!this.isValidIngredientData(data)) {
       throw new Error('Invalid ingredient data')
     }
-    return new Ingredient(
-      data.id,
-      data.ingredient_id,
-      data.name,
-      data.inci,
-      data.percentage,
-      data.cost,
-      data.tags
-    )
+    return new IngredientBuilder()
+      .data(data)
+      .setId(data.id)
+      .setIngredientId(data.ingredient_id)
+      .build()
   }
 
   static createEmptyPhase(): Phase {
@@ -89,7 +85,7 @@ class FormulaFactory {
       throw new Error('Invalid ingredient data')
     }
     console.log('creating ingredient from API data: ' + data) // data.Id seems to not be correct here, it seems to be same as ingredient_id)
-    return new Ingredient(optionalId, data.Id, data.Name, data.Inci, 0, data.cost, data.tags)
+    return new IngredientBuilder().data(data).setId(optionalId).build()
   }
 
   private static isValidIngredientAPIData(data: any): boolean {
@@ -148,11 +144,16 @@ class FormulaFactory {
       data.tags = []
     }
 
-    if (!data.ingredient_id) {
+    if (data.ingredient_id === undefined || data.ingredient_id === null) {
       // workaround for bad Ingredients on load
       data.ingredient_id = 0
     }
 
+    if(data.id === undefined || data.id === null) {
+        console.warn('Ingredient data does not have id, setting to 0', data)
+      // workaround for bad Ingredients on load
+      data.id = 0
+    }
     const isValid =
       data &&
       typeof data.id === 'number' &&

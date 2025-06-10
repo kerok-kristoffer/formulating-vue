@@ -1,7 +1,5 @@
 import axios from 'axios'
 import Formula from "./Formula";
-import Phase from "./Phase";
-import Ingredient from "./Ingredient";
 import FormulaFactory from "./FormulaFactory";
 import FormulaHelper from "./FormulaHelper";
 import {userData} from "../stores/userData";

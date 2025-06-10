@@ -57,7 +57,6 @@
                                @close="closeEditWindow"
                                @refresh="refreshInFormulaList" />
     <add-ingredient-component v-if="showAddWindow"
-                              :item="newIngredient"
                               @cancel="cancelAdd"
                               @updateItem="addIngredient"/>
   </div>
@@ -77,10 +76,10 @@ import {useAccountStore} from "../stores/account";
 
 import {userData} from "../stores/userData";
 import Formula from "../types/Formula";
-import IngredientList from "@/types/IngredientList";
+import IngredientBuilder from "@/types/IngredientBuilder";
 
 const data = userData()
-const newIngredient = new Ingredient(0,0,"new ingredient", "", 0, null, [])
+const newIngredient = new IngredientBuilder().build();
 const ingredients = computed(() => data.ingredientList.ingredients);
 const showEditWindow = ref(false);
 

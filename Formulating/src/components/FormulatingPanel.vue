@@ -11,8 +11,9 @@ import FormulaHelper from "@/types/FormulaHelper";
 import {useAccountStore} from "@/stores/account";
 import Phase from "@/types/Phase";
 import Ingredient from "@/types/Ingredient";
-import FormulaFactory from "@/types/FormulaFactory";
 import {selectNextInputOnEnterClick} from "@/types/UIHelper";
+import IngredientBuilder from "@/types/IngredientBuilder";
+import FormulaFactory from "@/types/FormulaFactory";
 
 const data = userData()
 const { displayFormula, freeVersion } = defineProps<{
@@ -49,8 +50,8 @@ function editIngredient(ingredient :Ingredient) {
   emit('editIngredient', ingredient)
 }
 
-async function addNewIngredientFromSearch(phase :Phase, input :string) {
-  let newIngredient = new Ingredient(0, 0, input, "", 0, 0, [])
+async function addNewIngredientFromSearch(phase :Phase, name :string) {
+  let newIngredient = IngredientBuilder.buildRaw()
 
   if (!freeVersion) {
     await data.api.getIngredientService().createIngredient(newIngredient).then((ing) => {
@@ -151,7 +152,13 @@ const ingredientDropFromIngredientList = (ingredientListIndex :number, dropPhase
   let ingredient = data.ingredientList.ingredients.find((i) => i.id == ingredientListIndex)
 
   if(ingredient != undefined) {
-    dropPhase.addIngredient(new Ingredient(0, ingredient.ingredient_id, ingredient.name, ingredient.inci, 0, Number(ingredient.cost), []))
+    const dropIngredient = new IngredientBuilder()
+        .setName(ingredient.name)
+        .setInci(ingredient.inci)
+        .setCost(Number(ingredient.cost))
+        .setIngredientId(ingredient.ingredient_id)
+        .build()
+    dropPhase.addIngredient(dropIngredient)
     dropPhase.updateIngredientOrderByPercentageAndName()
     return
   }

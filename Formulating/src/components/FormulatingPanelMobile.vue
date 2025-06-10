@@ -13,7 +13,7 @@ import Phase from "@/types/Phase";
 import Ingredient from "@/types/Ingredient";
 import FormulaFactory from "@/types/FormulaFactory";
 import {selectNextInputOnEnterClick} from "@/types/UIHelper";
-import ingredient from "@/types/Ingredient";
+import IngredientBuilder from "@/types/IngredientBuilder";
 
 const { displayFormula, freeVersion } = defineProps<{
   displayFormula: Formula,
@@ -73,8 +73,8 @@ function updateIngredientPercentage(ing, value) {
 }
 
 
-async function addNewIngredientFromSearch(phase :Phase, input :string) {
-  let newIngredient = new Ingredient(0, 0, input, "", 0, 0, [])
+async function addNewIngredientFromSearch(phase :Phase, name :string) {
+  let newIngredient = new IngredientBuilder().setName(name).build()
 
   if (!freeVersion) {
     await data.api.getIngredientService().createIngredient(newIngredient).then((ing) => {

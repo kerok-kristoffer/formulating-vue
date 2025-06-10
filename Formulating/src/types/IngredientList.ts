@@ -2,6 +2,7 @@ import Ingredient from './Ingredient'
 import axios from 'axios'
 import Tag from './Tag'
 import { userData } from '../stores/userData'
+import IngredientBuilder from "./IngredientBuilder";
 
 class IngredientList {
   public ingredients: Ingredient[]
@@ -43,15 +44,15 @@ class IngredientList {
         this.tags = []
         for (const i in data) {
           const ing = data[i]
-          const ingredient = new Ingredient(
-            Number(i),
-            ing.Id,
-            ing.Name,
-            ing.Inci,
-            ing.percentage,
-            ing.cost,
-            ing.tags
-          )
+          const ingredient = new IngredientBuilder()
+            .setName(ing.Name)
+            .setInci(ing.Inci)
+            .setId(Number(i))
+            .setIngredientId(ing.Id)
+            .setInfo(ing.info)
+            .setCost(ing.cost)
+            .build()
+          console.log('adding ingredient to list from populateWithTags: ' + ingredient.ingredient_id + ' ' + ingredient.name + ' ' + ingredient.info)
           this.ingredients.push(ingredient)
 
           for (const i in ing.tags) {
@@ -97,15 +98,8 @@ class IngredientList {
       if (userData().debug) {
         console.log('adding ingredient: ' + ing.name)
       }
-      const ingredient = new Ingredient(
-        Number(i),
-        ing.ingredient_id,
-        ing.name,
-        ing.inci,
-        ing.percentage,
-        ing.cost,
-        ing.tags
-      )
+
+      const ingredient = new IngredientBuilder().data(ing).setId(Number(i)).setIngredientId(ing.ingredient_id).build()
       this.ingredients.push(ingredient)
 
       for (const i in ing.tags) {

@@ -4,28 +4,80 @@ import {userData} from "../stores/userData";
 
 export default class IngredientBuilder {
     static buildToList(ingredients :any[], list :Ingredient[]) {
-        for (let i in ingredients) {
-            let ing = ingredients[i]
-            let ingredient = this.build(ing);
+        for (const i in ingredients) {
+            const ing = ingredients[i]
+            const ingredient = this.fromData(ing);
             list.push(ingredient);
         }
     }
-
-    static build(ing :any) :Ingredient {
-      return new Ingredient(ing.Id, ing.Id, ing.name, ing.inci, ing.percentage, ing.cost, ing.tags);
+    private ingredient: Ingredient;
+    constructor() {
+        this.ingredient = this.buildRaw();
     }
+
+    data(ing: any) :IngredientBuilder {
+        // console.log("building ingredient from data: " + ing.name)
+        this.ingredient = new Ingredient(ing.Id, ing.Id, ing.name, ing.inci, ing.percentage, ing.cost, ing.info, ing.tags);
+        return this
+    }
+
+    setTags(tags: Tag[]) :IngredientBuilder {
+        this.ingredient.tags = Array.isArray(tags) ? Array.from(tags) : []
+        return this;
+    }
+
+    static fromData(ing :any) :Ingredient {
+      return new Ingredient(ing.Id, ing.Id, ing.name, ing.inci, ing.percentage, ing.cost, ing.info, ing.tags);
+    }
+
+    buildRaw() :Ingredient {
+        return new Ingredient(0, 0, "", "", 0, 0, "", []);
+    }
+
+    public setName(name: string) :IngredientBuilder {
+        this.ingredient.name = name;
+        return this;
+    }
+
+    public setInci(inci: string) :IngredientBuilder {
+        this.ingredient.inci = inci;
+        return this;
+    }
+
+    public setCost(cost: number) :IngredientBuilder {
+        this.ingredient.cost = cost;
+        return this;
+    }
+
+    public setIngredientId(ingredientId: number) :IngredientBuilder {
+        this.ingredient.ingredient_id = ingredientId;
+        return this;
+    }
+
+    public setInfo(info: string) :IngredientBuilder {
+        this.ingredient.info = info; // todo dirty check notices info, but info is not displayed in edit window, investigate!
+        return this;
+    }
+
+    public setId(id: number) :IngredientBuilder {
+        this.ingredient.id = id;
+        return this;
+    }
+
+    public build() :Ingredient {
+        return this.ingredient;
+    }
+
 
     static buildToListWithTags(data: any[], ingredients: Ingredient[], tags: Tag[]) {
 
         let tagNames = new Set()
         for (let i in data) {
-            let ing = data[i]
+            const ing = data[i]
             if (userData().debug) {
                 console.log("building ingredient " + ing.name)
             }
-            ingredients.push(IngredientBuilder.build(ing))
-            // let ingredient = new Ingredient(Number(i), ing.Id, ing.Name, ing.Inci, ing.cost, ing.tags)
-            // this.ingredients.push(ingredient)
+            ingredients.push(new IngredientBuilder().data(ing).setId(Number(i)).build())
 
             for (let i in ing.tags) {
                 let tag = ing.tags[i]

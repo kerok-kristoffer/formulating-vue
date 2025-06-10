@@ -34,6 +34,7 @@ export class IngredientService extends BaseApiService {
       ingredientRef.inci.value,
       ingredientRef.percentage.value,
       ingredientRef.cost.value,
+      ingredientRef.info.value,
       ingredientRef.tags.value
     )
     return this.update('users/ingredients/' + updateIngredient.ingredient_id, updateIngredient)

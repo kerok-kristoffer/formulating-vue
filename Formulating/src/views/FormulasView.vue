@@ -18,10 +18,11 @@ import FormulaFactory from "@/types/FormulaFactory";
 import FormulaHelper from "@/types/FormulaHelper";
 import FormulatingPanelMobile from "@/components/FormulatingPanelMobile.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
+import IngredientBuilder from "@/types/IngredientBuilder";
 
 const formulaUnit = computed(() => userData().settings.preferredUnits)
 const formulaList = ref<Formula[]>([])
-const newIngredient = ref(new Ingredient(0, 0, "", "", 0, 0,  []))
+const newIngredient = ref(new IngredientBuilder().build())
 const ingInput = ref<any>(null)
 const accountStore = useAccountStore()
 const filteredIngredients = ref<Ingredient[]>([])
@@ -362,9 +363,10 @@ const submitIngredient = (ingredient :Ingredient) => {
             return
         }
         let ing = response.data
-        data.ingredientList.ingredients.value.push(new Ingredient(data.ingredientList.ingredients.value.length, Number(ing.Id), ing.Name, ing.Inci, ing.percentage, ing.cost, []))
+        const newIng = new IngredientBuilder().data(ing).setId(data.ingredientList.ingredients.value.length).setIngredientId(ing.Id).build()
+        data.ingredientList.ingredients.value.push(newIng)
         data.ingredientList.ingredients.sort()
-        newIngredient.value = new Ingredient(0, 0, "", "", 0, 0, [])
+        newIngredient.value = new IngredientBuilder().build()
         ingInput.value.focus()
     });
 }
