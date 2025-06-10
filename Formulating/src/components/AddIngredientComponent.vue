@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-200 dark:bg-slate-200">
+  <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-400/60 dark:bg-slate-400/60">
     <div class="bg-slate-100 p-8 rounded-sm shadow-lg h-full md:h-4/5 w-full md:w-2/3">
       <h2 class="text-xl font-semibold mb-4">Add Ingredient</h2>
         <div class="mb-4">
@@ -62,7 +62,7 @@ import IngredientBuilder from "@/types/IngredientBuilder";
 
 
 const emit = defineEmits(['updateItem', 'cancel']);
-const editedItem = ref(IngredientBuilder.buildRaw());
+const editedItem = ref(new IngredientBuilder().build());
 const showEditWindow = ref(true);
 
 const computedCost = computed(() => {

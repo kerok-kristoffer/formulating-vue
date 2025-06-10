@@ -30,7 +30,7 @@ export default class IngredientBuilder {
       return new Ingredient(ing.Id, ing.Id, ing.name, ing.inci, ing.percentage, ing.cost, ing.info, ing.tags);
     }
 
-    buildRaw() :Ingredient {
+    private buildRaw() :Ingredient {
         return new Ingredient(0, 0, "", "", 0, 0, "", []);
     }
 

@@ -51,7 +51,7 @@ function editIngredient(ingredient :Ingredient) {
 }
 
 async function addNewIngredientFromSearch(phase :Phase, name :string) {
-  let newIngredient = IngredientBuilder.buildRaw()
+  let newIngredient = new IngredientBuilder().build()
 
   if (!freeVersion) {
     await data.api.getIngredientService().createIngredient(newIngredient).then((ing) => {
