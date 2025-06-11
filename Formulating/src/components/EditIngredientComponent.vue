@@ -1,9 +1,10 @@
 <template> <!--todo : have to make In Formulas list scrollable for longer lists-->
 <!--todo otherwise long lists pushes buttons outside of edit box-->
-  <div class="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-2 bg-slate-400/60 dark:bg-slate-400/60">
-    <div v-if="item" class="bg-slate-100 dark:bg-slate-200 h-full md:h-4/5 pt-6 md:p-8 flex flex-col rounded-sm shadow-lg w-full md:w-2/3 pb-12 md:pb-0 max-h-[90vh] overflow-y-auto">
-      <h2 class="text-xl font-semibold mb-4 ">Edit Ingredient</h2>
-       <!-- todo: add a swipe left/right function that emits prev-next -->
+  <div class="fixed inset-0 flex items-center justify-center bg-slate-400/60">
+    <div v-if="item" class="relative bg-slate-200 h-full md:h-4/5 w-full md:w-2/3 max-h-[90vh] flex flex-col rounded-sm shadow-lg">
+      <h2 class="text-xl font-semibold px-6 py-3">Edit Ingredient</h2>
+      <div class="flex-1 relative overflow-y-auto px-6 pt-4 pb-8 border-y-2 border-slate-300 dark:border-slate-300">
+        <!-- todo: add a swipe left/right function that emits prev-next -->
         <div class="mb-4">
           <label for="name" class="block text-gray-600">Name</label>
           <input v-model="item.name" type="text" id="name" class="w-full border rounded-md p-2 dark:bg-slate-100" required />
@@ -20,12 +21,13 @@
 <!--          <input :value="computedCost" @input="updateCost($event.target.value)" type="number" id="cost" class="w-10/12 border rounded-md p-2 dark:bg-slate-100" />
           unit:<UnitSelector class="w-1/12" @unitSelected="setUnit"></UnitSelector>-->
         </div>
-      <div class="mb-4">
-        <label for="info" class="block text-gray-600">Notes</label>
-        <textarea v-model="item.info" rows="5" id="info" class="w-full border rounded-md p-2 dark:bg-slate-100" />
-      </div>
+        <div class="mb-4">
+          <label for="notes" class="block text-gray-600">Notes</label>
+          <textarea v-model="item.info" rows="5" id="notes" class="w-full border rounded-md p-2 dark:bg-slate-100" />
+        </div>
 
         <div class="mb-4">
+          <label for="tags" class="block text-gray-600">Tags</label>
           <div class="block tag-input h-24 border border-solid border-slate-500 bg-white dark:bg-slate-100">
             <div
                 v-for="(tag, index) in item.tags"
@@ -52,7 +54,6 @@
           </div>
 
           <div class="flex flex-col flex-grow overflow-y-auto">
-
             <div v-if="ingredientInFormulas.length > 0" >
               <p class="text-xl">In Formulas:</p>
               <ul v-for="formula in ingredientInFormulas" >
@@ -77,16 +78,19 @@
 
     </div>
 
-    <div class="flex md:flex-row flex-shrink-0 justify-between mb-2">
-      <div class="flex justify-start gap-1 h-6">
-        <button-standard :text="'Previous'" @click="prevIngredientClick()" />
-        <button-standard :text="'Next'" @click="nextIngredientClick()" />
+
+      <div class="flex flex-row flex-shrink-0 justify-between w-full px-6 py-4 z-20 bg-slate-200">
+        <div class="flex justify-start gap-1 h-6">
+          <button-standard :text="'Previous'" @click="prevIngredientClick()" />
+          <button-standard :text="'Next'" @click="nextIngredientClick()" />
+        </div>
+
+        <div class="flex gap-1 justify-end h-6">
+          <button-standard :text="'Save'" @click="updateItem(item)" />
+          <button-standard :text="'Cancel'" @click="cancelEdit" />
+        </div>
       </div>
 
-      <div class="flex gap-1 justify-end h-6">
-        <button-standard :text="'Save'" @click="updateItem(item)" />
-        <button-standard :text="'Cancel'" @click="cancelEdit" />
-      </div>
     </div>
 
     <AlertPopup v-if="isAlertVisible"
@@ -107,10 +111,8 @@ import {userData} from "../stores/userData";
 import Formula from "../types/Formula";
 import {useRouter} from "vue-router";
 import AlertPopup from "./AlertPopup.vue";
-import Units from "@/types/Units";
 import IngredientList from "@/types/IngredientList";
 import {useAccountStore} from "@/stores/account";
-import FormulaHelper from "@/types/FormulaHelper";
 const { item, ingredientList } = defineProps<{
   item: Ingredient,
   itemCopy: Ingredient,

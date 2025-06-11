@@ -489,7 +489,7 @@ function targetSearchBox(prefix :string, phaseKey :number) {
             </button>
           </div>
         </div>
-        <formula-details v-if="showDetails" :formula="displayFormula" @close="toggleShowDetails" />
+        <formula-details v-if="showDetails" :formula="displayFormula"  :userData="data" @close="toggleShowDetails" />
       </div>
     </div>
   </div>

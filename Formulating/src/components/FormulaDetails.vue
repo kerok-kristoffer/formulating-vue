@@ -32,6 +32,7 @@
               <h2>First created: {{ formula.created_at }} | Last updated: {{ formula.updated_at }}</h2>
             </div>
           </div>
+          <FormulaBatches :formula-id="formula.id" :formula-name="formula.name" :userData="userData" />
         </div>
       </div>
     </div>
@@ -42,9 +43,11 @@
 
 import {computed, defineEmits, defineProps, onMounted, UnwrapRef} from "vue";
 import Formula from "@/types/Formula";
+import FormulaBatches from "@/components/FormulaBatches.vue";
 
 const { formula } = defineProps<{
   formula: UnwrapRef<Formula>
+  userData: UnwrapRef<any>
 }>();
 
 const sortedInciList =  computed(() => {
